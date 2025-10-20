@@ -5,9 +5,12 @@ export const Card = ({ children, className = '', hover = false, onClick }) => {
   const { isDark } = useTheme();
   
   const baseStyles = `
-    rounded-xl p-6 transition-all duration-200
-    ${hover ? 'transform hover:scale-105 cursor-pointer' : ''}
-    ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200 shadow-md'}
+    rounded-2xl p-8 transition-all duration-300 border
+    ${hover ? 'cursor-pointer hover:translate-y-[-4px] hover:shadow-xl' : ''}
+    ${isDark 
+      ? 'bg-slate-800/80 border-slate-700 backdrop-blur-sm shadow-xl' 
+      : 'bg-white/80 border-slate-200 backdrop-blur-sm shadow-lg'
+    }
   `;
 
   return <div onClick={onClick} className={`${baseStyles} ${className}`}>{children}</div>;

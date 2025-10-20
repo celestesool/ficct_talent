@@ -81,7 +81,6 @@ export const Navbar = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           
-          {/* LOGO ORIGINAL */}
           <div className="flex items-center">
             <img 
               src="/images/logo.png" 
