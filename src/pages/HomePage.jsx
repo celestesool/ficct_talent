@@ -33,11 +33,13 @@ export const HomePage = () => {
             </div>
           </div>
           <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-            UAGRM - Ingeniería en Sistemas
+            UAGRM - FICCT
           </h1>
           <p className={`text-xl ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+            Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones
             Conectando talento con oportunidades
           </p>
+        
         </div>
 
         {/* Cards de selección */}
