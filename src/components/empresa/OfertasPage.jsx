@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
+import { Navbar } from '../common/Navbar';
+import { Card } from '../common/Card';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
 import { 
   Plus,
   Search,
@@ -24,7 +24,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-const OfertasPage = () => {
+export const OfertasPage = () => {
   const { isDark } = useTheme();
   const { navigate } = useRouter();
   const [showModal, setShowModal] = useState(false);
@@ -62,6 +62,21 @@ const OfertasPage = () => {
       status: 'active',
       created_at: '2024-01-20',
       expires_at: '2024-03-20'
+    },
+    {
+      id: '3',
+      title: 'Backend Developer Node.js',
+      company: 'Startup Innovadora',
+      location: 'Cochabamba, Bolivia',
+      salary: 'Bs 6000 - 8000',
+      type: 'Tiempo completo',
+      category: 'Desarrollo Backend',
+      description: 'Desarrollador Backend con experiencia en Node.js y bases de datos NoSQL.',
+      requirements: ['Node.js', 'MongoDB', 'Express', 'API REST'],
+      applicants: 23,
+      status: 'paused',
+      created_at: '2024-01-10',
+      expires_at: '2024-03-10'
     }
   ]);
 
@@ -124,6 +139,12 @@ const OfertasPage = () => {
     if (window.confirm('¿Estás seguro de eliminar esta oferta?')) {
       setOffers(offers.filter(o => o.id !== id));
     }
+  };
+
+  const handleStatusChange = (id, newStatus) => {
+    setOffers(offers.map(offer => 
+      offer.id === id ? { ...offer, status: newStatus } : offer
+    ));
   };
 
   const filteredOffers = offers.filter(offer => {
@@ -526,5 +547,3 @@ const OfertasPage = () => {
     </div>
   );
 };
-
-export { OfertasPage };
