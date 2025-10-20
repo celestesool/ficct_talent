@@ -39,8 +39,8 @@ export const Navbar = () => {
     { 
       category: 'Principal',
       routes: [
-        { path: '/estudiante/dashboard', label: 'Dashboard', icon: Home },
         { path: '/estudiante/perfil', label: 'Perfil', icon: User },
+        { path: '/estudiante/dashboard', label: 'Inicio', icon: Home },
       ]
     },
     { 
@@ -67,7 +67,11 @@ export const Navbar = () => {
     { path: '/empresa/candidatos', label: 'Candidatos', icon: Users },
   ];
 
-  const routes = isEstudiante ? estudianteRoutes.flatMap(group => group.routes) : empresaRoutes;
+  const getEstudianteRoutes = () => {
+    return estudianteRoutes.flatMap(group => group.routes || []);
+  };
+
+  const routes = isEstudiante ? getEstudianteRoutes() : empresaRoutes;
 
   const isActiveRoute = (path) => {
     return currentRoute === path;
@@ -92,8 +96,26 @@ export const Navbar = () => {
 
           <div className="hidden lg:flex items-center gap-1 flex-1 justify-end mr-8">
             {isEstudiante ? (
-              // Navegación agrupada para estudiante - ALINEADA A LA DERECHA
+            
               <div className="flex items-center gap-2">
+                
+                <button
+                  onClick={() => navigate('/estudiante/dashboard')}
+                  className={`
+                    flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium
+                    ${isActiveRoute('/estudiante/dashboard')
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
+                      : isDark
+                      ? 'text-slate-300 hover:bg-slate-800 hover:text-white hover:shadow-lg'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-lg'
+                    }
+                  `}
+                >
+                  <Home size={17} />
+                  Dashboard
+                </button>
+
+                {/* Categorías con dropdown */}
                 {estudianteRoutes.map((group, groupIndex) => (
                   <div key={groupIndex} className="relative group z-40">
                     <button className={`
@@ -126,9 +148,7 @@ export const Navbar = () => {
                               className={`
                                 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
                                 ${isActiveRoute(route.path)
-                                  ? isEstudiante
-                                    ? 'bg-blue-500/20 text-blue-600 border border-blue-500/30'
-                                    : 'bg-purple-500/20 text-purple-600 border border-purple-500/30'
+                                  ? 'bg-blue-500/20 text-blue-600 border border-blue-500/30'
                                   : isDark
                                   ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
                                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -148,7 +168,7 @@ export const Navbar = () => {
             ) : (
               // Navegación simple para empresa 
               <div className="flex items-center gap-2">
-                {routes.map((route) => {
+                {empresaRoutes.map((route) => {
                   const Icon = route.icon;
                   return (
                     <button
@@ -257,7 +277,7 @@ export const Navbar = () => {
           </div>
         </div>
 
-        {/* MENÚ MOBILE MEJORADO */}
+        {/* MENÚ MOBILE */}
         {isMenuOpen && (
           <div className="lg:hidden mt-3 pb-3 z-50">
             <div className={`
@@ -269,45 +289,66 @@ export const Navbar = () => {
             `}>
               <div className="p-3 space-y-1">
                 {isEstudiante ? (
-                  // Menú mobile agrupado para estudiante
-                  estudianteRoutes.map((group, groupIndex) => (
-                    <div key={groupIndex} className="space-y-1">
-                      <p className={`px-3 py-2 text-xs font-semibold uppercase tracking-wide ${
-                        isDark ? 'text-slate-400' : 'text-slate-500'
-                      }`}>
-                        {group.category}
-                      </p>
-                      {group.routes.map((route) => {
-                        const Icon = route.icon;
-                        return (
-                          <button
-                            key={route.path}
-                            onClick={() => {
-                              navigate(route.path);
-                              setIsMenuOpen(false);
-                            }}
-                            className={`
-                              w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
-                              ${isActiveRoute(route.path)
-                                ? isEstudiante
+                 
+                  <>
+                    {/* Botón Dashboard en mobile */}
+                    <button
+                      onClick={() => {
+                        navigate('/estudiante/dashboard');
+                        setIsMenuOpen(false);
+                      }}
+                      className={`
+                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
+                        ${isActiveRoute('/estudiante/dashboard')
+                          ? 'bg-blue-600 text-white'
+                          : isDark
+                          ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                        }
+                      `}
+                    >
+                      <Home size={18} />
+                      Dashboard
+                    </button>
+
+                    {/* Categorías en mobile */}
+                    {estudianteRoutes.map((group, groupIndex) => (
+                      <div key={groupIndex} className="space-y-1">
+                        <p className={`px-3 py-2 text-xs font-semibold uppercase tracking-wide ${
+                          isDark ? 'text-slate-400' : 'text-slate-500'
+                        }`}>
+                          {group.category}
+                        </p>
+                        {group.routes.map((route) => {
+                          const Icon = route.icon;
+                          return (
+                            <button
+                              key={route.path}
+                              onClick={() => {
+                                navigate(route.path);
+                                setIsMenuOpen(false);
+                              }}
+                              className={`
+                                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
+                                ${isActiveRoute(route.path)
                                   ? 'bg-blue-500/20 text-blue-600 border border-blue-500/30'
-                                  : 'bg-purple-500/20 text-purple-600 border border-purple-500/30'
-                                : isDark
-                                ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                              }
-                            `}
-                          >
-                            <Icon size={18} />
-                            {route.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ))
+                                  : isDark
+                                  ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                                }
+                              `}
+                            >
+                              <Icon size={18} />
+                              {route.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </>
                 ) : (
                   // Menú mobile simple para empresa
-                  routes.map((route) => {
+                  empresaRoutes.map((route) => {
                     const Icon = route.icon;
                     return (
                       <button
