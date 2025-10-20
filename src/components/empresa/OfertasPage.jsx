@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
+import { Navbar } from '../common/Navbar';
+import { Card } from '../common/Card';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
 import { 
   Plus,
   Search,

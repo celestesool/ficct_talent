@@ -19,8 +19,7 @@ import {
   Download,
   BookOpen,
   Award,
-  Briefcase, 
-  X
+  Briefcase
 } from 'lucide-react';
 
 export const CandidatosPage = () => {

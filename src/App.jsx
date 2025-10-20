@@ -16,6 +16,8 @@ import { InfoAcademicaPage } from './pages/estudiante/InfoAcademicaPage';
 
 // Páginas de Empresa
 import { DashboardEmpresa } from './pages/empresa/DashboardEmpresa';
+import { OfertasPage } from './pages/empresa/OfertasPage';
+import { CandidatosPage } from './pages/empresa/CandidatosPage';
 
 const AppRoutes = () => {
   const { currentRoute } = useRouter();
@@ -41,11 +43,14 @@ const AppRoutes = () => {
     
     // Rutas de Empresa
     '/empresa/dashboard': <DashboardEmpresa />,
+    '/empresa/ofertas': <OfertasPage />,
+    '/empresa/candidatos': <CandidatosPage />,
+    '/empresa/ofertas/nueva': <OfertasPage />,
+    '/empresa/ofertas/:id': <OfertasPage />,
+    '/empresa/candidatos/:id': <CandidatosPage />,
     
-    // Rutas adicionales (placeholder para futuras páginas)
-    '/estudiante/ofertas': <DashboardEstudiante />, // Temporal
-    '/empresa/ofertas': <DashboardEmpresa />, // Temporal
-    '/empresa/candidatos': <DashboardEmpresa />, // Temporal
+    // Rutas adicionales
+    '/estudiante/ofertas': <DashboardEstudiante />,
   };
 
   return routes[currentRoute] || <HomePage />;
