@@ -5,8 +5,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
 import { Button } from './Button';
 import { 
-  GraduationCap, 
-  Building2, 
   User, 
   LogOut, 
   Menu,
@@ -16,7 +14,8 @@ import {
   Award,
   Code,
   BookOpen,
-  Users
+  Users,
+  GraduationCap
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -57,28 +56,15 @@ export const Navbar = () => {
 
   return (
     <nav className={`${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-b`}>
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          {/* Logo y título */}
-          <div className="flex items-center gap-3">
-            <div className={`
-              w-10 h-10 rounded-lg flex items-center justify-center
-              ${isEstudiante ? 'bg-blue-600' : 'bg-purple-600'}
-            `}>
-              {isEstudiante ? (
-                <GraduationCap size={24} className="text-white" />
-              ) : (
-                <Building2 size={24} className="text-white" />
-              )}
-            </div>
-            <div>
-              <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                FICCT-TALENT
-              </h1>
-              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                {isEstudiante ? 'Portal Estudiante' : 'Portal Empresa'}
-              </p>
-            </div>
+          <div className="flex items-center">
+            <img 
+              src="/images/logo.png" 
+              alt="FICCT TALENT" 
+              className="w-18 h-16 object-contain cursor-pointer transition-transform hover:scale-105" // ✅ Corregido: w-12 h-12
+              onClick={() => navigate(isEstudiante ? '/estudiante/dashboard' : '/empresa/dashboard')}
+            />
           </div>
 
           {/* Navegación Desktop */}
@@ -112,8 +98,8 @@ export const Navbar = () => {
           <div className="flex items-center gap-4">
             {user && (
               <div className="hidden sm:flex items-center gap-2">
-                <User size={20} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
-                <span className={`font-medium ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
+                <User size={18} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
+                <span className={`font-medium text-sm ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
                   {user.name || 'Usuario'}
                 </span>
               </div>
@@ -128,13 +114,13 @@ export const Navbar = () => {
                   isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
                 }`}
               >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
 
-            <Button variant="outline" onClick={handleLogout} className="hidden sm:flex">
+            <Button variant="outline" onClick={handleLogout} className="hidden sm:flex text-sm py-2">
               <div className="flex items-center gap-2">
-                <LogOut size={18} />
+                <LogOut size={16} />
                 Cerrar Sesión
               </div>
             </Button>
@@ -143,8 +129,8 @@ export const Navbar = () => {
 
         {/* Menú Mobile */}
         {isMenuOpen && (
-          <div className="md:hidden mt-4 pb-4">
-            <div className={`rounded-lg p-4 ${
+          <div className="md:hidden mt-3 pb-3">
+            <div className={`rounded-lg p-3 ${
               isDark ? 'bg-slate-700' : 'bg-slate-100'
             }`}>
               <div className="space-y-2">
@@ -158,7 +144,7 @@ export const Navbar = () => {
                         setIsMenuOpen(false);
                       }}
                       className={`
-                        w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium
+                        w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium text-sm
                         ${isActiveRoute(route.path)
                           ? isEstudiante
                             ? 'bg-blue-600 text-white'
@@ -169,7 +155,7 @@ export const Navbar = () => {
                         }
                       `}
                     >
-                      <Icon size={20} />
+                      <Icon size={18} />
                       {route.label}
                     </button>
                   );
@@ -179,14 +165,14 @@ export const Navbar = () => {
                 <button
                   onClick={handleLogout}
                   className={`
-                    w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium
+                    w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium text-sm
                     ${isDark
                       ? 'text-red-400 hover:bg-red-900/20'
                       : 'text-red-600 hover:bg-red-50'
                     }
                   `}
                 >
-                  <LogOut size={20} />
+                  <LogOut size={18} />
                   Cerrar Sesión
                 </button>
               </div>
