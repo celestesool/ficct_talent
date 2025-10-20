@@ -15,7 +15,8 @@ import {
   Code,
   BookOpen,
   Users,
-  GraduationCap
+  GraduationCap,
+  FileText 
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -39,6 +40,7 @@ export const Navbar = () => {
     { path: '/estudiante/certificaciones', label: 'Certificaciones', icon: Award },
     { path: '/estudiante/habilidades', label: 'Habilidades', icon: BookOpen },
     { path: '/estudiante/academico', label: 'Académico', icon: GraduationCap },
+    { path: '/estudiante/cv-generator', label: 'Generar CV', icon: FileText }, 
   ];
 
   // Rutas para Empresa
@@ -62,7 +64,7 @@ export const Navbar = () => {
             <img 
               src="/images/logo.png" 
               alt="FICCT TALENT" 
-              className="w-18 h-16 object-contain cursor-pointer transition-transform hover:scale-105" // ✅ Corregido: w-12 h-12
+              className="w-18 h-16 object-contain cursor-pointer transition-transform hover:scale-105"
               onClick={() => navigate(isEstudiante ? '/estudiante/dashboard' : '/empresa/dashboard')}
             />
           </div>
