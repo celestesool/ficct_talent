@@ -12,7 +12,8 @@ import {
   TrendingUp,
   BookOpen,
   MessageSquare,
-  Bell
+  Bell, 
+  FileText 
 } from 'lucide-react';
 
 export const DashboardEstudiante = () => {
@@ -47,6 +48,13 @@ export const DashboardEstudiante = () => {
       icon: Award, 
       path: '/estudiante/certificaciones',
       color: 'green'
+    },
+    { 
+    title: 'Generar CV', 
+    desc: 'Crea tu CV con IA', 
+    icon: FileText, 
+    path: '/estudiante/cv-generator',
+    color: 'indigo'
     },
     { 
       title: 'Ofertas', 

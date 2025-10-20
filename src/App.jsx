@@ -13,6 +13,7 @@ import { ProyectosPage } from './pages/estudiante/ProyectosPage';
 import { CertificacionesPage } from './pages/estudiante/CertificacionesPage';
 import { HabilidadesPage } from './pages/estudiante/HabilidadesPage';
 import { InfoAcademicaPage } from './pages/estudiante/InfoAcademicaPage';
+import { CVGeneratorPage } from './pages/estudiante/CVGeneratorPage'; // ⭐ NUEVO
 
 // Páginas de Empresa
 import { DashboardEmpresa } from './pages/empresa/DashboardEmpresa';
@@ -40,6 +41,7 @@ const AppRoutes = () => {
     '/estudiante/certificaciones': <CertificacionesPage />,
     '/estudiante/habilidades': <HabilidadesPage />,
     '/estudiante/academico': <InfoAcademicaPage />,
+    '/estudiante/cv-generator': <CVGeneratorPage />, // ⭐ NUEVA RUTA
     
     // Rutas de Empresa
     '/empresa/dashboard': <DashboardEmpresa />,
