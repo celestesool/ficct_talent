@@ -9,8 +9,12 @@ export const ThemeToggle = () => {
     <button
       onClick={toggleTheme}
       className={`
-        p-3 rounded-full transition-all duration-200 hover:scale-110
-        ${isDark ? 'bg-slate-700 text-yellow-400' : 'bg-slate-200 text-slate-700'}
+        p-3 rounded-xl transition-all duration-300 hover:scale-110 border-2
+        ${isDark 
+          ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700 hover:border-slate-600' 
+          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+        }
+        shadow-lg hover:shadow-xl
       `}
       aria-label="Toggle theme"
     >
