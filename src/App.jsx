@@ -1,24 +1,24 @@
-import React from 'react';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { Router, useRouter } from './contexts/RouterContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { Router, useRouter } from './contexts/RouterContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegistroPage } from './pages/RegistroPage';
 
 // Páginas de Estudiante
-import { DashboardEstudiante } from './pages/estudiante/DashboardEstudiante';
-import { PerfilPage } from './pages/estudiante/PerfilPage';
-import { ProyectosPage } from './pages/estudiante/ProyectosPage';
+import JobSearch from './components/JobSearch';
 import { CertificacionesPage } from './pages/estudiante/CertificacionesPage';
+import { CVGeneratorPage } from './pages/estudiante/CVGeneratorPage'; // ⭐ NUEVO
+import { DashboardEstudiante } from './pages/estudiante/DashboardEstudiante';
 import { HabilidadesPage } from './pages/estudiante/HabilidadesPage';
 import { InfoAcademicaPage } from './pages/estudiante/InfoAcademicaPage';
-import { CVGeneratorPage } from './pages/estudiante/CVGeneratorPage'; // ⭐ NUEVO
+import { PerfilPage } from './pages/estudiante/PerfilPage';
+import { ProyectosPage } from './pages/estudiante/ProyectosPage';
 
 // Páginas de Empresa
+import { CandidatosPage } from './pages/empresa/CandidatosPage';
 import { DashboardEmpresa } from './pages/empresa/DashboardEmpresa';
 import { OfertasPage } from './pages/empresa/OfertasPage';
-import { CandidatosPage } from './pages/empresa/CandidatosPage';
 
 const AppRoutes = () => {
   const { currentRoute } = useRouter();
@@ -52,7 +52,7 @@ const AppRoutes = () => {
     '/empresa/candidatos/:id': <CandidatosPage />,
     
     // Rutas adicionales
-    '/estudiante/ofertas': <DashboardEstudiante />,
+    '/estudiante/ofertas': <JobSearch/>,
   };
 
   return routes[currentRoute] || <HomePage />;
