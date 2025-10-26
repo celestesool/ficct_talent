@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const AuthContext = createContext();
 
@@ -6,10 +6,23 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Simulamos un usuario autenticado con id estático
+  useEffect(() => {
+    const mockUser = {
+      id: 'c1528cb3-fecd-4427-8d81-055214884fc3',
+      first_name: 'Juan',
+      last_name: 'Pérez',
+      email: 'juan.perez@example.com',
+    };
+
+    setUser(mockUser);
+    setIsAuthenticated(true);
+  }, []);
+
   const login = (userData) => {
     setUser(userData);
     setIsAuthenticated(true);
-    // Aquí irá la lógica de autenticación real
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {

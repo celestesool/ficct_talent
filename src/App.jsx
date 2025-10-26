@@ -26,8 +26,10 @@ import { OfertasPage } from './pages/empresa/OfertasPage';
 import { CompanyLayout } from './components/layout/CompanyLayout';
 import { StudentLayout } from './components/layout/StudentLayout';
 import { UserTypeProvider } from './contexts/UserTypeContext';
+import { CVEditor } from './pages/estudiante/CVEditor';
 
 function App() {
+  //const { student } = useStudentStore(); //agregar auth para esto
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -50,6 +52,10 @@ function App() {
                 <Route path="academico" element={<InfoAcademicaPage />} />
                 <Route path="cv-generator" element={<CVGeneratorPage />} />
                 <Route path="ofertas" element={<JobSearch />} />
+
+
+                <Route path="cv-editor" element={<CVEditor studentId="c1528cb3-fecd-4427-8d81-055214884fc3" />} />
+                {/*<Route path="cv-editor" element={<CVEditor studentId={student.id} />} />*/}
               </Route>
 
               {/* Rutas de Empresa */}
