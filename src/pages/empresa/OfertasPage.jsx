@@ -1,32 +1,32 @@
-import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import { 
-  Plus,
-  Search,
-  Filter,
+import {
+  AlertCircle,
   Briefcase,
-  MapPin,
   Calendar,
-  DollarSign,
-  Users,
-  Eye,
-  Edit3,
-  Trash2,
-  X,
-  Save,
-  Clock,
   CheckCircle,
-  AlertCircle
+  Clock,
+  DollarSign,
+  Edit3,
+  Eye,
+  Filter,
+  MapPin,
+  Plus,
+  Save,
+  Search,
+  Trash2,
+  Users,
+  X
 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/common/Button';
+import { Card } from '../../components/common/Card';
+import { Input } from '../../components/common/Input';
+import { Navbar } from '../../components/common/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const OfertasPage = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -126,9 +126,14 @@ const OfertasPage = () => {
     }
   };
 
+  // ⭐⭐ ACTUALIZADO: Función de navegación para ver detalles de oferta
+  const handleViewOfferDetails = (offerId) => {
+    navigate(`/empresa/ofertas/${offerId}`);
+  };
+
   const filteredOffers = offers.filter(offer => {
     const matchesSearch = offer.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         offer.category.toLowerCase().includes(searchTerm.toLowerCase());
+      offer.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || offer.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
@@ -157,7 +162,7 @@ const OfertasPage = () => {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -191,8 +196,8 @@ const OfertasPage = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`
                   w-full pl-10 pr-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                  ${isDark 
-                    ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
+                  ${isDark
+                    ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400'
                     : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
                   }
                 `}
@@ -205,8 +210,8 @@ const OfertasPage = () => {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className={`
                   px-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                  ${isDark 
-                    ? 'bg-slate-700 border-slate-600 text-slate-100' 
+                  ${isDark
+                    ? 'bg-slate-700 border-slate-600 text-slate-100'
                     : 'bg-white border-slate-300 text-slate-900'
                   }
                 `}
@@ -236,7 +241,7 @@ const OfertasPage = () => {
                 No hay ofertas {searchTerm || filterStatus !== 'all' ? 'que coincidan' : ''}
               </h3>
               <p className={`mb-6 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                {searchTerm || filterStatus !== 'all' 
+                {searchTerm || filterStatus !== 'all'
                   ? 'Intenta con otros términos de búsqueda o filtros'
                   : 'Comienza publicando tu primera oferta de trabajo'
                 }
@@ -256,7 +261,7 @@ const OfertasPage = () => {
             {filteredOffers.map((offer) => {
               const StatusIcon = getStatusInfo(offer.status).icon;
               const daysUntilExpiry = getDaysUntilExpiry(offer.expires_at);
-              
+
               return (
                 <Card key={offer.id} hover>
                   <div className="flex justify-between items-start mb-4">
@@ -276,29 +281,26 @@ const OfertasPage = () => {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex gap-2">
                       <button
-                        onClick={() => navigate(`/empresa/ofertas/${offer.id}`)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
-                        }`}
+                        onClick={() => handleViewOfferDetails(offer.id)}
+                        className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
+                          }`}
                       >
                         <Eye size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
                       </button>
                       <button
                         onClick={() => handleOpenModal(offer)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
+                          }`}
                       >
                         <Edit3 size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
                       </button>
                       <button
                         onClick={() => handleDeleteOffer(offer.id)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
+                          }`}
                       >
                         <Trash2 size={16} className="text-red-600" />
                       </button>
@@ -343,8 +345,8 @@ const OfertasPage = () => {
                           key={idx}
                           className={`
                             px-2 py-1 rounded text-xs font-medium
-                            ${isDark 
-                              ? 'bg-slate-700 text-slate-300' 
+                            ${isDark
+                              ? 'bg-slate-700 text-slate-300'
                               : 'bg-slate-100 text-slate-700'
                             }
                           `}
@@ -365,7 +367,7 @@ const OfertasPage = () => {
                         text-sm font-medium
                         ${getStatusInfo(offer.status).color === 'green' ? 'text-green-600' :
                           getStatusInfo(offer.status).color === 'yellow' ? 'text-yellow-600' :
-                          'text-red-600'
+                            'text-red-600'
                         }
                       `}>
                         {getStatusInfo(offer.status).text}
@@ -444,8 +446,8 @@ const OfertasPage = () => {
                     onChange={(e) => setNewOffer({ ...newOffer, type: e.target.value })}
                     className={`
                       w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                      ${isDark 
-                        ? 'bg-slate-700 border-slate-600 text-slate-100' 
+                      ${isDark
+                        ? 'bg-slate-700 border-slate-600 text-slate-100'
                         : 'bg-white border-slate-300 text-slate-900'
                       }
                     `}
@@ -490,8 +492,8 @@ const OfertasPage = () => {
                     required
                     className={`
                       w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                      ${isDark 
-                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
+                      ${isDark
+                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400'
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
                       }
                     `}
@@ -528,3 +530,4 @@ const OfertasPage = () => {
 };
 
 export { OfertasPage };
+

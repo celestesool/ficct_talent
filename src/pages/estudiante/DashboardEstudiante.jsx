@@ -1,63 +1,61 @@
-import React from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { 
-  User, 
-  Briefcase, 
-  Award, 
-  Code, 
-  TrendingUp,
-  BookOpen,
-  Bell, 
-  FileText,
+import {
   ArrowRight,
-  Sparkles,
+  Award,
+  Bell,
+  Briefcase,
   Clock,
-  Eye
+  Code,
+  Eye,
+  FileText,
+  Sparkles,
+  TrendingUp,
+  User
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/common/Button';
+import { Card } from '../../components/common/Card';
+import { Navbar } from '../../components/common/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const DashboardEstudiante = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
 
   const stats = [
-    { 
-      label: 'Proyectos', 
-      value: '5', 
-      icon: Code, 
+    {
+      label: 'Proyectos',
+      value: '5',
+      icon: Code,
       color: 'blue',
       bgLight: 'bg-blue-50',
       bgDark: 'bg-blue-500/10',
       textColor: 'text-blue-600',
       borderColor: 'border-blue-200 dark:border-blue-500/30'
     },
-    { 
-      label: 'Certificaciones', 
-      value: '3', 
-      icon: Award, 
+    {
+      label: 'Certificaciones',
+      value: '3',
+      icon: Award,
       color: 'purple',
       bgLight: 'bg-purple-50',
       bgDark: 'bg-purple-500/10',
       textColor: 'text-purple-600',
       borderColor: 'border-purple-200 dark:border-purple-500/30'
     },
-    { 
-      label: 'Habilidades', 
-      value: '12', 
-      icon: TrendingUp, 
+    {
+      label: 'Habilidades',
+      value: '12',
+      icon: TrendingUp,
       color: 'green',
       bgLight: 'bg-green-50',
       bgDark: 'bg-green-500/10',
       textColor: 'text-green-600',
       borderColor: 'border-green-200 dark:border-green-500/30'
     },
-    { 
-      label: 'Postulaciones', 
-      value: '8', 
-      icon: Briefcase, 
+    {
+      label: 'Postulaciones',
+      value: '8',
+      icon: Briefcase,
       color: 'orange',
       bgLight: 'bg-orange-50',
       bgDark: 'bg-orange-500/10',
@@ -67,40 +65,40 @@ export const DashboardEstudiante = () => {
   ];
 
   const quickActions = [
-    { 
-      title: 'Mi Perfil', 
-      desc: 'Actualiza tu información personal', 
-      icon: User, 
+    {
+      title: 'Mi Perfil',
+      desc: 'Actualiza tu información personal',
+      icon: User,
       path: '/estudiante/perfil',
       gradient: 'from-blue-500 to-blue-600',
       bgLight: 'bg-blue-50',
       bgDark: 'bg-blue-500/10',
       hoverBorder: 'hover:border-blue-400 dark:hover:border-blue-500'
     },
-    { 
-      title: 'Proyectos', 
-      desc: 'Gestiona tu portafolio', 
-      icon: Code, 
+    {
+      title: 'Proyectos',
+      desc: 'Gestiona tu portafolio',
+      icon: Code,
       path: '/estudiante/proyectos',
       gradient: 'from-purple-500 to-purple-600',
       bgLight: 'bg-purple-50',
       bgDark: 'bg-purple-500/10',
       hoverBorder: 'hover:border-purple-400 dark:hover:border-purple-500'
     },
-    { 
-      title: 'Certificaciones', 
-      desc: 'Agrega tus certificados', 
-      icon: Award, 
+    {
+      title: 'Certificaciones',
+      desc: 'Agrega tus certificados',
+      icon: Award,
       path: '/estudiante/certificaciones',
       gradient: 'from-green-500 to-green-600',
       bgLight: 'bg-green-50',
       bgDark: 'bg-green-500/10',
       hoverBorder: 'hover:border-green-400 dark:hover:border-green-500'
     },
-    { 
-      title: 'Generar CV', 
-      desc: 'Crea tu CV con IA', 
-      icon: FileText, 
+    {
+      title: 'Generar CV',
+      desc: 'Crea tu CV con IA',
+      icon: FileText,
       path: '/estudiante/cv-generator',
       gradient: 'from-indigo-500 to-indigo-600',
       bgLight: 'bg-indigo-50',
@@ -108,10 +106,10 @@ export const DashboardEstudiante = () => {
       hoverBorder: 'hover:border-indigo-400 dark:hover:border-indigo-500',
       badge: 'IA'
     },
-    { 
-      title: 'Ofertas', 
-      desc: 'Busca oportunidades', 
-      icon: Briefcase, 
+    {
+      title: 'Ofertas',
+      desc: 'Busca oportunidades',
+      icon: Briefcase,
       path: '/estudiante/ofertas',
       gradient: 'from-orange-500 to-orange-600',
       bgLight: 'bg-orange-50',
@@ -121,21 +119,21 @@ export const DashboardEstudiante = () => {
   ];
 
   const recentActivity = [
-    { 
-      text: 'Postulaste a "Desarrollador Frontend"', 
+    {
+      text: 'Postulaste a "Desarrollador Frontend"',
       company: 'Tech Corp',
       time: 'Hace 2 horas',
       icon: Briefcase,
       color: 'text-blue-600'
     },
-    { 
-      text: 'Agregaste el proyecto "Sistema de Ventas"', 
+    {
+      text: 'Agregaste el proyecto "Sistema de Ventas"',
       time: 'Hace 1 día',
       icon: Code,
       color: 'text-purple-600'
     },
-    { 
-      text: 'Empresa XYZ vio tu perfil', 
+    {
+      text: 'Empresa XYZ vio tu perfil',
       time: 'Hace 2 días',
       icon: Eye,
       color: 'text-green-600'
@@ -159,10 +157,14 @@ export const DashboardEstudiante = () => {
     }
   ];
 
+  const handleActionClick = (path) => {
+    navigate(path);
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-slate-50'}`}>
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 lg:py-12">
         {/* Header - MEJORADO */}
         <div className="mb-10">
@@ -180,7 +182,7 @@ export const DashboardEstudiante = () => {
         {/* Stats Grid - MEJORADO */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10">
           {stats.map((stat, idx) => (
-            <Card 
+            <Card
               key={idx}
               className={`
                 border-2 ${stat.borderColor}
@@ -220,16 +222,16 @@ export const DashboardEstudiante = () => {
                   </h2>
                 </div>
               </div>
-              
+
               <div className="grid sm:grid-cols-2 gap-4 lg:gap-5">
                 {quickActions.map((action, idx) => (
                   <div
                     key={idx}
-                    onClick={() => navigate(action.path)}
+                    onClick={() => handleActionClick(action.path)}
                     className={`
                       group relative p-5 lg:p-6 rounded-xl border-2 cursor-pointer transition-all duration-300
-                      ${isDark 
-                        ? 'border-slate-700 bg-slate-800/50 hover:bg-slate-800' 
+                      ${isDark
+                        ? 'border-slate-700 bg-slate-800/50 hover:bg-slate-800'
                         : 'border-slate-200 bg-white hover:shadow-lg'
                       }
                       ${action.hoverBorder}
@@ -254,20 +256,20 @@ export const DashboardEstudiante = () => {
                       ${isDark ? action.bgDark : action.bgLight}
                       group-hover:scale-110 transition-transform duration-300
                     `}>
-                      <action.icon 
-                        className={`bg-gradient-to-br ${action.gradient} bg-clip-text text-transparent`} 
-                        size={24} 
+                      <action.icon
+                        className={`bg-gradient-to-br ${action.gradient} bg-clip-text text-transparent`}
+                        size={24}
                         strokeWidth={2.5}
                       />
                     </div>
-                    
+
                     <h3 className={`font-bold text-base lg:text-lg mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       {action.title}
                     </h3>
                     <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'} mb-3`}>
                       {action.desc}
                     </p>
-                    
+
                     <div className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
                       <span>Ir ahora</span>
                       <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -298,7 +300,7 @@ export const DashboardEstudiante = () => {
                 {/* Barra de progreso */}
                 <div>
                   <div className={`relative w-full h-3 rounded-full overflow-hidden ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}>
-                    <div 
+                    <div
                       className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
                       style={{ width: '75%' }}
                     >
@@ -318,11 +320,11 @@ export const DashboardEstudiante = () => {
                     <div key={idx} className="flex items-center gap-3">
                       <div className={`
                         w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0
-                        ${item.done 
-                          ? 'bg-gradient-to-br from-green-500 to-emerald-500' 
+                        ${item.done
+                          ? 'bg-gradient-to-br from-green-500 to-emerald-500'
                           : item.progress
-                          ? 'bg-gradient-to-br from-yellow-500 to-orange-500'
-                          : isDark ? 'bg-slate-700' : 'bg-slate-300'
+                            ? 'bg-gradient-to-br from-yellow-500 to-orange-500'
+                            : isDark ? 'bg-slate-700' : 'bg-slate-300'
                         }
                       `}>
                         {item.done && (
@@ -334,20 +336,19 @@ export const DashboardEstudiante = () => {
                           <Clock size={12} className="text-white" />
                         )}
                       </div>
-                      <span className={`text-sm ${
-                        item.done 
-                          ? isDark ? 'text-slate-300' : 'text-slate-700'
-                          : isDark ? 'text-slate-500' : 'text-slate-500'
-                      }`}>
+                      <span className={`text-sm ${item.done
+                        ? isDark ? 'text-slate-300' : 'text-slate-700'
+                        : isDark ? 'text-slate-500' : 'text-slate-500'
+                        }`}>
                         {item.text}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <Button 
-                  variant="primary" 
-                  fullWidth 
+                <Button
+                  variant="primary"
+                  fullWidth
                   onClick={() => navigate('/estudiante/perfil')}
                   className="py-3"
                 >
@@ -376,8 +377,8 @@ export const DashboardEstudiante = () => {
 
               <div className="space-y-4">
                 {recentActivity.map((activity, idx) => (
-                  <div 
-                    key={idx} 
+                  <div
+                    key={idx}
                     className={`
                       pb-4 
                       ${idx !== recentActivity.length - 1 ? 'border-b' : ''} 
@@ -435,7 +436,7 @@ export const DashboardEstudiante = () => {
                   >
                     {/* Gradient background */}
                     <div className={`absolute inset-0 bg-gradient-to-br ${offer.gradient} opacity-5 group-hover:opacity-10 transition-opacity`}></div>
-                    
+
                     <div className="relative">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1 min-w-0">
@@ -457,8 +458,8 @@ export const DashboardEstudiante = () => {
                         <span className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
                           {offer.type}
                         </span>
-                        <ArrowRight 
-                          size={16} 
+                        <ArrowRight
+                          size={16}
                           className={`${isDark ? 'text-slate-600' : 'text-slate-400'} group-hover:translate-x-1 transition-transform`}
                         />
                       </div>
@@ -467,10 +468,10 @@ export const DashboardEstudiante = () => {
                 ))}
               </div>
 
-              <Button 
-                variant="outline" 
-                fullWidth 
-                className="mt-4" 
+              <Button
+                variant="outline"
+                fullWidth
+                className="mt-4"
                 onClick={() => navigate('/estudiante/ofertas')}
               >
                 <span className="flex items-center justify-center gap-2">

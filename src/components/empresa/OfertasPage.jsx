@@ -1,36 +1,54 @@
-import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../common/Navbar';
-import { Card } from '../common/Card';
-import { Button } from '../common/Button';
-import { Input } from '../common/Input';
-import { 
-  Plus,
-  Search,
-  Filter,
+import {
+  AlertCircle,
+  ArrowLeft // ⭐ AÑADIDO: Icono para volver
+  ,
+
   Briefcase,
-  MapPin,
   Calendar,
-  DollarSign,
-  Users,
-  Eye,
-  Edit3,
-  Trash2,
-  X,
-  Save,
-  Clock,
   CheckCircle,
-  AlertCircle
+  Clock,
+  DollarSign,
+  Edit3,
+  Eye,
+  Filter,
+  MapPin,
+  Plus,
+  Save,
+  Search,
+  Trash2,
+  Users,
+  X
 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../contexts/ThemeContext';
+import { Button } from '../common/Button';
+import { Card } from '../common/Card';
+import { Input } from '../common/Input';
+import { Navbar } from '../common/Navbar';
 
 export const OfertasPage = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate(); // ⭐ ACTUALIZADO: useNavigate hook
   const [showModal, setShowModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+
+  // ⭐ NUEVO: Función para navegar al dashboard
+  const handleBackToDashboard = () => {
+    navigate('/empresa/dashboard');
+  };
+
+  // ⭐ NUEVO: Función para ver detalles de oferta
+  const handleViewOfferDetails = (offerId) => {
+    navigate(`/empresa/ofertas/${offerId}`);
+  };
+
+  // ⭐ NUEVO: Función para ver candidatos de una oferta
+  const handleViewCandidates = (offerId) => {
+    navigate(`/empresa/candidatos?offer=${offerId}`);
+  };
 
   const [offers, setOffers] = useState([
     {
@@ -46,7 +64,9 @@ export const OfertasPage = () => {
       applicants: 15,
       status: 'active',
       created_at: '2024-01-15',
-      expires_at: '2024-03-15'
+      expires_at: '2024-03-15',
+      views: 234,
+      matches: 8
     },
     {
       id: '2',
@@ -61,7 +81,9 @@ export const OfertasPage = () => {
       applicants: 8,
       status: 'active',
       created_at: '2024-01-20',
-      expires_at: '2024-03-20'
+      expires_at: '2024-03-20',
+      views: 156,
+      matches: 3
     },
     {
       id: '3',
@@ -76,7 +98,26 @@ export const OfertasPage = () => {
       applicants: 23,
       status: 'paused',
       created_at: '2024-01-10',
-      expires_at: '2024-03-10'
+      expires_at: '2024-03-10',
+      views: 189,
+      matches: 12
+    },
+    {
+      id: '4',
+      title: 'Pasantía en Desarrollo Móvil',
+      company: 'Mobile First Bolivia',
+      location: 'Santa Cruz, Bolivia',
+      salary: 'Bs 2000 - 3000',
+      type: 'Pasantía',
+      category: 'Desarrollo Móvil',
+      description: 'Pasantía para estudiantes de últimos semestres interesados en desarrollo de aplicaciones móviles.',
+      requirements: ['React Native', 'JavaScript', 'Git', 'Firebase'],
+      applicants: 32,
+      status: 'active',
+      created_at: '2024-01-25',
+      expires_at: '2024-02-28',
+      views: 321,
+      matches: 15
     }
   ]);
 
@@ -117,11 +158,18 @@ export const OfertasPage = () => {
   };
 
   const handleSaveOffer = () => {
+    if (!newOffer.title || !newOffer.company || !newOffer.location || !newOffer.description || !newOffer.expires_at) {
+      alert('Por favor completa todos los campos obligatorios');
+      return;
+    }
+
     const offerData = {
       ...newOffer,
-      requirements: newOffer.requirements.split(',').map(r => r.trim()),
+      requirements: newOffer.requirements.split(',').map(r => r.trim()).filter(r => r),
       id: editingOffer ? editingOffer.id : Date.now().toString(),
       applicants: editingOffer ? editingOffer.applicants : 0,
+      views: editingOffer ? editingOffer.views : 0,
+      matches: editingOffer ? editingOffer.matches : 0,
       status: editingOffer ? editingOffer.status : 'active',
       created_at: editingOffer ? editingOffer.created_at : new Date().toISOString().split('T')[0]
     };
@@ -136,20 +184,21 @@ export const OfertasPage = () => {
   };
 
   const handleDeleteOffer = (id) => {
-    if (window.confirm('¿Estás seguro de eliminar esta oferta?')) {
+    if (window.confirm('¿Estás seguro de eliminar esta oferta? Esta acción no se puede deshacer.')) {
       setOffers(offers.filter(o => o.id !== id));
     }
   };
 
   const handleStatusChange = (id, newStatus) => {
-    setOffers(offers.map(offer => 
+    setOffers(offers.map(offer =>
       offer.id === id ? { ...offer, status: newStatus } : offer
     ));
   };
 
   const filteredOffers = offers.filter(offer => {
     const matchesSearch = offer.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         offer.category.toLowerCase().includes(searchTerm.toLowerCase());
+      offer.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      offer.company.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || offer.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
@@ -157,13 +206,13 @@ export const OfertasPage = () => {
   const getStatusInfo = (status) => {
     switch (status) {
       case 'active':
-        return { color: 'green', text: 'Activa', icon: CheckCircle };
+        return { color: 'green', text: 'Activa', icon: CheckCircle, bgColor: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300' };
       case 'paused':
-        return { color: 'yellow', text: 'Pausada', icon: Clock };
+        return { color: 'yellow', text: 'Pausada', icon: Clock, bgColor: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300' };
       case 'expired':
-        return { color: 'red', text: 'Expirada', icon: AlertCircle };
+        return { color: 'red', text: 'Expirada', icon: AlertCircle, bgColor: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300' };
       default:
-        return { color: 'gray', text: 'Desconocido', icon: AlertCircle };
+        return { color: 'gray', text: 'Desconocido', icon: AlertCircle, bgColor: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300' };
     }
   };
 
@@ -175,15 +224,37 @@ export const OfertasPage = () => {
     return diffDays;
   };
 
+  const getExpiryColor = (days) => {
+    if (days <= 7) return 'text-red-600';
+    if (days <= 30) return 'text-yellow-600';
+    return 'text-green-600';
+  };
+
+  // ⭐ NUEVO: Estadísticas rápidas
+  const stats = {
+    total: offers.length,
+    active: offers.filter(o => o.status === 'active').length,
+    applicants: offers.reduce((sum, offer) => sum + offer.applicants, 0),
+    matches: offers.reduce((sum, offer) => sum + offer.matches, 0)
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
+        {/* Header Mejorado */}
         <div className="mb-8">
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="flex items-center gap-3 mb-4">
+            <Button
+              variant="outline"
+              onClick={handleBackToDashboard}
+              className="mr-2"
+            >
+              <ArrowLeft size={18} />
+            </Button>
+            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500`}></div>
+            <div className="flex-1">
               <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Mis Ofertas de Trabajo
               </h1>
@@ -191,6 +262,8 @@ export const OfertasPage = () => {
                 Gestiona y publica ofertas de pasantías y empleo
               </p>
             </div>
+          </div>
+          <div className="flex justify-between items-center">
             <Button variant="primary" onClick={() => handleOpenModal()}>
               <div className="flex items-center gap-2">
                 <Plus size={18} />
@@ -200,21 +273,49 @@ export const OfertasPage = () => {
           </div>
         </div>
 
+        {/* Estadísticas Rápidas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card className="p-4 text-center">
+            <div className={`text-2xl font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {stats.total}
+            </div>
+            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Total Ofertas</div>
+          </Card>
+          <Card className="p-4 text-center">
+            <div className={`text-2xl font-bold mb-1 text-green-600`}>
+              {stats.active}
+            </div>
+            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Activas</div>
+          </Card>
+          <Card className="p-4 text-center">
+            <div className={`text-2xl font-bold mb-1 text-blue-600`}>
+              {stats.applicants}
+            </div>
+            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Postulantes</div>
+          </Card>
+          <Card className="p-4 text-center">
+            <div className={`text-2xl font-bold mb-1 text-purple-600`}>
+              {stats.matches}
+            </div>
+            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Matches</div>
+          </Card>
+        </div>
+
         {/* Filtros y Búsqueda */}
-        <Card className="mb-6">
+        <Card className="mb-6 p-6">
           <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-            <div className="relative w-full md:w-64">
-              <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <div className="relative w-full md:w-96">
+              <Search size={20} className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
               <input
                 type="text"
-                placeholder="Buscar ofertas..."
+                placeholder="Buscar ofertas por título, categoría o empresa..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`
-                  w-full pl-10 pr-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                  ${isDark 
-                    ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
-                    : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                  w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all duration-200
+                  ${isDark
+                    ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500'
+                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-blue-500'
                   }
                 `}
               />
@@ -225,14 +326,14 @@ export const OfertasPage = () => {
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className={`
-                  px-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                  ${isDark 
-                    ? 'bg-slate-700 border-slate-600 text-slate-100' 
-                    : 'bg-white border-slate-300 text-slate-900'
+                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                  ${isDark
+                    ? 'bg-slate-800 border-slate-600 text-white'
+                    : 'bg-white border-slate-200 text-slate-900'
                   }
                 `}
               >
-                <option value="all">Todas</option>
+                <option value="all">Todas las ofertas</option>
                 <option value="active">Activas</option>
                 <option value="paused">Pausadas</option>
                 <option value="expired">Expiradas</option>
@@ -241,7 +342,7 @@ export const OfertasPage = () => {
               <Button variant="outline">
                 <div className="flex items-center gap-2">
                   <Filter size={18} />
-                  Filtros
+                  Más Filtros
                 </div>
               </Button>
             </div>
@@ -250,14 +351,14 @@ export const OfertasPage = () => {
 
         {/* Grid de Ofertas */}
         {filteredOffers.length === 0 ? (
-          <Card>
+          <Card className="p-8">
             <div className="text-center py-12">
               <Briefcase size={64} className={`mx-auto mb-4 ${isDark ? 'text-slate-600' : 'text-slate-400'}`} />
               <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 No hay ofertas {searchTerm || filterStatus !== 'all' ? 'que coincidan' : ''}
               </h3>
               <p className={`mb-6 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                {searchTerm || filterStatus !== 'all' 
+                {searchTerm || filterStatus !== 'all'
                   ? 'Intenta con otros términos de búsqueda o filtros'
                   : 'Comienza publicando tu primera oferta de trabajo'
                 }
@@ -277,9 +378,10 @@ export const OfertasPage = () => {
             {filteredOffers.map((offer) => {
               const StatusIcon = getStatusInfo(offer.status).icon;
               const daysUntilExpiry = getDaysUntilExpiry(offer.expires_at);
-              
+              const statusInfo = getStatusInfo(offer.status);
+
               return (
-                <Card key={offer.id} hover>
+                <Card key={offer.id} hover className="transition-all duration-200 hover:shadow-lg">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-start gap-4">
                       <div className={`
@@ -288,45 +390,54 @@ export const OfertasPage = () => {
                       `}>
                         <Briefcase size={24} className="text-purple-600" />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <h3 className={`text-xl font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                           {offer.title}
                         </h3>
-                        <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        <p className={`text-sm mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                           {offer.company} • {offer.location}
                         </p>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusInfo.bgColor}`}>
+                            <StatusIcon size={12} className="inline mr-1" />
+                            {statusInfo.text}
+                          </span>
+                          <span className={`text-xs font-medium ${getExpiryColor(daysUntilExpiry)}`}>
+                            Expira en {daysUntilExpiry} días
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex gap-2">
                       <button
-                        onClick={() => navigate(`/empresa/ofertas/${offer.id}`)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
-                        }`}
+                        onClick={() => handleViewOfferDetails(offer.id)}
+                        className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
+                          }`}
+                        title="Ver detalles"
                       >
                         <Eye size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
                       </button>
                       <button
                         onClick={() => handleOpenModal(offer)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
+                          }`}
+                        title="Editar oferta"
                       >
                         <Edit3 size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
                       </button>
                       <button
                         onClick={() => handleDeleteOffer(offer.id)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
+                          }`}
+                        title="Eliminar oferta"
                       >
                         <Trash2 size={16} className="text-red-600" />
                       </button>
                     </div>
                   </div>
 
-                  <p className={`mb-4 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <p className={`mb-4 line-clamp-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                     {offer.description}
                   </p>
 
@@ -350,9 +461,9 @@ export const OfertasPage = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Calendar size={16} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
+                      <Eye size={16} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
                       <span className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                        Expira en {daysUntilExpiry} días
+                        {offer.views} vistas
                       </span>
                     </div>
                   </div>
@@ -364,8 +475,8 @@ export const OfertasPage = () => {
                           key={idx}
                           className={`
                             px-2 py-1 rounded text-xs font-medium
-                            ${isDark 
-                              ? 'bg-slate-700 text-slate-300' 
+                            ${isDark
+                              ? 'bg-slate-700 text-slate-300'
                               : 'bg-slate-100 text-slate-700'
                             }
                           `}
@@ -380,18 +491,14 @@ export const OfertasPage = () => {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <StatusIcon size={16} className={`text-${getStatusInfo(offer.status).color}-500`} />
-                      <span className={`
-                        text-sm font-medium
-                        ${getStatusInfo(offer.status).color === 'green' ? 'text-green-600' :
-                          getStatusInfo(offer.status).color === 'yellow' ? 'text-yellow-600' :
-                          'text-red-600'
-                        }
-                      `}>
-                        {getStatusInfo(offer.status).text}
-                      </span>
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewCandidates(offer.id)}
+                    >
+                      <Users size={14} className="mr-2" />
+                      Ver Candidatos
+                    </Button>
                   </div>
                 </Card>
               );
@@ -410,7 +517,7 @@ export const OfertasPage = () => {
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className={`p-2 rounded-lg ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
               >
                 <X size={24} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
               </button>
@@ -464,9 +571,9 @@ export const OfertasPage = () => {
                     value={newOffer.type}
                     onChange={(e) => setNewOffer({ ...newOffer, type: e.target.value })}
                     className={`
-                      w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                      ${isDark 
-                        ? 'bg-slate-700 border-slate-600 text-slate-100' 
+                      w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                      ${isDark
+                        ? 'bg-slate-800 border-slate-600 text-white'
                         : 'bg-white border-slate-300 text-slate-900'
                       }
                     `}
@@ -510,9 +617,9 @@ export const OfertasPage = () => {
                     rows="4"
                     required
                     className={`
-                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                      ${isDark 
-                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
+                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                      ${isDark
+                        ? 'bg-slate-800 border-slate-600 text-slate-100 placeholder-slate-400'
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
                       }
                     `}

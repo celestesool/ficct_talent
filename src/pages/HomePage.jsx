@@ -1,17 +1,19 @@
-import React from 'react';
-import { GraduationCap, Building2, Users, Rocket, Target, Star, ArrowRight, Check } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-import { useRouter } from '../contexts/RouterContext';
-import { ThemeToggle } from '../components/common/ThemeToggle';
-import { Card } from '../components/common/Card';
+import { ArrowRight, Building2, Check, GraduationCap, Rocket, Star, Target, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { Card } from '../components/common/Card';
+import { ThemeToggle } from '../components/common/ThemeToggle';
+import { useTheme } from '../contexts/ThemeContext';
+import { useUserType } from '../contexts/UserTypeContext';
 
 export const HomePage = () => {
-  const { navigate, setUserType } = useRouter();
+  const navigate = useNavigate();
+  const { setUserType } = useUserType(); // ⭐ Para mantener el userType
   const { isDark } = useTheme();
 
   const handleUserTypeSelect = (type) => {
     setUserType(type);
+    // ⭐⭐ REEMPLAZO: navigate en lugar de la navegación anterior
     navigate(`/${type}/login`);
   };
 
@@ -61,18 +63,19 @@ export const HomePage = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
-      
+
       {/* Header con navegación - MEJORADO */}
-      <header className="relative border-b" style={{ 
-        borderColor: isDark ? 'rgba(51, 65, 85, 0.5)' : 'rgba(226, 232, 240, 0.8)' 
+      <header className="relative border-b" style={{
+        borderColor: isDark ? 'rgba(51, 65, 85, 0.5)' : 'rgba(226, 232, 240, 0.8)'
       }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <img 
-                src="/images/logo.png" 
-                alt="FICCT TALENT" 
-                className="w-18 h-14 object-contain"
+              <img
+                src="/images/logo.png"
+                alt="FICCT TALENT"
+                className="w-18 h-14 object-contain cursor-pointer"
+                onClick={() => navigate('/')} // ⭐⭐ Agregado navegación al logo
               />
               <div>
                 <h1 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
@@ -93,11 +96,11 @@ export const HomePage = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            
-            <div className="space-y-">
+
+            <div className="space-y-6">
               <div>
                 <span className={`inline-block px-4 py-2 rounded-full text-sm font-semibold mb-6 ${isDark ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-600'}`}>
-                   Plataforma Oficial FICCT - UAGRM
+                  Plataforma Oficial FICCT - UAGRM
                 </span>
                 <h1 className={`text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Conectamos{' '}
@@ -110,7 +113,7 @@ export const HomePage = () => {
                   </span>
                 </h1>
                 <p className={`text-lg lg:text-xl leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                  La plataforma oficial de la Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones 
+                  La plataforma oficial de la Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones
                   para conectar estudiantes con las mejores oportunidades laborales.
                 </p>
               </div>
@@ -133,8 +136,8 @@ export const HomePage = () => {
               {/* Card Estudiante - MEJORADA */}
               <Card className={`
                 border-2 transition-all duration-300 hover:shadow-2xl
-                ${isDark 
-                  ? 'border-slate-700 hover:border-blue-500 hover:shadow-blue-500/20' 
+                ${isDark
+                  ? 'border-slate-700 hover:border-blue-500 hover:shadow-blue-500/20'
                   : 'border-slate-200 hover:border-blue-400 hover:shadow-blue-400/20'
                 }
               `}>
@@ -156,12 +159,26 @@ export const HomePage = () => {
                       </p>
                     </div>
                   </div>
-                  
-                  
 
-                  <Button 
-                    variant="primary" 
-                    fullWidth 
+                  <div className="space-y-3 mb-6">
+                    {estudianteFeatures.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <div className={`
+                          w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0
+                          ${isDark ? 'bg-blue-500/20' : 'bg-blue-100'}
+                        `}>
+                          <Check size={12} className={isDark ? 'text-blue-400' : 'text-blue-600'} />
+                        </div>
+                        <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button
+                    variant="primary"
+                    fullWidth
                     onClick={() => handleUserTypeSelect('estudiante')}
                     className="group py-3"
                   >
@@ -176,8 +193,8 @@ export const HomePage = () => {
               {/* Card Empresa - MEJORADA */}
               <Card className={`
                 border-2 transition-all duration-300 hover:shadow-2xl
-                ${isDark 
-                  ? 'border-slate-700 hover:border-purple-500 hover:shadow-purple-500/20' 
+                ${isDark
+                  ? 'border-slate-700 hover:border-purple-500 hover:shadow-purple-500/20'
                   : 'border-slate-200 hover:border-purple-400 hover:shadow-purple-400/20'
                 }
               `}>
@@ -199,11 +216,26 @@ export const HomePage = () => {
                       </p>
                     </div>
                   </div>
-                  
 
-                  <Button 
-                    variant="secondary" 
-                    fullWidth 
+                  <div className="space-y-3 mb-6">
+                    {empresaFeatures.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <div className={`
+                          w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0
+                          ${isDark ? 'bg-purple-500/20' : 'bg-purple-100'}
+                        `}>
+                          <Check size={12} className={isDark ? 'text-purple-400' : 'text-purple-600'} />
+                        </div>
+                        <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button
+                    variant="secondary"
+                    fullWidth
                     onClick={() => handleUserTypeSelect('empresa')}
                     className="group py-3"
                   >
@@ -235,8 +267,8 @@ export const HomePage = () => {
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card 
-                  key={index} 
+                <Card
+                  key={index}
                   className="text-center hover:transform hover:scale-105 transition-all duration-300 p-6 lg:p-8"
                 >
                   <div className={`
@@ -268,8 +300,8 @@ export const HomePage = () => {
             Únete a la plataforma que está transformando la forma en que estudiantes y empresas se conectan
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               onClick={() => handleUserTypeSelect('estudiante')}
               className="px-6 py-3 text-base group"
             >
@@ -279,8 +311,8 @@ export const HomePage = () => {
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </span>
             </Button>
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               onClick={() => handleUserTypeSelect('empresa')}
               className="px-6 py-3 text-base group"
             >

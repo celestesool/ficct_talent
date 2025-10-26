@@ -1,28 +1,27 @@
-import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import { 
-  Plus,
+import {
   Award,
-  Calendar,
   Building2,
-  Link as LinkIcon,
-  Edit3,
-  Trash2,
-  X,
-  Save,
-  ExternalLink,
+  Calendar,
   Clock,
-  CheckCircle
+  Edit3,
+  ExternalLink,
+  Link as LinkIcon,
+  Plus,
+  Save,
+  Trash2,
+  X
 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/common/Button';
+import { Card } from '../../components/common/Card';
+import { Input } from '../../components/common/Input';
+import { Navbar } from '../../components/common/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const CertificacionesPage = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [editingCert, setEditingCert] = useState(null);
 
@@ -118,21 +117,21 @@ export const CertificacionesPage = () => {
     if (isExpired(cert.expiration_date)) {
       return { text: 'Expirada', color: 'red' };
     }
-    
+
     const expDate = new Date(cert.expiration_date);
     const monthsUntilExpiry = (expDate - new Date()) / (1000 * 60 * 60 * 24 * 30);
-    
+
     if (monthsUntilExpiry < 6) {
       return { text: 'Próxima a expirar', color: 'orange' };
     }
-    
+
     return { text: 'Válida', color: 'green' };
   };
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -189,17 +188,15 @@ export const CertificacionesPage = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleOpenModal(cert)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
+                          }`}
                       >
                         <Edit3 size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
                       </button>
                       <button
                         onClick={() => handleDeleteCert(cert.id)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
+                          }`}
                       >
                         <Trash2 size={16} className="text-red-600" />
                       </button>
@@ -209,7 +206,7 @@ export const CertificacionesPage = () => {
                   <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {cert.name}
                   </h3>
-                  
+
                   <div className="flex items-center gap-2 mb-3">
                     <Building2 size={16} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
                     <span className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -237,11 +234,11 @@ export const CertificacionesPage = () => {
                   <div className="flex justify-between items-center mb-4">
                     <span className={`
                       px-3 py-1 rounded-full text-xs font-semibold
-                      ${status.color === 'green' 
+                      ${status.color === 'green'
                         ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                         : status.color === 'orange'
-                        ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                          ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                          : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                       }
                     `}>
                       {status.text}
@@ -249,7 +246,7 @@ export const CertificacionesPage = () => {
                   </div>
 
                   {cert.credential_url && (
-                    <a 
+                    <a
                       href={cert.credential_url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -312,7 +309,7 @@ export const CertificacionesPage = () => {
                   required
                   icon={Calendar}
                 />
-                
+
                 <Input
                   label="Fecha de Expiración"
                   type="date"

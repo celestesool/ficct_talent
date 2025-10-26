@@ -1,33 +1,60 @@
-import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import { 
-  Search,
-  Filter,
-  User,
-  MapPin,
-  GraduationCap,
-  Code,
-  Star,
-  Eye,
-  Mail,
-  Phone,
-  Download,
-  BookOpen,
+import {
+  ArrowLeft,
   Award,
-  Briefcase, 
+  BookOpen,
+  Briefcase, // ⭐ AÑADIDO: Icono para volver
+  Calendar // ⭐ AÑADIDO: Icono para fecha
+  ,
+
+  Code,
+  Download,
+  Eye,
+  Filter,
+  Mail,
+  MapPin,
+  Phone,
+  Search,
+  User,
   X
 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/common/Button';
+import { Card } from '../../components/common/Card';
+import { Navbar } from '../../components/common/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const CandidatosPage = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate(); // ⭐ ACTUALIZADO: useNavigate hook
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [filterPosition, setFilterPosition] = useState('all');
+  const [filterLocation, setFilterLocation] = useState('all');
+
+  // ⭐ NUEVO: Función para navegar al dashboard
+  const handleBackToDashboard = () => {
+    navigate('/empresa/dashboard');
+  };
+
+  // ⭐ NUEVO: Función para contactar candidato
+  const handleContactCandidate = (candidate) => {
+    // Aquí podrías implementar lógica de contacto
+    console.log('Contactando a:', candidate.name);
+    alert(`Función de contacto para ${candidate.name} - Próximamente`);
+  };
+
+  // ⭐ NUEVO: Función para programar entrevista
+  const handleScheduleInterview = (candidate) => {
+    // Aquí podrías implementar lógica de programación
+    console.log('Programando entrevista con:', candidate.name);
+    alert(`Función de programar entrevista para ${candidate.name} - Próximamente`);
+  };
+
+  // ⭐ NUEVO: Función para ver perfil completo
+  const handleViewFullProfile = (candidateId) => {
+    navigate(`/empresa/candidatos/${candidateId}`);
+  };
 
   const [candidates, setCandidates] = useState([
     {
@@ -39,11 +66,15 @@ export const CandidatosPage = () => {
       career: 'Ingeniería en Sistemas',
       semester: '8vo Semestre',
       gpa: '85.5',
-      skills: ['React', 'Node.js', 'JavaScript', 'Python', 'MongoDB'],
+      skills: ['React', 'Node.js', 'JavaScript', 'Python', 'MongoDB', 'TypeScript', 'Git'],
       projects: 5,
       certifications: 3,
       match: 95,
-      appliedFor: 'Desarrollador Frontend React'
+      appliedFor: 'Desarrollador Frontend React',
+      appliedDate: '2024-01-15',
+      status: 'Nuevo',
+      lastActivity: 'Hace 2 días',
+      experience: '2 años'
     },
     {
       id: '2',
@@ -54,11 +85,15 @@ export const CandidatosPage = () => {
       career: 'Ingeniería en Sistemas',
       semester: '7mo Semestre',
       gpa: '88.2',
-      skills: ['Java', 'Spring Boot', 'SQL', 'Docker', 'AWS'],
+      skills: ['Java', 'Spring Boot', 'SQL', 'Docker', 'AWS', 'MySQL', 'REST APIs'],
       projects: 3,
       certifications: 2,
       match: 87,
-      appliedFor: 'Backend Developer'
+      appliedFor: 'Backend Developer',
+      appliedDate: '2024-01-14',
+      status: 'Revisado',
+      lastActivity: 'Hace 1 día',
+      experience: '1 año'
     },
     {
       id: '3',
@@ -69,11 +104,15 @@ export const CandidatosPage = () => {
       career: 'Ingeniería en Sistemas',
       semester: '9no Semestre',
       gpa: '82.1',
-      skills: ['Angular', 'TypeScript', 'Firebase', 'Git', 'Scrum'],
+      skills: ['Angular', 'TypeScript', 'Firebase', 'Git', 'Scrum', 'RxJS', 'Material UI'],
       projects: 4,
       certifications: 4,
       match: 92,
-      appliedFor: 'Desarrollador Frontend'
+      appliedFor: 'Desarrollador Frontend',
+      appliedDate: '2024-01-13',
+      status: 'Nuevo',
+      lastActivity: 'Hace 3 días',
+      experience: '3 años'
     },
     {
       id: '4',
@@ -84,18 +123,44 @@ export const CandidatosPage = () => {
       career: 'Ingeniería en Sistemas',
       semester: '6to Semestre',
       gpa: '90.3',
-      skills: ['Python', 'Machine Learning', 'Pandas', 'TensorFlow', 'SQL'],
+      skills: ['Python', 'Machine Learning', 'Pandas', 'TensorFlow', 'SQL', 'NumPy', 'Scikit-learn'],
       projects: 2,
       certifications: 1,
       match: 78,
-      appliedFor: 'Data Science Intern'
+      appliedFor: 'Data Science Intern',
+      appliedDate: '2024-01-12',
+      status: 'En proceso',
+      lastActivity: 'Hace 5 días',
+      experience: '6 meses'
+    },
+    {
+      id: '5',
+      name: 'Roberto Andrés Mendoza Castro',
+      email: 'roberto.mendoza@uagrm.edu.bo',
+      phone: '74567890',
+      location: 'La Paz, Bolivia',
+      career: 'Ingeniería en Sistemas',
+      semester: '10mo Semestre',
+      gpa: '79.8',
+      skills: ['Vue.js', 'JavaScript', 'PHP', 'Laravel', 'MySQL', 'Bootstrap'],
+      projects: 6,
+      certifications: 2,
+      match: 83,
+      appliedFor: 'Desarrollador Full Stack',
+      appliedDate: '2024-01-11',
+      status: 'Revisado',
+      lastActivity: 'Hace 1 semana',
+      experience: '2.5 años'
     }
   ]);
 
   const filteredCandidates = candidates.filter(candidate =>
-    candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    candidate.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    candidate.appliedFor.toLowerCase().includes(searchTerm.toLowerCase())
+    (candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidate.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      candidate.appliedFor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidate.career.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (filterPosition === 'all' || candidate.appliedFor.includes(filterPosition)) &&
+    (filterLocation === 'all' || candidate.location.includes(filterLocation))
   );
 
   const getMatchColor = (match) => {
@@ -103,6 +168,19 @@ export const CandidatosPage = () => {
     if (match >= 80) return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20';
     if (match >= 70) return 'text-orange-600 bg-orange-100 dark:bg-orange-900/20';
     return 'text-red-600 bg-red-100 dark:bg-red-900/20';
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Nuevo':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300';
+      case 'Revisado':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
+      case 'En proceso':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
+    }
   };
 
   const viewCandidateProfile = (candidate) => {
@@ -113,15 +191,31 @@ export const CandidatosPage = () => {
     setSelectedCandidate(null);
   };
 
+  // ⭐ NUEVO: Estadísticas rápidas
+  const stats = {
+    total: candidates.length,
+    new: candidates.filter(c => c.status === 'Nuevo').length,
+    highMatch: candidates.filter(c => c.match >= 90).length,
+    fromSantaCruz: candidates.filter(c => c.location.includes('Santa Cruz')).length
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
+        {/* Header Mejorado */}
         <div className="mb-8">
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="flex items-center gap-3 mb-4">
+            <Button
+              variant="outline"
+              onClick={handleBackToDashboard}
+              className="mr-2"
+            >
+              <ArrowLeft size={18} />
+            </Button>
+            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500`}></div>
+            <div className="flex-1">
               <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Candidatos
               </h1>
@@ -129,32 +223,60 @@ export const CandidatosPage = () => {
                 Encuentra y evalúa el talento joven para tu empresa
               </p>
             </div>
-            <div className="flex gap-4">
-              <Button variant="outline">
-                <div className="flex items-center gap-2">
-                  <Download size={18} />
-                  Exportar
-                </div>
-              </Button>
-            </div>
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline">
+              <div className="flex items-center gap-2">
+                <Download size={18} />
+                Exportar
+              </div>
+            </Button>
           </div>
         </div>
 
+        {/* Estadísticas Rápidas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card className="p-4 text-center">
+            <div className={`text-2xl font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {stats.total}
+            </div>
+            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Total Candidatos</div>
+          </Card>
+          <Card className="p-4 text-center">
+            <div className={`text-2xl font-bold mb-1 text-blue-600`}>
+              {stats.new}
+            </div>
+            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Nuevos</div>
+          </Card>
+          <Card className="p-4 text-center">
+            <div className={`text-2xl font-bold mb-1 text-green-600`}>
+              {stats.highMatch}
+            </div>
+            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Alto Match</div>
+          </Card>
+          <Card className="p-4 text-center">
+            <div className={`text-2xl font-bold mb-1 text-purple-600`}>
+              {stats.fromSantaCruz}
+            </div>
+            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>De Santa Cruz</div>
+          </Card>
+        </div>
+
         {/* Filtros y Búsqueda */}
-        <Card className="mb-6">
+        <Card className="mb-6 p-6">
           <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
             <div className="relative w-full md:w-96">
-              <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+              <Search size={20} className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
               <input
                 type="text"
-                placeholder="Buscar por nombre, habilidades o puesto..."
+                placeholder="Buscar por nombre, habilidades, puesto o carrera..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`
-                  w-full pl-10 pr-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                  ${isDark 
-                    ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
-                    : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                  w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all duration-200
+                  ${isDark
+                    ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500'
+                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-blue-500'
                   }
                 `}
               />
@@ -162,24 +284,44 @@ export const CandidatosPage = () => {
 
             <div className="flex gap-4 w-full md:w-auto">
               <select
+                value={filterPosition}
+                onChange={(e) => setFilterPosition(e.target.value)}
                 className={`
-                  px-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                  ${isDark 
-                    ? 'bg-slate-700 border-slate-600 text-slate-100' 
-                    : 'bg-white border-slate-300 text-slate-900'
+                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                  ${isDark
+                    ? 'bg-slate-800 border-slate-600 text-white'
+                    : 'bg-white border-slate-200 text-slate-900'
                   }
                 `}
               >
-                <option>Todos los puestos</option>
-                <option>Desarrollador Frontend</option>
-                <option>Backend Developer</option>
-                <option>Data Science</option>
+                <option value="all">Todos los puestos</option>
+                <option value="Frontend">Desarrollador Frontend</option>
+                <option value="Backend">Backend Developer</option>
+                <option value="Data Science">Data Science</option>
+                <option value="Full Stack">Desarrollador Full Stack</option>
+              </select>
+
+              <select
+                value={filterLocation}
+                onChange={(e) => setFilterLocation(e.target.value)}
+                className={`
+                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                  ${isDark
+                    ? 'bg-slate-800 border-slate-600 text-white'
+                    : 'bg-white border-slate-200 text-slate-900'
+                  }
+                `}
+              >
+                <option value="all">Todas las ubicaciones</option>
+                <option value="Santa Cruz">Santa Cruz</option>
+                <option value="La Paz">La Paz</option>
+                <option value="Cochabamba">Cochabamba</option>
               </select>
 
               <Button variant="outline">
                 <div className="flex items-center gap-2">
                   <Filter size={18} />
-                  Filtros
+                  Más Filtros
                 </div>
               </Button>
             </div>
@@ -188,7 +330,7 @@ export const CandidatosPage = () => {
 
         {/* Grid de Candidatos */}
         {filteredCandidates.length === 0 ? (
-          <Card>
+          <Card className="p-8">
             <div className="text-center py-12">
               <User size={64} className={`mx-auto mb-4 ${isDark ? 'text-slate-600' : 'text-slate-400'}`} />
               <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -202,13 +344,18 @@ export const CandidatosPage = () => {
         ) : (
           <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredCandidates.map((candidate) => (
-              <Card key={candidate.id} hover className="relative">
+              <Card key={candidate.id} hover className="relative transition-all duration-200 hover:shadow-lg">
                 {/* Match Score */}
                 <div className={`absolute -top-2 -right-2 px-3 py-1 rounded-full text-sm font-bold ${getMatchColor(candidate.match)}`}>
                   {candidate.match}% Match
                 </div>
 
-                <div className="flex items-start gap-4 mb-4">
+                {/* Status Badge */}
+                <div className={`absolute -top-2 -left-2 px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(candidate.status)}`}>
+                  {candidate.status}
+                </div>
+
+                <div className="flex items-start gap-4 mb-4 pt-2">
                   <div className={`
                     w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold
                     ${isDark ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-600'}
@@ -242,6 +389,12 @@ export const CandidatosPage = () => {
                         Promedio: {candidate.gpa}%
                       </span>
                     </div>
+                    <div className="flex items-center gap-1">
+                      <Briefcase size={14} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
+                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                        {candidate.experience}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -253,8 +406,8 @@ export const CandidatosPage = () => {
                         key={idx}
                         className={`
                           px-2 py-1 rounded text-xs font-medium
-                          ${isDark 
-                            ? 'bg-slate-700 text-slate-300' 
+                          ${isDark
+                            ? 'bg-slate-700 text-slate-300'
                             : 'bg-slate-100 text-slate-700'
                           }
                         `}
@@ -290,8 +443,8 @@ export const CandidatosPage = () => {
 
                 {/* Acciones */}
                 <div className="flex gap-2">
-                  <Button 
-                    variant="primary" 
+                  <Button
+                    variant="primary"
                     onClick={() => viewCandidateProfile(candidate)}
                     fullWidth
                   >
@@ -300,7 +453,10 @@ export const CandidatosPage = () => {
                       Ver Perfil
                     </div>
                   </Button>
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleContactCandidate(candidate)}
+                  >
                     <Mail size={16} />
                   </Button>
                 </div>
@@ -332,14 +488,19 @@ export const CandidatosPage = () => {
                   <p className={`mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                     <strong>Postulado para:</strong> {selectedCandidate.appliedFor}
                   </p>
-                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${getMatchColor(selectedCandidate.match)}`}>
-                    {selectedCandidate.match}% Match
+                  <div className="flex gap-2">
+                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${getMatchColor(selectedCandidate.match)}`}>
+                      {selectedCandidate.match}% Match
+                    </div>
+                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${getStatusColor(selectedCandidate.status)}`}>
+                      {selectedCandidate.status}
+                    </div>
                   </div>
                 </div>
               </div>
               <button
                 onClick={closeCandidateDetail}
-                className={`p-2 rounded-lg ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
+                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
               >
                 <X size={24} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
               </button>
@@ -347,7 +508,7 @@ export const CandidatosPage = () => {
 
             <div className="grid md:grid-cols-2 gap-6">
               {/* Información de Contacto */}
-              <Card>
+              <Card className="p-6">
                 <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Información de Contacto
                 </h3>
@@ -370,11 +531,17 @@ export const CandidatosPage = () => {
                       {selectedCandidate.location}
                     </span>
                   </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar size={18} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
+                    <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
+                      Postuló: {selectedCandidate.appliedDate}
+                    </span>
+                  </div>
                 </div>
               </Card>
 
               {/* Información Académica */}
-              <Card>
+              <Card className="p-6">
                 <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Información Académica
                 </h3>
@@ -397,12 +564,18 @@ export const CandidatosPage = () => {
                       {selectedCandidate.certifications}
                     </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Experiencia:</span>
+                    <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {selectedCandidate.experience}
+                    </span>
+                  </div>
                 </div>
               </Card>
             </div>
 
             {/* Habilidades */}
-            <Card className="mt-6">
+            <Card className="mt-6 p-6">
               <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Habilidades Técnicas
               </h3>
@@ -412,8 +585,8 @@ export const CandidatosPage = () => {
                     key={idx}
                     className={`
                       px-3 py-2 rounded-lg font-medium
-                      ${isDark 
-                        ? 'bg-purple-900/20 text-purple-300 border border-purple-700' 
+                      ${isDark
+                        ? 'bg-purple-900/20 text-purple-300 border border-purple-700'
                         : 'bg-purple-100 text-purple-700 border border-purple-200'
                       }
                     `}
@@ -426,13 +599,21 @@ export const CandidatosPage = () => {
 
             {/* Acciones */}
             <div className="flex gap-4 mt-6">
-              <Button variant="primary" fullWidth>
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={() => handleContactCandidate(selectedCandidate)}
+              >
                 <div className="flex items-center justify-center gap-2">
                   <Mail size={18} />
                   Contactar Candidato
                 </div>
               </Button>
-              <Button variant="outline" fullWidth>
+              <Button
+                variant="outline"
+                fullWidth
+                onClick={() => handleScheduleInterview(selectedCandidate)}
+              >
                 <div className="flex items-center justify-center gap-2">
                   <Briefcase size={18} />
                   Programar Entrevista

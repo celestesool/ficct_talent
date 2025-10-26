@@ -12,11 +12,11 @@ import {
   X
 } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Navbar } from '../../components/common/Navbar';
 import { CVPreview } from '../../components/estudiante/CVPreview';
-import { useRouter } from '../../contexts/RouterContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { aiService } from '../../services/aiService';
 import { emailService } from '../../services/emailService';
@@ -24,7 +24,7 @@ import { exportToPDF } from '../../utils/pdfExporter';
 
 export const CVGeneratorPage = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [cvGenerated, setCvGenerated] = useState(false);

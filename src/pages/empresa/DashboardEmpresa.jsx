@@ -1,23 +1,21 @@
-import React from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { 
-  Users, 
-  Briefcase, 
-  Eye, 
-  TrendingUp,
-  Plus,
-  FileText,
+import {
+  Briefcase,
   CheckCircle,
-  Clock
+  Eye,
+  FileText,
+  Plus,
+  TrendingUp,
+  Users
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/common/Button';
+import { Card } from '../../components/common/Card';
+import { Navbar } from '../../components/common/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const DashboardEmpresa = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
 
   const stats = [
     { label: 'Ofertas Activas', value: '12', icon: Briefcase, color: 'purple' },
@@ -27,23 +25,23 @@ export const DashboardEmpresa = () => {
   ];
 
   const recentOffers = [
-    { 
-      title: 'Desarrollador Frontend', 
-      applicants: 15, 
+    {
+      title: 'Desarrollador Frontend',
+      applicants: 15,
       status: 'Activa',
       posted: 'Hace 3 días',
       statusColor: 'green'
     },
-    { 
-      title: 'Data Scientist', 
-      applicants: 8, 
+    {
+      title: 'Data Scientist',
+      applicants: 8,
       status: 'Activa',
       posted: 'Hace 1 semana',
       statusColor: 'green'
     },
-    { 
-      title: 'Backend Developer', 
-      applicants: 23, 
+    {
+      title: 'Backend Developer',
+      applicants: 23,
       status: 'En revisión',
       posted: 'Hace 2 semanas',
       statusColor: 'yellow'
@@ -56,10 +54,35 @@ export const DashboardEmpresa = () => {
     { name: 'Carlos Ruiz', skills: 'Angular, TypeScript', match: '88%' },
   ];
 
+  // ⭐⭐ ACTUALIZADO: Funciones de navegación
+  const handleNewOffer = () => {
+    navigate('/empresa/ofertas/nueva');
+  };
+
+  const handleViewAllOffers = () => {
+    navigate('/empresa/ofertas');
+  };
+
+  const handleViewOfferDetails = (offerId) => {
+    navigate(`/empresa/ofertas/${offerId}`);
+  };
+
+  const handleViewAllCandidates = () => {
+    navigate('/empresa/candidatos');
+  };
+
+  const handleViewCandidateDetails = (candidateId) => {
+    navigate(`/empresa/candidatos/${candidateId}`);
+  };
+
+  const handleViewReports = () => {
+    navigate('/empresa/reportes');
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -72,7 +95,7 @@ export const DashboardEmpresa = () => {
                 Gestiona tus ofertas y encuentra el mejor talento
               </p>
             </div>
-            <Button variant="secondary" onClick={() => navigate('/empresa/ofertas/nueva')}>
+            <Button variant="secondary" onClick={handleNewOffer}>
               <div className="flex items-center gap-2">
                 <Plus size={18} />
                 Nueva Oferta
@@ -94,18 +117,16 @@ export const DashboardEmpresa = () => {
                     {stat.value}
                   </p>
                 </div>
-                <div className={`p-3 rounded-lg ${
-                  stat.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/20' :
-                  stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/20' :
-                  stat.color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
-                  'bg-orange-100 dark:bg-orange-900/20'
-                }`}>
-                  <stat.icon className={`${
-                    stat.color === 'purple' ? 'text-purple-600' :
-                    stat.color === 'blue' ? 'text-blue-600' :
-                    stat.color === 'green' ? 'text-green-600' :
-                    'text-orange-600'
-                  }`} size={24} />
+                <div className={`p-3 rounded-lg ${stat.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/20' :
+                    stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/20' :
+                      stat.color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
+                        'bg-orange-100 dark:bg-orange-900/20'
+                  }`}>
+                  <stat.icon className={`${stat.color === 'purple' ? 'text-purple-600' :
+                      stat.color === 'blue' ? 'text-blue-600' :
+                        stat.color === 'green' ? 'text-green-600' :
+                          'text-orange-600'
+                    }`} size={24} />
                 </div>
               </div>
             </Card>
@@ -120,22 +141,22 @@ export const DashboardEmpresa = () => {
                 <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Ofertas Recientes
                 </h2>
-                <Button variant="outline" onClick={() => navigate('/empresa/ofertas')}>
+                <Button variant="outline" onClick={handleViewAllOffers}>
                   Ver todas
                 </Button>
               </div>
               <div className="space-y-4">
                 {recentOffers.map((offer, idx) => (
-                  <div 
+                  <div
                     key={idx}
                     className={`
                       p-4 rounded-lg border-2 cursor-pointer transition-all
-                      ${isDark 
-                        ? 'border-slate-700 hover:border-purple-500 hover:bg-slate-700' 
+                      ${isDark
+                        ? 'border-slate-700 hover:border-purple-500 hover:bg-slate-700'
                         : 'border-slate-200 hover:border-purple-400 hover:bg-purple-50'
                       }
                     `}
-                    onClick={() => navigate(`/empresa/ofertas/${idx + 1}`)}
+                    onClick={() => handleViewOfferDetails(idx + 1)}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
@@ -193,10 +214,10 @@ export const DashboardEmpresa = () => {
               </h2>
               <div className="space-y-4">
                 {topCandidates.map((candidate, idx) => (
-                  <div 
+                  <div
                     key={idx}
                     className={`p-3 rounded-lg cursor-pointer ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
-                    onClick={() => navigate(`/empresa/candidatos/${idx + 1}`)}
+                    onClick={() => handleViewCandidateDetails(idx + 1)}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <p className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -212,7 +233,7 @@ export const DashboardEmpresa = () => {
                   </div>
                 ))}
               </div>
-              <Button variant="outline" fullWidth className="mt-4" onClick={() => navigate('/empresa/candidatos')}>
+              <Button variant="outline" fullWidth className="mt-4" onClick={handleViewAllCandidates}>
                 Ver todos los candidatos
               </Button>
             </Card>
@@ -224,7 +245,7 @@ export const DashboardEmpresa = () => {
               </h2>
               <div className="space-y-3">
                 <button
-                  onClick={() => navigate('/empresa/ofertas/nueva')}
+                  onClick={handleNewOffer}
                   className={`
                     w-full p-3 rounded-lg text-left transition-all
                     ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}
@@ -238,7 +259,7 @@ export const DashboardEmpresa = () => {
                   </div>
                 </button>
                 <button
-                  onClick={() => navigate('/empresa/candidatos')}
+                  onClick={handleViewAllCandidates}
                   className={`
                     w-full p-3 rounded-lg text-left transition-all
                     ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}
@@ -252,7 +273,7 @@ export const DashboardEmpresa = () => {
                   </div>
                 </button>
                 <button
-                  onClick={() => navigate('/empresa/reportes')}
+                  onClick={handleViewReports}
                   className={`
                     w-full p-3 rounded-lg text-left transition-all
                     ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}

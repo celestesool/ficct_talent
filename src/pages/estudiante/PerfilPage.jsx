@@ -1,25 +1,24 @@
-import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Calendar,
-  MapPin,
+import {
   Briefcase,
-  Save,
+  Calendar,
   Camera,
-  Edit3
+  Edit3,
+  Mail,
+  Phone,
+  Save,
+  User
 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/common/Button';
+import { Card } from '../../components/common/Card';
+import { Input } from '../../components/common/Input';
+import { Navbar } from '../../components/common/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const PerfilPage = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
 
   const [profileData, setProfileData] = useState({
@@ -44,10 +43,15 @@ export const PerfilPage = () => {
     alert('Perfil actualizado correctamente');
   };
 
+  // ⭐⭐ ACTUALIZADO: Funciones de navegación
+  const handleGoToAcademicInfo = () => {
+    navigate('/estudiante/academico');
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -60,7 +64,7 @@ export const PerfilPage = () => {
                 Administra tu información personal y académica
               </p>
             </div>
-            <Button 
+            <Button
               variant={isEditing ? 'success' : 'primary'}
               onClick={() => isEditing ? handleSave() : setIsEditing(true)}
             >
@@ -166,7 +170,7 @@ export const PerfilPage = () => {
                     disabled={!isEditing}
                     icon={User}
                   />
-                  
+
                   <Input
                     label="Registro Universitario"
                     type="text"
@@ -186,7 +190,7 @@ export const PerfilPage = () => {
                     disabled={!isEditing}
                     icon={User}
                   />
-                  
+
                   <Input
                     label="Apellidos"
                     type="text"
@@ -205,7 +209,7 @@ export const PerfilPage = () => {
                     disabled={!isEditing}
                     icon={Mail}
                   />
-                  
+
                   <Input
                     label="Teléfono"
                     type="tel"
@@ -236,8 +240,8 @@ export const PerfilPage = () => {
                     rows="4"
                     className={`
                       w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                      ${isDark 
-                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
+                      ${isDark
+                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400'
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
                       }
                       ${!isEditing && 'opacity-60 cursor-not-allowed'}
@@ -267,16 +271,16 @@ export const PerfilPage = () => {
                 <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Información Académica
                 </h3>
-                <Button variant="outline" onClick={() => navigate('/estudiante/academico')}>
+                <Button variant="outline" onClick={handleGoToAcademicInfo}>
                   Editar
                 </Button>
               </div>
-              
+
               <div className={`p-4 rounded-lg ${isDark ? 'bg-slate-700' : 'bg-slate-50'}`}>
                 <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'} mb-2`}>
                   Esta sección se gestiona en el módulo de Información Académica
                 </p>
-                <Button variant="primary" onClick={() => navigate('/estudiante/academico')}>
+                <Button variant="primary" onClick={handleGoToAcademicInfo}>
                   Ir a Información Académica
                 </Button>
               </div>

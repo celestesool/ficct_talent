@@ -1,21 +1,33 @@
+// src/pages/LoginPage.jsx
+import { Building2, GraduationCap, Lock, User } from 'lucide-react';
 import React, { useState } from 'react';
-import { GraduationCap, Building2, User, Lock } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-import { useRouter } from '../contexts/RouterContext';
-import { useAuth } from '../contexts/AuthContext';
-import { ThemeToggle } from '../components/common/ThemeToggle';
-import { Card } from '../components/common/Card';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { Card } from '../components/common/Card';
 import { Input } from '../components/common/Input';
+import { ThemeToggle } from '../components/common/ThemeToggle';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { useUserType } from '../contexts/UserTypeContext'; // ⭐ NUEVO
 
 export const LoginPage = () => {
-  const { navigate, userType } = useRouter();
+  // ⭐⭐ REEMPLAZO: useNavigate y useParams
+  const navigate = useNavigate();
+  const { userType } = useParams(); // Obtener userType de la URL (/estudiante/login o /empresa/login)
   const { isDark } = useTheme();
   const { login } = useAuth();
+  const { setUserType } = useUserType(); // ⭐ Para mantener el estado global
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const isEstudiante = userType === 'estudiante';
+
+  // ⭐⭐ Establecer userType global cuando el componente se monta
+  React.useEffect(() => {
+    if (userType) {
+      setUserType(userType);
+    }
+  }, [userType, setUserType]);
 
   const handleLogin = () => {
     // Simulación de login
@@ -23,11 +35,15 @@ export const LoginPage = () => {
       id: '1',
       name: isEstudiante ? 'Juan Pérez' : 'Empresa Tech SA',
       email: email,
-      type: userType
+      role: userType
     };
-    
+
     login(mockUser);
     navigate(`/${userType}/dashboard`);
+  };
+
+  const handleGoBack = () => {
+    navigate('/');
   };
 
   return (
@@ -35,9 +51,9 @@ export const LoginPage = () => {
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
-      
+
       <div className="absolute top-4 left-4">
-        <Button variant="outline" onClick={() => navigate('/')}>
+        <Button variant="outline" onClick={handleGoBack}>
           ← Volver
         </Button>
       </div>
@@ -47,7 +63,7 @@ export const LoginPage = () => {
           <div className="text-center mb-8">
             <div className={`
               w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center
-              ${isEstudiante 
+              ${isEstudiante
                 ? (isDark ? 'bg-blue-600' : 'bg-blue-100')
                 : (isDark ? 'bg-purple-600' : 'bg-purple-100')
               }
@@ -76,7 +92,7 @@ export const LoginPage = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            
+
             <Input
               label="Contraseña"
               type="password"
@@ -88,15 +104,15 @@ export const LoginPage = () => {
             />
 
             <div className="mb-6">
-              <button 
+              <button
                 className={`text-sm ${isEstudiante ? 'text-blue-600 hover:text-blue-700' : 'text-purple-600 hover:text-purple-700'}`}
               >
                 ¿Olvidaste tu contraseña?
               </button>
             </div>
 
-            <Button 
-              variant={isEstudiante ? 'primary' : 'secondary'} 
+            <Button
+              variant={isEstudiante ? 'primary' : 'secondary'}
               fullWidth
               onClick={handleLogin}
             >
