@@ -1,25 +1,24 @@
-import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import { 
-  Plus,
-  Code,
+import {
   Calendar,
-  Link as LinkIcon,
+  Code,
   Edit3,
+  Link as LinkIcon,
+  Plus,
+  Save,
   Trash2,
-  Eye,
-  X,
-  Save
+  X
 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/common/Button';
+import { Card } from '../../components/common/Card';
+import { Input } from '../../components/common/Input';
+import { Navbar } from '../../components/common/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const ProyectosPage = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
 
@@ -116,7 +115,7 @@ export const ProyectosPage = () => {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -171,17 +170,15 @@ export const ProyectosPage = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleOpenModal(project)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
-                      }`}
+                      className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
+                        }`}
                     >
                       <Edit3 size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
                     </button>
                     <button
                       onClick={() => handleDeleteProject(project.id)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
-                      }`}
+                      className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
+                        }`}
                     >
                       <Trash2 size={16} className="text-red-600" />
                     </button>
@@ -191,7 +188,7 @@ export const ProyectosPage = () => {
                 <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   {project.title}
                 </h3>
-                
+
                 <p className={`text-sm mb-4 line-clamp-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                   {project.description}
                 </p>
@@ -202,14 +199,14 @@ export const ProyectosPage = () => {
                     <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
                       {new Date(project.start_date).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' })}
                       {' - '}
-                      {project.end_date 
+                      {project.end_date
                         ? new Date(project.end_date).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' })
                         : 'Presente'
                       }
                     </span>
                   </div>
                   {project.project_url && (
-                    <a 
+                    <a
                       href={project.project_url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -227,8 +224,8 @@ export const ProyectosPage = () => {
                       key={idx}
                       className={`
                         px-2 py-1 rounded text-xs font-medium
-                        ${isDark 
-                          ? 'bg-slate-700 text-slate-300' 
+                        ${isDark
+                          ? 'bg-slate-700 text-slate-300'
                           : 'bg-slate-100 text-slate-700'
                         }
                       `}
@@ -286,8 +283,8 @@ export const ProyectosPage = () => {
                   required
                   className={`
                     w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                    ${isDark 
-                      ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-blue-500' 
+                    ${isDark
+                      ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-blue-500'
                       : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-blue-500'
                     }
                   `}
@@ -303,7 +300,7 @@ export const ProyectosPage = () => {
                   required
                   icon={Calendar}
                 />
-                
+
                 <Input
                   label="Fecha de Fin"
                   type="date"

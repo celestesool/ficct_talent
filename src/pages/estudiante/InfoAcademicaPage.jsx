@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import { 
-  Save,
+import {
   BookOpen,
   Calendar,
-  TrendingUp,
   Edit3,
   Plus,
+  Save,
+  TrendingUp,
   X
 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/common/Button';
+import { Card } from '../../components/common/Card';
+import { Input } from '../../components/common/Input';
+import { Navbar } from '../../components/common/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const InfoAcademicaPage = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
 
   const [academicInfo, setAcademicInfo] = useState({
@@ -71,7 +71,7 @@ export const InfoAcademicaPage = () => {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -84,7 +84,7 @@ export const InfoAcademicaPage = () => {
                 Gestiona tu historial y progreso académico
               </p>
             </div>
-            <Button 
+            <Button
               variant={isEditing ? 'success' : 'primary'}
               onClick={() => isEditing ? handleSave() : setIsEditing(true)}
             >
@@ -138,7 +138,7 @@ export const InfoAcademicaPage = () => {
                     onChange={(e) => handleChange('current_semester', e.target.value)}
                     disabled={!isEditing}
                   />
-                  
+
                   <Input
                     label="Año de Ingreso"
                     type="number"
@@ -158,7 +158,7 @@ export const InfoAcademicaPage = () => {
                     disabled={!isEditing}
                     icon={Calendar}
                   />
-                  
+
                   <Input
                     label="Promedio General"
                     type="text"
@@ -177,7 +177,7 @@ export const InfoAcademicaPage = () => {
                     onChange={(e) => handleChange('completed_credits', e.target.value)}
                     disabled={!isEditing}
                   />
-                  
+
                   <Input
                     label="Total de Créditos"
                     type="number"
@@ -223,8 +223,8 @@ export const InfoAcademicaPage = () => {
                     key={course.id}
                     className={`
                       p-4 rounded-lg border-2 flex justify-between items-center
-                      ${isDark 
-                        ? 'bg-slate-800 border-slate-700' 
+                      ${isDark
+                        ? 'bg-slate-800 border-slate-700'
                         : 'bg-slate-50 border-slate-200'
                       }
                     `}
@@ -243,9 +243,8 @@ export const InfoAcademicaPage = () => {
                       </div>
                     </div>
                     <button
-                      className={`p-2 rounded-lg transition-colors ${
-                        isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
-                      }`}
+                      className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
+                        }`}
                     >
                       <X size={16} className="text-red-600" />
                     </button>
@@ -262,7 +261,7 @@ export const InfoAcademicaPage = () => {
               <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Progreso de Carrera
               </h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-1">
@@ -274,8 +273,8 @@ export const InfoAcademicaPage = () => {
                     </span>
                   </div>
                   <div className={`w-full h-2 rounded-full ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}>
-                    <div 
-                      className="h-full bg-blue-600 rounded-full transition-all duration-300" 
+                    <div
+                      className="h-full bg-blue-600 rounded-full transition-all duration-300"
                       style={{ width: `${creditsProgress}%` }}
                     ></div>
                   </div>
@@ -294,8 +293,8 @@ export const InfoAcademicaPage = () => {
                     </span>
                   </div>
                   <div className={`w-full h-2 rounded-full ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}>
-                    <div 
-                      className="h-full bg-green-600 rounded-full transition-all duration-300" 
+                    <div
+                      className="h-full bg-green-600 rounded-full transition-all duration-300"
                       style={{ width: `${timeProgress}%` }}
                     ></div>
                   </div>

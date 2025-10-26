@@ -1,33 +1,34 @@
 // src/components/JobSearch.jsx
-import React, { useState } from 'react';
 import axios from 'axios';
-import { useTheme } from '../contexts/ThemeContext';
-import { useRouter } from '../contexts/RouterContext';
-import { Navbar } from './common/Navbar';
-import { Card } from '../components/common/Card';
-import { Button } from '../components/common/Button';
-import { 
-  Search, 
-  MapPin, 
-  Building, 
+import {
+  ArrowLeft,
+  Bookmark,
+  Briefcase,
+  Building,
   Calendar,
   DollarSign,
-  X,
   ExternalLink,
   Eye,
-  LayoutGrid,
-  Sparkles,
-  Globe,
   Filter,
-  Bookmark,
+  Globe,
+  LayoutGrid,
+  MapPin,
+  Search,
   Share2,
-  Zap,
-  Briefcase
+  Sparkles,
+  X,
+  Zap
 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/common/Button';
+import { Card } from '../../components/common/Card';
+import { Navbar } from '../../components/common/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const JobSearch = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate(); 
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,13 +38,28 @@ const JobSearch = () => {
   const [showLinkedInView, setShowLinkedInView] = useState(false);
   const [savedJobs, setSavedJobs] = useState(new Set());
 
+  // ⭐ NUEVO: Función para navegar al dashboard
+  const handleBackToDashboard = () => {
+    navigate('/estudiante/dashboard');
+  };
+
+  // ⭐ NUEVO: Función para ver detalles del trabajo
+  const handleViewJobDetails = (jobId) => {
+    navigate(`/estudiante/ofertas/${jobId}`);
+  };
+
+  // ⭐ NUEVO: Función para navegar al generador de CV
+  const handleGoToCVGenerator = () => {
+    navigate('/estudiante/cv-generator');
+  };
+
   const createProxyUrl = (url) => {
     return `https://corsproxy.io/?${encodeURIComponent(url)}`;
   };
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    
+
     if (!searchTerm.trim()) {
       setError('Por favor ingresa un término de búsqueda');
       return;
@@ -57,7 +73,7 @@ const JobSearch = () => {
 
     try {
       const linkedInUrl = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(searchTerm)}${location ? `&location=${encodeURIComponent(location)}` : ''}`;
-      
+
       console.log('Buscando en:', linkedInUrl);
 
       const response = await axios.get(createProxyUrl(linkedInUrl), {
@@ -67,9 +83,9 @@ const JobSearch = () => {
       if (response.data) {
         console.log('HTML recibido correctamente');
         console.log('Tamaño del HTML:', response.data.length, 'caracteres');
-        
+
         setLinkedInHtml(response.data);
-        
+
         // Generar datos mock mejorados
         const mockJobs = generateMockJobs(searchTerm, location);
         setJobs(mockJobs);
@@ -78,7 +94,7 @@ const JobSearch = () => {
     } catch (err) {
       console.error('Error en la búsqueda:', err);
       setError('Error al conectar con LinkedIn. Mostrando datos de ejemplo. ' + err.message);
-      
+
       // Fallback a datos mock mejorados
       const mockJobs = generateMockJobs(searchTerm, location);
       setJobs(mockJobs);
@@ -90,12 +106,12 @@ const JobSearch = () => {
   const generateMockJobs = (searchTerm, location) => {
     const technologies = ['React', 'JavaScript', 'Node.js', 'Python', 'Java', 'Vue', 'Angular', 'TypeScript'];
     const companies = [
-      'Tech Solutions Bolivia', 'Innovation Labs', 'Digital Creations', 
-      'Startup Ventures', 'Global Tech S.A.', 'Future Systems', 
+      'Tech Solutions Bolivia', 'Innovation Labs', 'Digital Creations',
+      'Startup Ventures', 'Global Tech S.A.', 'Future Systems',
       'Bolivian Tech Hub', 'Andean Innovations'
     ];
     const locations = ['La Paz', 'Santa Cruz', 'Cochabamba', 'Remoto', 'Híbrido', 'Sucre', 'Tarija'];
-    
+
     return Array.from({ length: 12 }, (_, index) => ({
       id: Date.now() + index,
       title: `${['Senior', 'Mid-Level', 'Junior', 'Trainee'][index % 4]} ${technologies[index % technologies.length]} ${['Developer', 'Engineer', 'Specialist'][index % 3]}`,
@@ -114,7 +130,8 @@ const JobSearch = () => {
       ],
       remote: [true, false][index % 2],
       urgent: index < 3,
-      featured: index < 2
+      featured: index < 2,
+      applyUrl: `https://linkedin.com/jobs/view/${Date.now() + index}` // ⭐ NUEVO: URL para postular
     }));
   };
 
@@ -156,15 +173,28 @@ const JobSearch = () => {
     setLocation(loc);
   };
 
+  // ⭐ NUEVO: Función para postular a un trabajo
+  const handleApplyJob = (job, e) => {
+    e.stopPropagation();
+    window.open(job.applyUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-slate-50'}`}>
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-        
-        {/* Header */}
+
+        {/* Header Mejorado */}
         <div className="mb-10">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-4">
+            <Button
+              variant="outline"
+              onClick={handleBackToDashboard}
+              className="mr-2"
+            >
+              <ArrowLeft size={18} />
+            </Button>
             <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500`}></div>
             <h1 className={`text-3xl lg:text-4xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Buscador de Empleos
@@ -193,8 +223,8 @@ const JobSearch = () => {
                     placeholder="Ej: React developer, Python backend, Frontend..."
                     className={`
                       w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all duration-200
-                      ${isDark 
-                        ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500' 
+                      ${isDark
+                        ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500'
                         : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-blue-500'
                       }
                       ${loading ? 'opacity-50 cursor-not-allowed' : ''}
@@ -218,8 +248,8 @@ const JobSearch = () => {
                     placeholder="Ej: Bolivia, Remoto, La Paz..."
                     className={`
                       w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all duration-200
-                      ${isDark 
-                        ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500' 
+                      ${isDark
+                        ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500'
                         : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-blue-500'
                       }
                       ${loading ? 'opacity-50 cursor-not-allowed' : ''}
@@ -284,8 +314,8 @@ const JobSearch = () => {
                 onClick={() => handleQuickSearch(search.term, search.location)}
                 className={`
                   flex items-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 border text-sm font-medium
-                  ${isDark 
-                    ? 'bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-blue-500' 
+                  ${isDark
+                    ? 'bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-blue-500'
                     : 'bg-white border-slate-200 text-slate-700 hover:bg-blue-50 hover:border-blue-500 hover:text-blue-700'
                   }
                 `}
@@ -323,11 +353,11 @@ const JobSearch = () => {
                   onClick={() => setShowLinkedInView(false)}
                   className={`
                     flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 font-medium
-                    ${!showLinkedInView 
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25' 
-                      : isDark 
-                      ? 'text-slate-300 hover:bg-slate-700' 
-                      : 'text-slate-600 hover:bg-slate-100'
+                    ${!showLinkedInView
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
+                      : isDark
+                        ? 'text-slate-300 hover:bg-slate-700'
+                        : 'text-slate-600 hover:bg-slate-100'
                     }
                   `}
                 >
@@ -338,11 +368,11 @@ const JobSearch = () => {
                   onClick={() => setShowLinkedInView(true)}
                   className={`
                     flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 font-medium
-                    ${showLinkedInView 
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25' 
-                      : isDark 
-                      ? 'text-slate-300 hover:bg-slate-700' 
-                      : 'text-slate-600 hover:bg-slate-100'
+                    ${showLinkedInView
+                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
+                      : isDark
+                        ? 'text-slate-300 hover:bg-slate-700'
+                        : 'text-slate-600 hover:bg-slate-100'
                     }
                   `}
                 >
@@ -413,7 +443,12 @@ const JobSearch = () => {
               <div className="lg:col-span-2">
                 <div className="space-y-4">
                   {jobs.map((job) => (
-                    <Card key={job.id} hover className="p-6 relative">
+                    <Card
+                      key={job.id}
+                      hover
+                      className="p-6 relative cursor-pointer"
+                      onClick={() => handleViewJobDetails(job.id)} // ⭐ ACTUALIZADO: Navegación al hacer clic
+                    >
                       {/* Badges */}
                       <div className="flex gap-2 mb-3">
                         {job.featured && (
@@ -446,7 +481,7 @@ const JobSearch = () => {
                         <div className="flex items-center gap-2">
                           <span className={`
                             px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap
-                            ${job.match > 85 
+                            ${job.match > 85
                               ? isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700'
                               : isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700'
                             }
@@ -454,12 +489,14 @@ const JobSearch = () => {
                             {job.match}% match
                           </span>
                           <button
-                            onClick={() => toggleSaveJob(job.id)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              savedJobs.has(job.id) 
-                                ? 'text-yellow-500' 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSaveJob(job.id);
+                            }}
+                            className={`p-2 rounded-lg transition-colors ${savedJobs.has(job.id)
+                                ? 'text-yellow-500'
                                 : isDark ? 'text-slate-400 hover:text-yellow-500' : 'text-slate-400 hover:text-yellow-500'
-                            }`}
+                              }`}
                           >
                             <Bookmark size={18} fill={savedJobs.has(job.id) ? 'currentColor' : 'none'} />
                           </button>
@@ -515,11 +552,22 @@ const JobSearch = () => {
                           </span>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Lógica para compartir
+                            }}
+                          >
                             <Share2 size={16} className="mr-2" />
                             Compartir
                           </Button>
-                          <Button variant="primary" size="sm">
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={(e) => handleApplyJob(job, e)}
+                          >
                             <ExternalLink size={16} className="mr-2" />
                             Postular
                           </Button>
@@ -563,24 +611,31 @@ const JobSearch = () => {
                   </div>
                 </Card>
 
-                {/* Tips */}
+                {/* Tips y Acciones */}
                 <Card className="p-6">
                   <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    💡 Tips para Postular
+                    💡 Mejora tu Perfil
                   </h3>
-                  <div className="space-y-3 text-sm">
-                    <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                      • Personaliza tu CV para cada puesto
-                    </p>
-                    <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                      • Destaca proyectos relevantes
-                    </p>
-                    <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                      • Prepara tu portafolio
-                    </p>
-                    <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                      • Investiga la empresa
-                    </p>
+                  <div className="space-y-3">
+                    <Button
+                      variant="primary"
+                      fullWidth
+                      onClick={handleGoToCVGenerator}
+                    >
+                      <Briefcase size={18} className="mr-2" />
+                      Generar CV Profesional
+                    </Button>
+                    <div className="space-y-2 text-sm">
+                      <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                        • Personaliza tu CV para cada puesto
+                      </p>
+                      <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                        • Destaca proyectos relevantes
+                      </p>
+                      <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                        • Prepara tu portafolio
+                      </p>
+                    </div>
                   </div>
                 </Card>
               </div>
@@ -600,10 +655,16 @@ const JobSearch = () => {
             <p className={`text-lg mb-6 max-w-md mx-auto ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
               Busca entre miles de oportunidades en LinkedIn y empresas locales
             </p>
-            <Button variant="primary" size="lg" onClick={() => setSearchTerm('React Developer')}>
-              <Search size={20} className="mr-2" />
-              Comenzar a Buscar
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button variant="primary" size="lg" onClick={() => setSearchTerm('React Developer')}>
+                <Search size={20} className="mr-2" />
+                Comenzar a Buscar
+              </Button>
+              <Button variant="outline" size="lg" onClick={handleGoToCVGenerator}>
+                <Briefcase size={20} className="mr-2" />
+                Generar CV
+              </Button>
+            </div>
           </Card>
         )}
       </div>

@@ -1,23 +1,22 @@
-import React, { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useRouter } from '../../contexts/RouterContext';
-import { Navbar } from '../../components/common/Navbar';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
-import { 
-  Plus,
+import {
   Code,
-  TrendingUp,
-  X,
-  Save,
+  Plus,
+  Search,
   Star,
-  Search
+  TrendingUp,
+  X
 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../../components/common/Button';
+import { Card } from '../../components/common/Card';
+import { Input } from '../../components/common/Input';
+import { Navbar } from '../../components/common/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const HabilidadesPage = () => {
   const { isDark } = useTheme();
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [newSkill, setNewSkill] = useState('');
   const [skillLevel, setSkillLevel] = useState(3);
@@ -61,7 +60,7 @@ export const HabilidadesPage = () => {
   };
 
   const handleUpdateLevel = (id, newLevel) => {
-    setSkills(skills.map(skill => 
+    setSkills(skills.map(skill =>
       skill.id === id ? { ...skill, level: newLevel } : skill
     ));
   };
@@ -93,7 +92,7 @@ export const HabilidadesPage = () => {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -116,7 +115,7 @@ export const HabilidadesPage = () => {
               <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Agregar Habilidad
               </h3>
-              
+
               <div className="space-y-4">
                 <Input
                   label="Nombre de la Habilidad"
@@ -154,8 +153,8 @@ export const HabilidadesPage = () => {
                   </p>
                 </div>
 
-                <Button 
-                  variant="primary" 
+                <Button
+                  variant="primary"
                   onClick={handleAddSkill}
                   disabled={!newSkill.trim()}
                   fullWidth
@@ -218,8 +217,8 @@ export const HabilidadesPage = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className={`
                       w-full pl-10 pr-4 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                      ${isDark 
-                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400' 
+                      ${isDark
+                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400'
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
                       }
                     `}
@@ -250,8 +249,8 @@ export const HabilidadesPage = () => {
                             key={skill.id}
                             className={`
                               p-4 rounded-lg border-2 flex justify-between items-center
-                              ${isDark 
-                                ? 'bg-slate-800 border-slate-700 hover:border-slate-600' 
+                              ${isDark
+                                ? 'bg-slate-800 border-slate-700 hover:border-slate-600'
                                 : 'bg-slate-50 border-slate-200 hover:border-slate-300'
                               }
                             `}
@@ -266,9 +265,8 @@ export const HabilidadesPage = () => {
                             </div>
                             <button
                               onClick={() => handleDeleteSkill(skill.id)}
-                              className={`p-2 rounded-lg transition-colors ${
-                                isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
-                              }`}
+                              className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'
+                                }`}
                             >
                               <X size={16} className="text-red-600" />
                             </button>
