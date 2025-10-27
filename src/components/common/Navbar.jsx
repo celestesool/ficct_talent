@@ -34,7 +34,7 @@ export const Navbar = () => {
     navigate('/');
   };
 
-  // ⭐⭐ DETECTAR TIPO DE USUARIO POR LA RUTA ACTUAL
+  //  DETECTAR TIPO DE USUARIO POR LA RUTA ACTUAL
   const currentPath = location.pathname;
   const isEstudiante = currentPath.includes('/estudiante');
   const userType = isEstudiante ? 'estudiante' : 'empresa';
@@ -78,12 +78,12 @@ export const Navbar = () => {
 
   const routes = isEstudiante ? getEstudianteRoutes() : empresaRoutes;
 
-  // ⭐⭐ REEMPLAZO: Detectar ruta activa con useLocation
+  // REEMPLAZO: Detectar ruta activa con useLocation
   const isActiveRoute = (path) => {
     return location.pathname === path;
   };
 
-  // ⭐⭐ FUNCIÓN DE NAVEGACIÓN ACTUALIZADA
+  //  FUNCIÓN DE NAVEGACIÓN ACTUALIZADA
   const handleNavigation = (path) => {
     navigate(path);
     setIsMenuOpen(false);
@@ -230,7 +230,7 @@ export const Navbar = () => {
                     {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                   </div>
                   <span className="hidden sm:block font-medium text-sm max-w-24 truncate">
-                    {user.name || 'Usuario'}
+                    {user?.name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Usuario'}
                   </span>
                   <ChevronDown size={16} className={isProfileDropdownOpen ? 'rotate-180' : ''} />
                 </button>
@@ -246,7 +246,9 @@ export const Navbar = () => {
                   `}>
                     <div className="p-2 space-y-1">
                       <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-700">
-                        <p className="font-medium text-sm truncate">{user.name || 'Usuario'}</p>
+                        <p className="font-medium text-sm truncate dark:text-slate-400">
+                          {user?.name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Usuario'}
+                        </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                           {isEstudiante ? 'Estudiante' : 'Empresa'}
                         </p>

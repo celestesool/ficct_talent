@@ -29,19 +29,19 @@ export const CandidatosPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState(null);
 
-  // ⭐ NUEVO: Función para navegar al dashboard
+  //  NUEVO: Función para navegar al dashboard
   const handleBackToDashboard = () => {
     navigate('/empresa/dashboard');
   };
 
-  // ⭐ NUEVO: Función para contactar candidato
+  //  NUEVO: Función para contactar candidato
   const handleContactCandidate = (candidate) => {
     // Aquí podrías implementar lógica de contacto
     console.log('Contactando a:', candidate.name);
     alert(`Función de contacto para ${candidate.name} - Próximamente`);
   };
 
-  // ⭐ NUEVO: Función para programar entrevista
+  //  NUEVO: Función para programar entrevista
   const handleScheduleInterview = (candidate) => {
     // Aquí podrías implementar lógica de programación
     console.log('Programando entrevista con:', candidate.name);
@@ -156,7 +156,6 @@ export const CandidatosPage = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
-      <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         {/* Header Mejorado */}

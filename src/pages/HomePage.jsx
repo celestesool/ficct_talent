@@ -8,63 +8,46 @@ import { useUserType } from '../contexts/UserTypeContext';
 
 export const HomePage = () => {
   const navigate = useNavigate();
-  const { setUserType } = useUserType(); // ⭐ Para mantener el userType
+  const { setUserType } = useUserType();
   const { isDark } = useTheme();
 
   const handleUserTypeSelect = (type) => {
     setUserType(type);
-    // ⭐⭐ REEMPLAZO: navigate en lugar de la navegación anterior
     navigate(`/${type}/login`);
   };
 
   const features = [
-    {
-      icon: Users,
-      title: 'Comunidad Activa',
-      description: 'Más de 5,000 estudiantes y 200 empresas conectadas'
-    },
-    {
-      icon: Rocket,
-      title: 'Oportunidades Reales',
-      description: 'Pasantías, empleos y proyectos con empresas líderes'
-    },
-    {
-      icon: Target,
-      title: 'Match Perfecto',
-      description: 'Algoritmo inteligente que conecta talento con oportunidades'
-    },
-    {
-      icon: Star,
-      title: 'Desarrollo Profesional',
-      description: 'Herramientas para potenciar tu carrera desde la universidad'
-    }
+    { icon: Users, title: 'Comunidad Activa', description: 'Más de 5,000 estudiantes y 200 empresas conectadas' },
+    { icon: Rocket, title: 'Oportunidades Reales', description: 'Pasantías, empleos y proyectos con empresas líderes' },
+    { icon: Target, title: 'Match Perfecto', description: 'Algoritmo inteligente que conecta talento con oportunidades' },
+    { icon: Star, title: 'Desarrollo Profesional', description: 'Herramientas para potenciar tu carrera desde la universidad' },
   ];
 
   const stats = [
     { number: '5,000+', label: 'Estudiantes' },
     { number: '200+', label: 'Empresas' },
     { number: '1,200+', label: 'Oportunidades' },
-    { number: '95%', label: 'Tasa de Match' }
+    { number: '95%', label: 'Tasa de Match' },
   ];
 
   const estudianteFeatures = [
-    'Crea tu portafolio digital',
-    'Gestiona proyectos y certificaciones',
-    'Genera CV profesional con IA',
-    'Conecta con empresas líderes'
+    'CV profesional y portafolio digital',
+    'Oportunidades de empleo y pasantías',
+    'Seguimiento de postulaciones',
+    'Test de aptitud con IA'
   ];
 
   const empresaFeatures = [
-    'Acceso a talento calificado',
-    'Publica ofertas ilimitadas',
-    'Sistema de match inteligente',
-    'Gestión de candidatos eficiente'
+    'Acceso a talento especializado FICCT',
+    'Publicación de ofertas laborales',
+    'Evaluación de candidatos con IA',
+    'Gestión de procesos de selección'
   ];
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
-
-      {/* Header con navegación - MEJORADO */}
+      
+      {/* Header con navegación */}
       <header className="relative border-b" style={{
         borderColor: isDark ? 'rgba(51, 65, 85, 0.5)' : 'rgba(226, 232, 240, 0.8)'
       }}>
@@ -75,7 +58,7 @@ export const HomePage = () => {
                 src="/images/logo.png"
                 alt="FICCT TALENT"
                 className="w-18 h-14 object-contain cursor-pointer"
-                onClick={() => navigate('/')} // ⭐⭐ Agregado navegación al logo
+                onClick={() => navigate('/')}
               />
               <div>
                 <h1 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
@@ -91,12 +74,11 @@ export const HomePage = () => {
         </div>
       </header>
 
-      {/* Hero Section - MEJORADO */}
+      {/* Hero Section */}
       <section className="relative py-16 lg:py-24">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
             <div className="space-y-6">
               <div>
                 <span className={`inline-block px-4 py-2 rounded-full text-sm font-semibold mb-6 ${isDark ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-600'}`}>
@@ -131,9 +113,9 @@ export const HomePage = () => {
               </div>
             </div>
 
-            {/* Cards de selección - REDISEÑADAS Y MEJORADAS */}
+            {/* Cards de selección */}
             <div className="space-y-6">
-              {/* Card Estudiante - MEJORADA */}
+              {/* Card Estudiante */}
               <Card className={`
                 border-2 transition-all duration-300 hover:shadow-2xl
                 ${isDark
@@ -190,7 +172,7 @@ export const HomePage = () => {
                 </div>
               </Card>
 
-              {/* Card Empresa - MEJORADA */}
+              {/* Card Empresa */}
               <Card className={`
                 border-2 transition-all duration-300 hover:shadow-2xl
                 ${isDark
@@ -251,7 +233,7 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Features Section - MEJORADO */}
+      {/* Features Section */}
       <section className={`py-16 lg:py-24 ${isDark ? 'bg-slate-800/30' : 'bg-slate-50/50'}`}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-12 lg:mb-16">
@@ -277,10 +259,10 @@ export const HomePage = () => {
                   `}>
                     <Icon size={32} className={isDark ? 'text-blue-400' : 'text-blue-600'} />
                   </div>
-                  <h3 className={`text-lg lg:text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <h3 className={`text-xl font-semibold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {feature.title}
                   </h3>
-                  <p className={`text-sm lg:text-base ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                     {feature.description}
                   </p>
                 </Card>
@@ -290,7 +272,7 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* CTA Section - MEJORADO */}
+      {/* CTA Section */}
       <section className="py-16 lg:py-24">
         <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <h2 className={`text-3xl lg:text-4xl font-bold mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -326,17 +308,15 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Footer - MEJORADO */}
+      {/* Footer */}
       <footer className={`py-8 border-t ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className={`text-sm text-center sm:text-left ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-              © 2024 FICCT - Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones
-            </p>
-            <p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-              Universidad Autónoma Gabriel René Moreno
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+            © 2024 FICCT - Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones
+          </p>
+          <p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+            Universidad Autónoma Gabriel René Moreno
+          </p>
         </div>
       </footer>
     </div>
