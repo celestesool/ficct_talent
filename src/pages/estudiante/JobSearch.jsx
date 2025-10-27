@@ -337,7 +337,7 @@ const JobSearch = () => {
                 <Zap size={16} />
               </div>
               <div>
-                <p className="font-medium">Búsqueda simulada</p>
+                <p className="font-medium">Búsqueda</p>
                 <p className="text-sm">{error}</p>
               </div>
             </div>

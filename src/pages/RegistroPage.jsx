@@ -1,5 +1,4 @@
-// src/pages/RegistroPage.jsx
-import { Building2, Calendar, GraduationCap, Lock, Mail, Phone, User } from 'lucide-react';
+import { Building2, Calendar, GraduationCap, Lock, Mail, Phone, User, AlertCircle } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
@@ -8,19 +7,18 @@ import { Input } from '../components/common/Input';
 import { ThemeToggle } from '../components/common/ThemeToggle';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { useUserType } from '../contexts/UserTypeContext'; // ⭐ NUEVO
+import { useUserType } from '../contexts/UserTypeContext';
 
 export const RegistroPage = () => {
-  // ⭐⭐ REEMPLAZO: useNavigate y useParams
   const navigate = useNavigate();
-  const { userType } = useParams(); // Obtener userType de la URL
+  const { userType } = useParams();
   const { isDark } = useTheme();
-  const { login } = useAuth();
-  const { setUserType } = useUserType(); // ⭐ Para mantener el estado global
+  const { registerStudent, registerCompany } = useAuth();
+  const { setUserType } = useUserType();
 
   const isEstudiante = userType === 'estudiante';
 
-  // ⭐⭐ Establecer userType global cuando el componente se monta
+  // Establecer userType global cuando el componente se monta
   React.useEffect(() => {
     if (userType) {
       setUserType(userType);
@@ -52,6 +50,9 @@ export const RegistroPage = () => {
     confirmPassword: ''
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   const handleEstudianteChange = (field, value) => {
     setEstudianteData(prev => ({ ...prev, [field]: value }));
   };
@@ -60,27 +61,36 @@ export const RegistroPage = () => {
     setEmpresaData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const data = isEstudiante ? estudianteData : empresaData;
 
     // Validación básica
     if (data.password !== data.confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      setError('Las contraseñas no coinciden');
       return;
     }
 
-    // Simulación de registro
-    const mockUser = {
-      id: '1',
-      name: isEstudiante ? `${estudianteData.first_name} ${estudianteData.last_name}` : empresaData.name,
-      email: data.email,
-      role: userType
-    };
+    setLoading(true);
+    setError('');
 
-    login(mockUser);
-    navigate(`/${userType}/dashboard`);
+    try {
+      if (isEstudiante) {
+        await registerStudent(estudianteData);
+      } else {
+        await registerCompany(empresaData);
+      }
+      
+      // Después del registro exitoso, redirigir al login
+      navigate(`/${userType}/login`);
+      alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+      
+    } catch (error) {
+      setError(error.message || 'Error en el registro. Intenta nuevamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoBack = () => {
@@ -123,6 +133,15 @@ export const RegistroPage = () => {
             </p>
           </div>
 
+          {error && (
+            <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${
+              isDark ? 'bg-red-900/50 text-red-200' : 'bg-red-100 text-red-700'
+            }`}>
+              <AlertCircle size={18} />
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
             {isEstudiante ? (
               // Formulario Estudiante
@@ -135,6 +154,7 @@ export const RegistroPage = () => {
                     value={estudianteData.ci}
                     onChange={(e) => handleEstudianteChange('ci', e.target.value)}
                     required
+                    disabled={loading}
                   />
 
                   <Input
@@ -144,6 +164,7 @@ export const RegistroPage = () => {
                     value={estudianteData.registration_number}
                     onChange={(e) => handleEstudianteChange('registration_number', e.target.value)}
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -156,6 +177,7 @@ export const RegistroPage = () => {
                     value={estudianteData.first_name}
                     onChange={(e) => handleEstudianteChange('first_name', e.target.value)}
                     required
+                    disabled={loading}
                   />
 
                   <Input
@@ -165,6 +187,7 @@ export const RegistroPage = () => {
                     value={estudianteData.last_name}
                     onChange={(e) => handleEstudianteChange('last_name', e.target.value)}
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -177,8 +200,9 @@ export const RegistroPage = () => {
                     value={estudianteData.phone_number}
                     onChange={(e) => handleEstudianteChange('phone_number', e.target.value)}
                     required
+                    disabled={loading}
                   />
-
+                  
                   <Input
                     label="Fecha de Nacimiento"
                     type="date"
@@ -186,6 +210,7 @@ export const RegistroPage = () => {
                     value={estudianteData.birthDate}
                     onChange={(e) => handleEstudianteChange('birthDate', e.target.value)}
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -197,6 +222,7 @@ export const RegistroPage = () => {
                   value={estudianteData.email}
                   onChange={(e) => handleEstudianteChange('email', e.target.value)}
                   required
+                  disabled={loading}
                 />
 
                 <div className="mb-4">
@@ -208,12 +234,14 @@ export const RegistroPage = () => {
                     value={estudianteData.bio}
                     onChange={(e) => handleEstudianteChange('bio', e.target.value)}
                     rows="3"
+                    disabled={loading}
                     className={`
                       w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                      ${isDark
-                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-blue-500'
+                      ${isDark 
+                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-blue-500' 
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-blue-500'
                       }
+                      ${loading ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   />
                 </div>
@@ -227,8 +255,9 @@ export const RegistroPage = () => {
                     value={estudianteData.password}
                     onChange={(e) => handleEstudianteChange('password', e.target.value)}
                     required
+                    disabled={loading}
                   />
-
+                  
                   <Input
                     label="Confirmar Contraseña"
                     type="password"
@@ -237,6 +266,7 @@ export const RegistroPage = () => {
                     value={estudianteData.confirmPassword}
                     onChange={(e) => handleEstudianteChange('confirmPassword', e.target.value)}
                     required
+                    disabled={loading}
                   />
                 </div>
               </>
@@ -251,6 +281,7 @@ export const RegistroPage = () => {
                   value={empresaData.name}
                   onChange={(e) => handleEmpresaChange('name', e.target.value)}
                   required
+                  disabled={loading}
                 />
 
                 <div className="mb-4">
@@ -263,12 +294,14 @@ export const RegistroPage = () => {
                     onChange={(e) => handleEmpresaChange('description', e.target.value)}
                     rows="4"
                     required
+                    disabled={loading}
                     className={`
                       w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
-                      ${isDark
-                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500'
+                      ${isDark 
+                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500' 
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-purple-500'
                       }
+                      ${loading ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   />
                 </div>
@@ -279,6 +312,7 @@ export const RegistroPage = () => {
                   placeholder="https://www.tuempresa.com"
                   value={empresaData.website}
                   onChange={(e) => handleEmpresaChange('website', e.target.value)}
+                  disabled={loading}
                 />
 
                 <div className="grid md:grid-cols-2 gap-4">
@@ -290,8 +324,9 @@ export const RegistroPage = () => {
                     value={empresaData.email}
                     onChange={(e) => handleEmpresaChange('email', e.target.value)}
                     required
+                    disabled={loading}
                   />
-
+                  
                   <Input
                     label="Teléfono"
                     type="tel"
@@ -300,6 +335,7 @@ export const RegistroPage = () => {
                     value={empresaData.phone_number}
                     onChange={(e) => handleEmpresaChange('phone_number', e.target.value)}
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -312,8 +348,9 @@ export const RegistroPage = () => {
                     value={empresaData.password}
                     onChange={(e) => handleEmpresaChange('password', e.target.value)}
                     required
+                    disabled={loading}
                   />
-
+                  
                   <Input
                     label="Confirmar Contraseña"
                     type="password"
@@ -322,14 +359,20 @@ export const RegistroPage = () => {
                     value={empresaData.confirmPassword}
                     onChange={(e) => handleEmpresaChange('confirmPassword', e.target.value)}
                     required
+                    disabled={loading}
                   />
                 </div>
               </>
             )}
 
-            <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
+            <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-slate-700' : 'bg-slate-100'} ${loading ? 'opacity-50' : ''}`}>
               <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" required className="mt-1" />
+                <input 
+                  type="checkbox" 
+                  required 
+                  className="mt-1" 
+                  disabled={loading}
+                />
                 <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Acepto los{' '}
                   <a href="#" className={isEstudiante ? 'text-blue-600 hover:underline' : 'text-purple-600 hover:underline'}>
@@ -343,12 +386,13 @@ export const RegistroPage = () => {
               </label>
             </div>
 
-            <Button
-              variant={isEstudiante ? 'primary' : 'secondary'}
+            <Button 
+              variant={isEstudiante ? 'primary' : 'secondary'} 
               fullWidth
               type="submit"
+              disabled={loading}
             >
-              Crear Cuenta
+              {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
             </Button>
           </form>
 
@@ -357,7 +401,8 @@ export const RegistroPage = () => {
               ¿Ya tienes cuenta?{' '}
               <button
                 onClick={() => navigate(`/${userType}/login`)}
-                className={`font-semibold ${isEstudiante ? 'text-blue-600 hover:text-blue-700' : 'text-purple-600 hover:text-purple-700'}`}
+                className={`font-semibold ${isEstudiante ? 'text-blue-600 hover:text-blue-700' : 'text-purple-600 hover:text-purple-700'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={loading}
               >
                 Inicia sesión aquí
               </button>

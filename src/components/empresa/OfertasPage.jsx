@@ -240,7 +240,6 @@ export const OfertasPage = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
-      <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         {/* Header Mejorado */}

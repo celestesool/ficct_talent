@@ -6,6 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegistroPage } from './pages/RegistroPage';
+import { ConfirmEmailPage } from './pages/ConfirmEmailPage';
 
 // Páginas de Estudiante
 import { CertificacionesPage } from './pages/estudiante/CertificacionesPage';
@@ -30,17 +31,17 @@ import { CVEditor } from './pages/estudiante/CVEditor';
 import { PostulacionesPage } from './pages/estudiante/PostulacionesPage';
 
 function App() {
-  //const { student } = useStudentStore(); //agregar auth para esto
   return (
     <ThemeProvider>
       <AuthProvider>
-        <UserTypeProvider> {/* ⭐ ENVOLVER CON UserTypeProvider */}
+        <UserTypeProvider>
           <Router>
             <Routes>
               {/* Rutas públicas */}
               <Route path="/" element={<HomePage />} />
               <Route path="/:userType/login" element={<LoginPage />} />
               <Route path="/:userType/registro" element={<RegistroPage />} />
+              <Route path="/confirmar" element={<ConfirmEmailPage />} />
 
               {/* Rutas de Estudiante */}
               <Route path="/estudiante" element={<StudentLayout />}>
@@ -54,10 +55,7 @@ function App() {
                 <Route path="cv-generator" element={<CVGeneratorPage />} />
                 <Route path="ofertas" element={<JobSearch />} />
                 <Route path="postulaciones" element={<PostulacionesPage />} />
-
-
                 <Route path="cv-editor" element={<CVEditor studentId="c1528cb3-fecd-4427-8d81-055214884fc3" />} />
-                {/*<Route path="cv-editor" element={<CVEditor studentId={student.id} />} />*/}
               </Route>
 
               {/* Rutas de Empresa */}

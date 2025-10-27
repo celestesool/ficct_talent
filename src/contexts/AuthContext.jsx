@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -6,33 +7,53 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Simulamos un usuario autenticado con id estático
+  // Verificar si hay un usuario en localStorage al cargar la aplicación
   useEffect(() => {
-    const mockUser = {
-      id: 'c1528cb3-fecd-4427-8d81-055214884fc3',
-      first_name: 'Juan',
-      last_name: 'Pérez',
-      email: 'juan.perez@example.com',
-    };
-
-    setUser(mockUser);
-    setIsAuthenticated(true);
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      setUser(userData);
+      setIsAuthenticated(true);
+    }
   }, []);
 
-  const login = (userData) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const login = async (credentials, userType) => {
+    try {
+      const response = await authService.login(credentials, userType);
+      setUser(response.user);
+      setIsAuthenticated(true);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      return response;
+    } catch (error) {
+      throw error;
+    }
   };
 
   const logout = () => {
+    authService.logout();
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('user');
   };
 
+  // Funciones de registro (si las necesitas)
+  const registerStudent = async (studentData) => {
+    return await authService.registerStudent(studentData);
+  };
+
+  const registerCompany = async (companyData) => {
+    return await authService.registerCompany(companyData);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isAuthenticated,
+      login, 
+      logout,
+      registerStudent,
+      registerCompany
+    }}>
       {children}
     </AuthContext.Provider>
   );
