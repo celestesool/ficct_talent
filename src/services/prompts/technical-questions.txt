@@ -1,0 +1,10 @@
+Genera preguntas técnicas específicas para evaluar habilidades en las tecnologías y herramientas mencionadas.
+
+ENFOQUE:
+- Preguntas prácticas y realistas
+- Dificultad progresiva
+- Enfocadas en los requisitos específicos del puesto
+- Incluir escenarios del mundo real
+
+FORMATO:
+Lista de preguntas con 4 opciones de respuesta y la respuesta correcta indicada.

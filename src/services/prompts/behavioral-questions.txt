@@ -1,0 +1,14 @@
+Genera preguntas de comportamiento para evaluar competencias profesionales y cultural fit.
+
+COMPETENCIAS A EVALUAR:
+- Trabajo en equipo
+- Resolución de problemas
+- Adaptabilidad
+- Liderazgo
+- Comunicación
+- Gestión del tiempo
+
+ENFOQUE:
+- Situaciones realistas en el contexto de la empresa
+- Evaluación de valores y cultura
+- Escenarios relevantes al puesto

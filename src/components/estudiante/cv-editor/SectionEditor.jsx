@@ -1,12 +1,14 @@
 import { Editor } from '@tinymce/tinymce-react';
 
 export const SectionEditor = ({ title, content, onUpdate, height = 300 }) => {
+  const tinymceApiKey = import.meta.env.VITE_TINYMCE_API_KEY;
+
   return (
     <div className="section-editor mb-6">
       <h3 className="text-lg font-semibold mb-3 text-gray-800">{title}</h3>
       <div className="border border-gray-300 rounded-lg overflow-hidden">
         <Editor
-          apiKey="kdadjwcoyo3os0ukkwqj56er6dan72po6q12nls2geawv4tj" // Reemplaza con tu API key real
+          apiKey={tinymceApiKey}
           value={content}
           onEditorChange={onUpdate}
           init={{
