@@ -14,7 +14,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
-import { Navbar } from '../../components/common/Navbar';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export const DashboardEstudiante = () => {
@@ -116,6 +115,16 @@ export const DashboardEstudiante = () => {
       bgDark: 'bg-orange-500/10',
       hoverBorder: 'hover:border-orange-400 dark:hover:border-orange-500'
     },
+    {
+      title: 'Postulaciones',
+      desc: 'Ver Postulaciones',
+      icon: Briefcase,
+      path: '/estudiante/postulaciones',
+      gradient: 'from-orange-500 to-orange-600',
+      bgLight: 'bg-orange-50',
+      bgDark: 'bg-orange-500/10',
+      hoverBorder: 'hover:border-orange-400 dark:hover:border-orange-500'
+    },
   ];
 
   const recentActivity = [
@@ -163,8 +172,6 @@ export const DashboardEstudiante = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-slate-50'}`}>
-      <Navbar />
-
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 lg:py-12">
         {/* Header - MEJORADO */}
         <div className="mb-10">

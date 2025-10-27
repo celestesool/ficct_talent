@@ -13,7 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
-import { Navbar } from '../../components/common/Navbar';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export const ProyectosPage = () => {
@@ -114,8 +113,6 @@ export const ProyectosPage = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
-      <Navbar />
-
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">

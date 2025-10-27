@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { API_BASE } from '../api';
 
-export const cvService = {
+export const jobService = {
+
   // Método con manejo de errores integrado
-  getCVDataWithErrorHandling: async (studentId) => {
+  getJobWithCompanyWithErrorHandling: async (jobId) => {
     try {
-      const response = await axios.get(`${API_BASE}/students/${studentId}/cv-data`);
+      const response = await axios.get(`${API_BASE}/jobs/${jobId}/with-company`);
       return {
         data: response.data,
         error: null,
@@ -14,9 +15,10 @@ export const cvService = {
     } catch (error) {
       return {
         data: null,
-        error: error.response?.data?.message || 'Error al cargar datos del CV',
+        error: error.response?.data?.message || 'Error al cargar datos del job y empresa',
         success: false
       };
     }
-  }
+  },
+
 };
