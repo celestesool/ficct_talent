@@ -1,4 +1,4 @@
-// src/contexts/UserTypeContext.jsx (NUEVO ARCHIVO)
+// src/contexts/UserTypeContext.jsx 
 import { createContext, useContext, useState } from 'react';
 
 const UserTypeContext = createContext();
@@ -19,4 +19,5 @@ export const useUserType = () => {
     throw new Error('useUserType debe ser usado dentro de un UserTypeProvider');
   }
   return context;
+  
 };
