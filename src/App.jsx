@@ -26,6 +26,7 @@ import { OfertasPage } from './pages/empresa/OfertasPage';
 import { CompanyLayout } from './components/layout/CompanyLayout';
 import { StudentLayout } from './components/layout/StudentLayout';
 import { UserTypeProvider } from './contexts/UserTypeContext';
+import AvatarInterviewer from './pages/estudiante/AvatarInterviewer';
 import { CVEditor } from './pages/estudiante/CVEditor';
 import { PostulacionesPage } from './pages/estudiante/PostulacionesPage';
 
@@ -54,6 +55,7 @@ function App() {
                 <Route path="cv-generator" element={<CVGeneratorPage />} />
                 <Route path="ofertas" element={<JobSearch />} />
                 <Route path="postulaciones" element={<PostulacionesPage />} />
+                <Route path="avatar-interviewer" element={<AvatarInterviewer />} />
 
 
                 <Route path="cv-editor" element={<CVEditor studentId="c1528cb3-fecd-4427-8d81-055214884fc3" />} />

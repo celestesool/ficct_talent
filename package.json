@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.21.0",
     "@emailjs/browser": "^4.4.1",
     "@google/generative-ai": "^0.24.1",
     "@tanstack/react-query": "^5.90.5",
