@@ -7,7 +7,7 @@ import { Input } from '../components/common/Input';
 import { ThemeToggle } from '../components/common/ThemeToggle';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { useUserType } from '../contexts/UserTypeContext';
+import { useUserType } from '../contexts/userTypeContext.jsx';
 
 export const LoginPage = () => {
   const navigate = useNavigate();

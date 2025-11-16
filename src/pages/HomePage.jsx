@@ -4,7 +4,7 @@ import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 import { ThemeToggle } from '../components/common/ThemeToggle';
 import { useTheme } from '../contexts/ThemeContext';
-import { useUserType } from '../contexts/UserTypeContext';
+import { useUserType } from '../contexts/userTypeContext.jsx';
 
 export const HomePage = () => {
   const navigate = useNavigate();

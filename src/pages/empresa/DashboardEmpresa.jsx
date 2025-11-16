@@ -1,3 +1,4 @@
+// src/pages/empresa/DashboardEmpresa.jsx
 import {
   Briefcase,
   CheckCircle,
@@ -13,76 +14,156 @@ import { Card } from '../../components/common/Card';
 import { Navbar } from '../../components/common/Navbar';
 import { useTheme } from '../../contexts/ThemeContext';
 
+import { useEffect, useState } from 'react';
+import api from '../../services/api';
+
 export const DashboardEmpresa = () => {
   const { isDark } = useTheme();
   const navigate = useNavigate();
 
+  const [offers, setOffers] = useState([]);
+  const [candidates, setCandidates] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // =====================================================
+  // LOAD DASHBOARD DATA FROM BACKEND (WITH AUTOMAPPING)
+  // =====================================================
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  async function loadDashboardData() {
+    try {
+      setLoading(true);
+
+      const companyId = localStorage.getItem("user_id");
+      if (!companyId) {
+        console.error("No company user_id found in localStorage");
+        setLoading(false);
+        return;
+      }
+
+      // 1) Load this company's jobs
+      const jobsResponse = await api.get(`/jobs/company/${companyId}`);
+
+      // Ensure jobs is always an array
+      const jobList = Array.isArray(jobsResponse) ? jobsResponse : [];
+
+      // ===========================
+      //  AUTOMAP JOB DATA
+      // ===========================
+      const mappedJobs = jobList.map(job => ({
+        id: job.id,
+        title: job.title,
+        description: job.description,
+        requirements: job.requirements ? job.requirements.split(',') : [],
+        salary: job.salary_range || "No especificado",
+        location: job.location,
+        posted: new Date(job.created_at).toLocaleDateString(),
+        expires_at: job.deadline ? new Date(job.deadline).toLocaleDateString() : "Sin fecha",
+        applicantsCount: job.applications ? job.applications.length : 0,
+        is_active: job.is_active,
+        statusColor: job.is_active ? "green" : "yellow",
+        job_type: job.job_type,
+        raw: job
+      }));
+
+      setOffers(mappedJobs);
+
+      // ===========================
+      // 2) LOAD APPLICANTS PER JOB
+      // ===========================
+
+      const applicantList = [];
+
+      for (const job of jobList) {
+        const apps = await api.get(`/applications/job/${job.id}`);
+
+        // Map real applications → UI format
+        apps.forEach(app => {
+          const s = app.student;
+
+          applicantList.push({
+            id: app.id,
+            name: `${s.first_name} ${s.last_name}`,
+            skills: s.skills ? s.skills.split(',') : [],
+            match: 80, // placeholder
+            appliedFor: job.title,
+            email: s.email,
+          });
+        });
+      }
+
+      setCandidates(applicantList);
+
+    } catch (error) {
+      console.error("Error loading dashboard:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // =====================================================
+  // ORIGINAL NAVIGATION FUNCTIONS
+  // =====================================================
+  const handleNewOffer = () => navigate('/empresa/ofertas/nueva');
+  const handleViewAllOffers = () => navigate('/empresa/ofertas');
+  const handleViewOfferDetails = (id) => navigate(`/empresa/ofertas/${id}`);
+  const handleViewAllCandidates = () => navigate('/empresa/candidatos');
+  const handleViewCandidateDetails = (id) => navigate(`/empresa/candidatos/${id}`);
+  const handleViewReports = () => navigate('/empresa/reportes');
+
+  // =====================================================
+  // UPDATED STATS (REAL DATA)
+  // =====================================================
   const stats = [
-    { label: 'Ofertas Activas', value: '12', icon: Briefcase, color: 'purple' },
-    { label: 'Candidatos', value: '48', icon: Users, color: 'blue' },
-    { label: 'Vistas del Perfil', value: '234', icon: Eye, color: 'green' },
-    { label: 'Contrataciones', value: '7', icon: CheckCircle, color: 'orange' },
-  ];
-
-  const recentOffers = [
     {
-      title: 'Desarrollador Frontend',
-      applicants: 15,
-      status: 'Activa',
-      posted: 'Hace 3 días',
-      statusColor: 'green'
+      label: 'Ofertas Activas',
+      value: offers.filter(o => o.is_active).length,
+      icon: Briefcase,
+      color: 'purple'
     },
     {
-      title: 'Data Scientist',
-      applicants: 8,
-      status: 'Activa',
-      posted: 'Hace 1 semana',
-      statusColor: 'green'
+      label: 'Candidatos',
+      value: candidates.length,
+      icon: Users,
+      color: 'blue'
     },
     {
-      title: 'Backend Developer',
-      applicants: 23,
-      status: 'En revisión',
-      posted: 'Hace 2 semanas',
-      statusColor: 'yellow'
+      label: 'Vistas del Perfil',
+      value: '0',
+      icon: Eye,
+      color: 'green'
+    },
+    {
+      label: 'Contrataciones',
+      value: '0',
+      icon: CheckCircle,
+      color: 'orange'
     },
   ];
 
-  const topCandidates = [
-    { name: 'Juan Pérez', skills: 'React, Node.js, Python', match: '95%' },
-    { name: 'María González', skills: 'Java, Spring, SQL', match: '92%' },
-    { name: 'Carlos Ruiz', skills: 'Angular, TypeScript', match: '88%' },
-  ];
+  // =====================================================
+  // RECENT OFFERS FIXED (REAL DATA)
+  // =====================================================
+  const recentOffers = offers.slice(0, 3).map(offer => ({
+    id: offer.id,
+    title: offer.title,
+    applicants: offer.applicantsCount,
+    posted: offer.posted,
+    status: offer.is_active ? "Activa" : "Inactiva",
+    statusColor: offer.statusColor
+  }));
 
-  // ⭐⭐ ACTUALIZADO: Funciones de navegación
-  const handleNewOffer = () => {
-    navigate('/empresa/ofertas/nueva');
-  };
+  const topCandidates = candidates.slice(0, 3);
 
-  const handleViewAllOffers = () => {
-    navigate('/empresa/ofertas');
-  };
-
-  const handleViewOfferDetails = (offerId) => {
-    navigate(`/empresa/ofertas/${offerId}`);
-  };
-
-  const handleViewAllCandidates = () => {
-    navigate('/empresa/candidatos');
-  };
-
-  const handleViewCandidateDetails = (candidateId) => {
-    navigate(`/empresa/candidatos/${candidateId}`);
-  };
-
-  const handleViewReports = () => {
-    navigate('/empresa/reportes');
-  };
-
+  // =====================================================
+  // UI (UNCHANGED)
+  // =====================================================
   return (
-    <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
-
+    <div className={`min-h-screen ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <div className="container mx-auto px-4 py-8">
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-start">
@@ -116,24 +197,33 @@ export const DashboardEmpresa = () => {
                     {stat.value}
                   </p>
                 </div>
-                <div className={`p-3 rounded-lg ${stat.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/20' :
-                    stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/20' :
-                      stat.color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
-                        'bg-orange-100 dark:bg-orange-900/20'
-                  }`}>
-                  <stat.icon className={`${stat.color === 'purple' ? 'text-purple-600' :
+                <div className={`p-3 rounded-lg ${
+                  stat.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/20' :
+                  stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/20' :
+                  stat.color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
+                  'bg-orange-100 dark:bg-orange-900/20'
+                }`}>
+                  <stat.icon
+                    className={`${
+                      stat.color === 'purple' ? 'text-purple-600' :
                       stat.color === 'blue' ? 'text-blue-600' :
-                        stat.color === 'green' ? 'text-green-600' :
-                          'text-orange-600'
-                    }`} size={24} />
+                      stat.color === 'green' ? 'text-green-600' :
+                      'text-orange-600'
+                    }`}
+                    size={24}
+                  />
                 </div>
               </div>
             </Card>
           ))}
         </div>
 
+        {/* Rest of UI stays EXACTLY the same */}
+        {/* -------------------------------------------- */}
+
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Ofertas Recientes */}
+
+          {/* Recent Offers */}
           <div className="lg:col-span-2">
             <Card>
               <div className="flex justify-between items-center mb-4">
@@ -144,18 +234,17 @@ export const DashboardEmpresa = () => {
                   Ver todas
                 </Button>
               </div>
+
               <div className="space-y-4">
-                {recentOffers.map((offer, idx) => (
+                {recentOffers.map((offer) => (
                   <div
-                    key={idx}
-                    className={`
-                      p-4 rounded-lg border-2 cursor-pointer transition-all
+                    key={offer.id}
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all
                       ${isDark
                         ? 'border-slate-700 hover:border-purple-500 hover:bg-slate-700'
                         : 'border-slate-200 hover:border-purple-400 hover:bg-purple-50'
-                      }
-                    `}
-                    onClick={() => handleViewOfferDetails(idx + 1)}
+                      }`}
+                    onClick={() => handleViewOfferDetails(offer.id)}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
@@ -166,6 +255,7 @@ export const DashboardEmpresa = () => {
                           {offer.posted}
                         </p>
                       </div>
+
                       <span className={`
                         px-3 py-1 rounded-full text-xs font-semibold
                         ${offer.statusColor === 'green'
@@ -176,6 +266,7 @@ export const DashboardEmpresa = () => {
                         {offer.status}
                       </span>
                     </div>
+
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
                         <Users size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
@@ -189,7 +280,7 @@ export const DashboardEmpresa = () => {
               </div>
             </Card>
 
-            {/* Gráfico de Actividad */}
+            {/* Graph placeholder */}
             <Card className="mt-6">
               <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Actividad del Mes
@@ -205,50 +296,54 @@ export const DashboardEmpresa = () => {
             </Card>
           </div>
 
-          {/* Candidatos Destacados */}
+          {/* Top Candidates */}
           <div>
             <Card>
               <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Candidatos Destacados
               </h2>
+
               <div className="space-y-4">
                 {topCandidates.map((candidate, idx) => (
                   <div
                     key={idx}
-                    className={`p-3 rounded-lg cursor-pointer ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
-                    onClick={() => handleViewCandidateDetails(idx + 1)}
+                    className={`p-3 rounded-lg cursor-pointer ${
+                      isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'
+                    }`}
+                    onClick={() => handleViewCandidateDetails(candidate.id)}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <p className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                         {candidate.name}
                       </p>
                       <span className="text-sm font-bold text-purple-600">
-                        {candidate.match}
+                        {candidate.match}%
                       </span>
                     </div>
                     <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      {candidate.skills}
+                      {candidate.skills.join(', ')}
                     </p>
                   </div>
                 ))}
               </div>
+
               <Button variant="outline" fullWidth className="mt-4" onClick={handleViewAllCandidates}>
                 Ver todos los candidatos
               </Button>
             </Card>
 
-            {/* Acciones Rápidas */}
+            {/* Quick Actions */}
             <Card className="mt-6">
               <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Acciones Rápidas
               </h2>
+
               <div className="space-y-3">
                 <button
                   onClick={handleNewOffer}
-                  className={`
-                    w-full p-3 rounded-lg text-left transition-all
-                    ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}
-                  `}
+                  className={`w-full p-3 rounded-lg text-left ${
+                    isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <Plus size={20} className="text-purple-600" />
@@ -257,12 +352,12 @@ export const DashboardEmpresa = () => {
                     </span>
                   </div>
                 </button>
+
                 <button
                   onClick={handleViewAllCandidates}
-                  className={`
-                    w-full p-3 rounded-lg text-left transition-all
-                    ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}
-                  `}
+                  className={`w-full p-3 rounded-lg text-left ${
+                    isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <Users size={20} className="text-blue-600" />
@@ -271,12 +366,12 @@ export const DashboardEmpresa = () => {
                     </span>
                   </div>
                 </button>
+
                 <button
                   onClick={handleViewReports}
-                  className={`
-                    w-full p-3 rounded-lg text-left transition-all
-                    ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}
-                  `}
+                  className={`w-full p-3 rounded-lg text-left ${
+                    isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <FileText size={20} className="text-green-600" />
@@ -286,8 +381,10 @@ export const DashboardEmpresa = () => {
                   </div>
                 </button>
               </div>
+
             </Card>
           </div>
+
         </div>
       </div>
     </div>
