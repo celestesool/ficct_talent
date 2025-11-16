@@ -23,6 +23,7 @@ REGLAS ESTRICTAS:
 5. Mantén el mismo idioma del CV original.
 6. Si un campo está vacío, déjalo vacío (no inventes).
 7. Devuelve SOLO el JSON mejorado, sin markdown, sin explicaciones.
+8. las palabras con acento, agregalas sin acento.
 
 CV ACTUAL:
 {JSON_INPUT}
