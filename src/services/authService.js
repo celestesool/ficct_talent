@@ -2,7 +2,7 @@
 import { apiService } from './api';
 
 export const authService = {
-  // Registro de estudiante
+  // Registro estudiante
   async registerStudent(studentData) {
     return apiService.post('/auth/register/student', {
       email: studentData.email,
@@ -17,7 +17,7 @@ export const authService = {
     });
   },
 
-  // Registro de empresa
+  // Registro empresa
   async registerCompany(companyData) {
     return apiService.post('/auth/register/company', {
       email: companyData.email,
@@ -29,29 +29,62 @@ export const authService = {
     });
   },
 
-  // Login diferenciado por tipo de usuario
+  // Login
   async login(credentials, userType) {
     const endpoint =
       userType === 'estudiante'
         ? '/auth/login/student'
         : '/auth/login/company';
 
-    const response = await apiService.post(endpoint, {
+    const axiosResponse = await apiService.post(endpoint, {
       email: credentials.email,
       password: credentials.password,
     });
 
+    // Axios returns: { data: {...}, status: ... }
+    const response = axiosResponse.data;
+
+    console.log("Backend normalized response:", response);
+
+    if (!response || !response.user) {
+      throw new Error('Login response is missing "user"');
+    }
+
+    // Normalize user
+    const normalizedUser = {
+      id: response.user.id,
+      email: response.user.email,
+      user_type: response.user.user_type,
+      name:
+        response.user.name ||
+        response.user.first_name ||
+        response.user.last_name ||
+        null,
+    };
+
+    // Store tokens
     if (response.access_token) {
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('refresh_token', response.refresh_token);
     }
 
-    return response;
+    // Store user ID needed for companies/jobs
+    localStorage.setItem('user_id', normalizedUser.id);
+
+    // Store normalized user
+    localStorage.setItem('user', JSON.stringify(normalizedUser));
+
+    return {
+      ...response,
+      user: normalizedUser,
+    };
   },
 
   logout() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('user_id');
   },
 
   isAuthenticated() {

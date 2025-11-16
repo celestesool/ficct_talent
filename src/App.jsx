@@ -26,7 +26,7 @@ import { OfertasPage } from './pages/empresa/OfertasPage';
 // Layouts
 import { CompanyLayout } from './components/layout/CompanyLayout';
 import { StudentLayout } from './components/layout/StudentLayout';
-import { UserTypeProvider } from './contexts/UserTypeContext';
+import { UserTypeProvider } from './contexts/userTypeContext';
 import { CVEditor } from './pages/estudiante/CVEditor';
 import { PostulacionesPage } from './pages/estudiante/PostulacionesPage';
 

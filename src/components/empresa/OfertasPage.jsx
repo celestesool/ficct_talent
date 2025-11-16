@@ -230,7 +230,7 @@ export const OfertasPage = () => {
     return 'text-green-600';
   };
 
-  // ⭐ NUEVO: Estadísticas rápidas
+  // NUEVO: Estadísticas rápidas
   const stats = {
     total: offers.length,
     active: offers.filter(o => o.status === 'active').length,

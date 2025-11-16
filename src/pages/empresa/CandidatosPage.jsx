@@ -1,11 +1,8 @@
+// src/pages/empresa/CandidatosPage.jsx
 import {
   ArrowLeft,
-  Award,
-  BookOpen,
-  Briefcase, // ⭐ AÑADIDO: Icono para volver
-  Calendar // ⭐ AÑADIDO: Icono para fecha
-  ,
-
+  Briefcase,
+  Calendar,
   Code,
   Download,
   Eye,
@@ -16,612 +13,508 @@ import {
   Search,
   User,
   X
-} from 'lucide-react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../../components/common/Button';
-import { Card } from '../../components/common/Card';
-import { Navbar } from '../../components/common/Navbar';
-import { useTheme } from '../../contexts/ThemeContext';
+} from "lucide-react";
+
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { Button } from "../../components/common/Button";
+import { Card } from "../../components/common/Card";
+import { Navbar } from "../../components/common/Navbar";
+import { useTheme } from "../../contexts/ThemeContext";
+import { apiService } from "../../services/api";
 
 export const CandidatosPage = () => {
   const { isDark } = useTheme();
-  const navigate = useNavigate(); // ⭐ ACTUALIZADO: useNavigate hook
-  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
+
+  const [candidates, setCandidates] = useState([]);
+  const [search, setSearch] = useState("");
+
+  const [filterPosition, setFilterPosition] = useState("all");
+  const [filterLocation, setFilterLocation] = useState("all");
+
   const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [filterPosition, setFilterPosition] = useState('all');
-  const [filterLocation, setFilterLocation] = useState('all');
+  const [interviewModal, setInterviewModal] = useState(null);
+  const [interviewDate, setInterviewDate] = useState("");
 
-  // ⭐ NUEVO: Función para navegar al dashboard
-  const handleBackToDashboard = () => {
-    navigate('/empresa/dashboard');
-  };
+  // ===============================================
+  // LOAD REAL CANDIDATES FROM BACKEND
+  // ===============================================
+  const loadCandidates = async () => {
+    try {
+      const companyId = localStorage.getItem("user_id");
+      if (!companyId) return;
 
-  // ⭐ NUEVO: Función para contactar candidato
-  const handleContactCandidate = (candidate) => {
-    // Aquí podrías implementar lógica de contacto
-    console.log('Contactando a:', candidate.name);
-    alert(`Función de contacto para ${candidate.name} - Próximamente`);
-  };
+      const res = await apiService.get(`/applications/company/${companyId}`);
+      const data = Array.isArray(res.data) ? res.data : [];
 
-  // ⭐ NUEVO: Función para programar entrevista
-  const handleScheduleInterview = (candidate) => {
-    // Aquí podrías implementar lógica de programación
-    console.log('Programando entrevista con:', candidate.name);
-    alert(`Función de programar entrevista para ${candidate.name} - Próximamente`);
-  };
+      const mapped = data.map((c) => ({
+        id: c.application_id,
+        studentId: c.student.id,
+        name: c.student.first_name + " " + c.student.last_name,
+        email: c.student.email,
+        phone: c.student.phone_number,
+        birthDate: c.student.birthDate,
+        appliedFor: c.job_title,
+        appliedDate: new Date(c.applied_at).toLocaleDateString(),
+        gpa: c.academicInfo?.[0]?.GPA ?? 0,
+        institution: c.academicInfo?.[0]?.institution ?? "No especificado",
+        certifications: c.certifications.length,
+        projects: c.projects.length,
+        skills: c.skills.map((s) => s.skill.name),
+        match: c.match,
+        status: c.status,
+        location: "Santa Cruz",
+        raw: c,
+      }));
 
-  // ⭐ NUEVO: Función para ver perfil completo
-  const handleViewFullProfile = (candidateId) => {
-    navigate(`/empresa/candidatos/${candidateId}`);
-  };
-
-  const [candidates, setCandidates] = useState([
-    {
-      id: '1',
-      name: 'Juan Carlos Pérez García',
-      email: 'juan.perez@uagrm.edu.bo',
-      phone: '70123456',
-      location: 'Santa Cruz, Bolivia',
-      career: 'Ingeniería en Sistemas',
-      semester: '8vo Semestre',
-      gpa: '85.5',
-      skills: ['React', 'Node.js', 'JavaScript', 'Python', 'MongoDB', 'TypeScript', 'Git'],
-      projects: 5,
-      certifications: 3,
-      match: 95,
-      appliedFor: 'Desarrollador Frontend React',
-      appliedDate: '2024-01-15',
-      status: 'Nuevo',
-      lastActivity: 'Hace 2 días',
-      experience: '2 años'
-    },
-    {
-      id: '2',
-      name: 'María Elena González López',
-      email: 'maria.gonzalez@uagrm.edu.bo',
-      phone: '71234567',
-      location: 'La Paz, Bolivia',
-      career: 'Ingeniería en Sistemas',
-      semester: '7mo Semestre',
-      gpa: '88.2',
-      skills: ['Java', 'Spring Boot', 'SQL', 'Docker', 'AWS', 'MySQL', 'REST APIs'],
-      projects: 3,
-      certifications: 2,
-      match: 87,
-      appliedFor: 'Backend Developer',
-      appliedDate: '2024-01-14',
-      status: 'Revisado',
-      lastActivity: 'Hace 1 día',
-      experience: '1 año'
-    },
-    {
-      id: '3',
-      name: 'Carlos Andrés Ruiz Mendoza',
-      email: 'carlos.ruiz@uagrm.edu.bo',
-      phone: '72345678',
-      location: 'Cochabamba, Bolivia',
-      career: 'Ingeniería en Sistemas',
-      semester: '9no Semestre',
-      gpa: '82.1',
-      skills: ['Angular', 'TypeScript', 'Firebase', 'Git', 'Scrum', 'RxJS', 'Material UI'],
-      projects: 4,
-      certifications: 4,
-      match: 92,
-      appliedFor: 'Desarrollador Frontend',
-      appliedDate: '2024-01-13',
-      status: 'Nuevo',
-      lastActivity: 'Hace 3 días',
-      experience: '3 años'
-    },
-    {
-      id: '4',
-      name: 'Ana Patricia Silva Rojas',
-      email: 'ana.silva@uagrm.edu.bo',
-      phone: '73456789',
-      location: 'Santa Cruz, Bolivia',
-      career: 'Ingeniería en Sistemas',
-      semester: '6to Semestre',
-      gpa: '90.3',
-      skills: ['Python', 'Machine Learning', 'Pandas', 'TensorFlow', 'SQL', 'NumPy', 'Scikit-learn'],
-      projects: 2,
-      certifications: 1,
-      match: 78,
-      appliedFor: 'Data Science Intern',
-      appliedDate: '2024-01-12',
-      status: 'En proceso',
-      lastActivity: 'Hace 5 días',
-      experience: '6 meses'
-    },
-    {
-      id: '5',
-      name: 'Roberto Andrés Mendoza Castro',
-      email: 'roberto.mendoza@uagrm.edu.bo',
-      phone: '74567890',
-      location: 'La Paz, Bolivia',
-      career: 'Ingeniería en Sistemas',
-      semester: '10mo Semestre',
-      gpa: '79.8',
-      skills: ['Vue.js', 'JavaScript', 'PHP', 'Laravel', 'MySQL', 'Bootstrap'],
-      projects: 6,
-      certifications: 2,
-      match: 83,
-      appliedFor: 'Desarrollador Full Stack',
-      appliedDate: '2024-01-11',
-      status: 'Revisado',
-      lastActivity: 'Hace 1 semana',
-      experience: '2.5 años'
+      setCandidates(mapped);
+    } catch (err) {
+      console.error("Error loading candidates:", err);
     }
-  ]);
-
-  const filteredCandidates = candidates.filter(candidate =>
-    (candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidate.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      candidate.appliedFor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidate.career.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (filterPosition === 'all' || candidate.appliedFor.includes(filterPosition)) &&
-    (filterLocation === 'all' || candidate.location.includes(filterLocation))
-  );
-
-  const getMatchColor = (match) => {
-    if (match >= 90) return 'text-green-600 bg-green-100 dark:bg-green-900/20';
-    if (match >= 80) return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20';
-    if (match >= 70) return 'text-orange-600 bg-orange-100 dark:bg-orange-900/20';
-    return 'text-red-600 bg-red-100 dark:bg-red-900/20';
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Nuevo':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300';
-      case 'Revisado':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
-      case 'En proceso':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300';
+  useEffect(() => {
+    loadCandidates();
+  }, []);
+
+  // ===============================================
+  // FILTERING
+  // ===============================================
+  const filtered = candidates.filter((c) => {
+    const q = search.toLowerCase();
+
+    const matchSearch =
+      c.name.toLowerCase().includes(q) ||
+      c.appliedFor.toLowerCase().includes(q) ||
+      c.skills.some((s) => s.toLowerCase().includes(q));
+
+    const matchPosition =
+      filterPosition === "all" || c.appliedFor.includes(filterPosition);
+
+    const matchLocation =
+      filterLocation === "all" || c.location.includes(filterLocation);
+
+    return matchSearch && matchPosition && matchLocation;
+  });
+
+  // ===============================================
+  // COLOR UTILITIES
+  // ===============================================
+  const matchColor = (m) => {
+    if (m >= 85) return "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300";
+    if (m >= 70) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300";
+    return "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300";
+  };
+
+  const statusColor = (s) => {
+    switch (s) {
+      case "aplicado":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300";
+      case "revisado":
+        return "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300";
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
+        return "bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-300";
     }
   };
 
-  const viewCandidateProfile = (candidate) => {
-    setSelectedCandidate(candidate);
+  // ===============================================
+  // CONTACTAR (GMAIL)
+  // ===============================================
+  const contact = (c) => {
+    window.location.href = `mailto:${c.email}?subject=Contacto%20de%20empresa&body=Hola%20${c.name}`;
   };
 
-  const closeCandidateDetail = () => {
-    setSelectedCandidate(null);
+  // ===============================================
+  // PROGRAMAR ENTREVISTA (modal)
+  // ===============================================
+  const openInterviewModal = (candidate) => {
+    setInterviewModal(candidate);
   };
 
-  // ⭐ NUEVO: Estadísticas rápidas
-  const stats = {
-    total: candidates.length,
-    new: candidates.filter(c => c.status === 'Nuevo').length,
-    highMatch: candidates.filter(c => c.match >= 90).length,
-    fromSantaCruz: candidates.filter(c => c.location.includes('Santa Cruz')).length
+  const sendInterview = async () => {
+    try {
+      await apiService.patch(
+        `/applications/${interviewModal.id}/status`,
+        { status: "interview" }
+      );
+
+      alert("Entrevista programada correctamente.");
+      setInterviewModal(null);
+      setInterviewDate("");
+      loadCandidates();
+    } catch (err) {
+      console.error(err);
+      alert("Error al programar entrevista.");
+    }
   };
 
+  // ===============================================
+  // RETURN UI
+  // ===============================================
   return (
-    <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
+    <div className={isDark ? "bg-slate-900 min-h-screen" : "bg-gray-50 min-h-screen"}>
 
+      {/* HEADER */}
       <div className="container mx-auto px-4 py-8">
-        {/* Header Mejorado */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <Button
-              variant="outline"
-              onClick={handleBackToDashboard}
-              className="mr-2"
-            >
-              <ArrowLeft size={18} />
-            </Button>
-            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500`}></div>
-            <div className="flex-1">
-              <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Candidatos
-              </h1>
-              <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                Encuentra y evalúa el talento joven para tu empresa
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <Button variant="outline">
-              <div className="flex items-center gap-2">
-                <Download size={18} />
-                Exportar
-              </div>
-            </Button>
+
+        <div className="flex items-center gap-3 mb-6">
+          <Button variant="outline" onClick={() => navigate("/empresa/dashboard")}>
+            <ArrowLeft size={18} />
+          </Button>
+
+          <div className="w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500"></div>
+
+          <div>
+            <h1 className={`text-3xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+              Candidatos
+            </h1>
+            <p className={isDark ? "text-slate-400" : "text-slate-600"}>
+              Encuentra y evalúa talento para tus vacantes
+            </p>
           </div>
         </div>
 
-        {/* Estadísticas Rápidas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card className="p-4 text-center">
-            <div className={`text-2xl font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              {stats.total}
-            </div>
-            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Total Candidatos</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className={`text-2xl font-bold mb-1 text-blue-600`}>
-              {stats.new}
-            </div>
-            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Nuevos</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className={`text-2xl font-bold mb-1 text-green-600`}>
-              {stats.highMatch}
-            </div>
-            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Alto Match</div>
-          </Card>
-          <Card className="p-4 text-center">
-            <div className={`text-2xl font-bold mb-1 text-purple-600`}>
-              {stats.fromSantaCruz}
-            </div>
-            <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>De Santa Cruz</div>
-          </Card>
-        </div>
+        {/* FILTERS */}
+        <Card className="p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-        {/* Filtros y Búsqueda */}
-        <Card className="mb-6 p-6">
-          <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-            <div className="relative w-full md:w-96">
-              <Search size={20} className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+            {/* Search */}
+            <div className="relative">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
-                type="text"
-                placeholder="Buscar por nombre, habilidades, puesto o carrera..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`
-                  w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all duration-200
-                  ${isDark
-                    ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500'
-                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-blue-500'
-                  }
-                `}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar candidato / skill / puesto"
+                className="w-full pl-10 px-4 py-3 border rounded-xl"
               />
             </div>
 
-            <div className="flex gap-4 w-full md:w-auto">
-              <select
-                value={filterPosition}
-                onChange={(e) => setFilterPosition(e.target.value)}
-                className={`
-                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                  ${isDark
-                    ? 'bg-slate-800 border-slate-600 text-white'
-                    : 'bg-white border-slate-200 text-slate-900'
-                  }
-                `}
-              >
-                <option value="all">Todos los puestos</option>
-                <option value="Frontend">Desarrollador Frontend</option>
-                <option value="Backend">Backend Developer</option>
-                <option value="Data Science">Data Science</option>
-                <option value="Full Stack">Desarrollador Full Stack</option>
-              </select>
+            {/* Position */}
+            <select
+              value={filterPosition}
+              onChange={(e) => setFilterPosition(e.target.value)}
+              className="border rounded-xl px-4 py-3"
+            >
+              <option value="all">Puestos</option>
+              <option value="Front">Frontend</option>
+              <option value="Back">Backend</option>
+              <option value="Data">Data Science</option>
+            </select>
 
-              <select
-                value={filterLocation}
-                onChange={(e) => setFilterLocation(e.target.value)}
-                className={`
-                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                  ${isDark
-                    ? 'bg-slate-800 border-slate-600 text-white'
-                    : 'bg-white border-slate-200 text-slate-900'
-                  }
-                `}
-              >
-                <option value="all">Todas las ubicaciones</option>
-                <option value="Santa Cruz">Santa Cruz</option>
-                <option value="La Paz">La Paz</option>
-                <option value="Cochabamba">Cochabamba</option>
-              </select>
+            {/* Location – always Santa Cruz */}
+            <select
+              value={filterLocation}
+              onChange={(e) => setFilterLocation(e.target.value)}
+              className="border rounded-xl px-4 py-3"
+            >
+              <option value="all">Ubicación</option>
+              <option value="Santa Cruz">Santa Cruz</option>
+            </select>
 
-              <Button variant="outline">
-                <div className="flex items-center gap-2">
-                  <Filter size={18} />
-                  Más Filtros
-                </div>
-              </Button>
-            </div>
           </div>
         </Card>
 
-        {/* Grid de Candidatos */}
-        {filteredCandidates.length === 0 ? (
-          <Card className="p-8">
-            <div className="text-center py-12">
-              <User size={64} className={`mx-auto mb-4 ${isDark ? 'text-slate-600' : 'text-slate-400'}`} />
-              <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                No se encontraron candidatos
-              </h3>
-              <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                {searchTerm ? 'Intenta con otros términos de búsqueda' : 'No hay candidatos postulados'}
-              </p>
-            </div>
+        {/* NO RESULTS */}
+        {filtered.length === 0 ? (
+          <Card className="p-10 text-center">
+            <User size={48} className="mx-auto mb-4 text-slate-400" />
+            <p>No se encontraron candidatos.</p>
           </Card>
         ) : (
-          <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredCandidates.map((candidate) => (
-              <Card key={candidate.id} hover className="relative transition-all duration-200 hover:shadow-lg">
-                {/* Match Score */}
-                <div className={`absolute -top-2 -right-2 px-3 py-1 rounded-full text-sm font-bold ${getMatchColor(candidate.match)}`}>
-                  {candidate.match}% Match
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+            {filtered.map((c) => (
+              <Card
+                key={c.id}
+                className="p-6 hover:shadow-lg transition"
+              >
+
+                {/* Bubbles */}
+                <div className="flex justify-between mb-2">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor(c.status)}`}>
+                    {c.status}
+                  </span>
+
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${matchColor(c.match)}`}>
+                    {c.match}% Match
+                  </span>
                 </div>
 
-                {/* Status Badge */}
-                <div className={`absolute -top-2 -left-2 px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(candidate.status)}`}>
-                  {candidate.status}
-                </div>
-
-                <div className="flex items-start gap-4 mb-4 pt-2">
+                {/* Avatar + Name */}
+                <div className="flex items-center gap-4 mb-4">
                   <div className={`
-                    w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold
-                    ${isDark ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-600'}
+                    w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold
+                    ${isDark ? "bg-purple-600 text-white" : "bg-purple-100 text-purple-700"}
                   `}>
-                    {candidate.name.split(' ').map(n => n[0]).join('')}
+                    {c.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
                   </div>
-                  <div className="flex-1">
-                    <h3 className={`text-lg font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      {candidate.name}
-                    </h3>
-                    <p className={`text-sm mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      {candidate.career} • {candidate.semester}
+
+                  <div>
+                    <h2 className={`text-lg font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                      {c.name}
+                    </h2>
+                    <p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                      {c.appliedFor}
                     </p>
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin size={14} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                        {candidate.location}
-                      </span>
-                    </div>
                   </div>
                 </div>
 
-                <div className="mb-4">
-                  <p className={`text-sm mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    <strong>Postulado para:</strong> {candidate.appliedFor}
-                  </p>
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <BookOpen size={14} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                        Promedio: {candidate.gpa}%
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Briefcase size={14} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                        {candidate.experience}
-                      </span>
-                    </div>
+                {/* Skills */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {c.skills.slice(0, 4).map((s, idx) => (
+                    <span
+                      key={idx}
+                      className={`
+                        px-3 py-1 text-xs rounded-lg
+                        ${isDark ? "bg-slate-700 text-slate-200" : "bg-slate-100 text-slate-700"}
+                      `}
+                    >
+                      {s}
+                    </span>
+                  ))}
+                  {c.skills.length > 4 && (
+                    <span className="text-xs text-slate-500">
+                      +{c.skills.length - 4} más
+                    </span>
+                  )}
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center gap-4 text-sm mb-4">
+                  <div className="flex items-center gap-1">
+                    <Code size={14} className="text-slate-500" />
+                    {c.projects} proyectos
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <Briefcase size={14} className="text-slate-500" />
+                    {c.certifications} certs.
                   </div>
                 </div>
 
-                {/* Habilidades */}
-                <div className="mb-4">
-                  <div className="flex flex-wrap gap-2">
-                    {candidate.skills.slice(0, 4).map((skill, idx) => (
-                      <span
-                        key={idx}
-                        className={`
-                          px-2 py-1 rounded text-xs font-medium
-                          ${isDark
-                            ? 'bg-slate-700 text-slate-300'
-                            : 'bg-slate-100 text-slate-700'
-                          }
-                        `}
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                    {candidate.skills.length > 4 && (
-                      <span className={`px-2 py-1 text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-                        +{candidate.skills.length - 4} más
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Estadísticas */}
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <Code size={14} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                        {candidate.projects} proyectos
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Award size={14} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
-                      <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                        {candidate.certifications} certs.
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Acciones */}
+                {/* Buttons */}
                 <div className="flex gap-2">
-                  <Button
-                    variant="primary"
-                    onClick={() => viewCandidateProfile(candidate)}
-                    fullWidth
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <Eye size={16} />
-                      Ver Perfil
-                    </div>
+                  <Button fullWidth variant="primary" onClick={() => setSelectedCandidate(c)}>
+                    <Eye size={16} /> Ver Perfil
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleContactCandidate(candidate)}
-                  >
+
+                  <Button variant="outline" onClick={() => contact(c)}>
                     <Mail size={16} />
                   </Button>
                 </div>
+
               </Card>
             ))}
+
           </div>
         )}
+
       </div>
 
-      {/* Modal de Detalle de Candidato */}
+      {/* ================================
+           MODAL PERFIL COMPLETO
+      ================================= */}
       {selectedCandidate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+
+            {/* Header */}
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-start gap-4">
+
                 <div className={`
                   w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold
-                  ${isDark ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-600'}
+                  ${isDark ? "bg-purple-600 text-white" : "bg-purple-100 text-purple-700"}
                 `}>
-                  {selectedCandidate.name.split(' ').map(n => n[0]).join('')}
+                  {selectedCandidate.name.split(" ").map((n) => n[0]).join("")}
                 </div>
+
                 <div>
-                  <h2 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
                     {selectedCandidate.name}
                   </h2>
-                  <p className={`text-lg mb-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {selectedCandidate.career} • {selectedCandidate.semester}
+
+                  <p className={isDark ? "text-slate-400" : "text-slate-600"}>
+                    {selectedCandidate.appliedFor}
                   </p>
-                  <p className={`mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    <strong>Postulado para:</strong> {selectedCandidate.appliedFor}
-                  </p>
-                  <div className="flex gap-2">
-                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${getMatchColor(selectedCandidate.match)}`}>
+
+                  <div className="flex gap-2 mt-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${matchColor(selectedCandidate.match)}`}>
                       {selectedCandidate.match}% Match
-                    </div>
-                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${getStatusColor(selectedCandidate.status)}`}>
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusColor(selectedCandidate.status)}`}>
                       {selectedCandidate.status}
-                    </div>
+                    </span>
                   </div>
                 </div>
+
               </div>
-              <button
-                onClick={closeCandidateDetail}
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
-              >
-                <X size={24} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
+
+              <button onClick={() => setSelectedCandidate(null)} className="p-2">
+                <X size={24} className={isDark ? "text-slate-400" : "text-slate-600"} />
               </button>
             </div>
 
+            {/* Info */}
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Información de Contacto */}
+
+              {/* Contact */}
               <Card className="p-6">
-                <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`text-lg font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>
                   Información de Contacto
                 </h3>
+
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Mail size={18} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
-                    <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                      {selectedCandidate.email}
-                    </span>
+
+                  <div className="flex gap-3">
+                    <Mail size={18} className="text-slate-500" />
+                    {selectedCandidate.email}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Phone size={18} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
-                    <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                      {selectedCandidate.phone}
-                    </span>
+
+                  <div className="flex gap-3">
+                    <Phone size={18} className="text-slate-500" />
+                    {selectedCandidate.phone}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <MapPin size={18} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
-                    <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                      {selectedCandidate.location}
-                    </span>
+
+                  <div className="flex gap-3">
+                    <MapPin size={18} className="text-slate-500" />
+                    Santa Cruz
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Calendar size={18} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
-                    <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                      Postuló: {selectedCandidate.appliedDate}
-                    </span>
+
+                  <div className="flex gap-3">
+                    <Calendar size={18} className="text-slate-500" />
+                    Aplicó el: {selectedCandidate.appliedDate}
                   </div>
+
                 </div>
               </Card>
 
-              {/* Información Académica */}
+              {/* Academic */}
               <Card className="p-6">
-                <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`text-lg font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>
                   Información Académica
                 </h3>
+
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Promedio:</span>
-                    <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      {selectedCandidate.gpa}%
-                    </span>
+                    <span className="text-slate-500">GPA:</span>
+                    <span>{selectedCandidate.gpa}%</span>
                   </div>
+
                   <div className="flex justify-between">
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Proyectos:</span>
-                    <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      {selectedCandidate.projects}
-                    </span>
+                    <span className="text-slate-500">Institución:</span>
+                    <span>{selectedCandidate.institution}</span>
                   </div>
+
                   <div className="flex justify-between">
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Certificaciones:</span>
-                    <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      {selectedCandidate.certifications}
-                    </span>
+                    <span className="text-slate-500">Proyectos:</span>
+                    <span>{selectedCandidate.projects}</span>
                   </div>
+
                   <div className="flex justify-between">
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Experiencia:</span>
-                    <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      {selectedCandidate.experience}
-                    </span>
+                    <span className="text-slate-500">Certificaciones:</span>
+                    <span>{selectedCandidate.certifications}</span>
                   </div>
                 </div>
               </Card>
+
             </div>
 
-            {/* Habilidades */}
+            {/* Skills */}
             <Card className="mt-6 p-6">
-              <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <h3 className={`text-lg font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>
                 Habilidades Técnicas
               </h3>
+
               <div className="flex flex-wrap gap-2">
-                {selectedCandidate.skills.map((skill, idx) => (
+                {selectedCandidate.skills.map((s, idx) => (
                   <span
                     key={idx}
                     className={`
-                      px-3 py-2 rounded-lg font-medium
-                      ${isDark
-                        ? 'bg-purple-900/20 text-purple-300 border border-purple-700'
-                        : 'bg-purple-100 text-purple-700 border border-purple-200'
-                      }
+                      px-3 py-2 rounded-lg text-sm font-medium
+                      ${isDark ? "bg-purple-900/20 text-purple-300" : "bg-purple-100 text-purple-700"}
                     `}
                   >
-                    {skill}
+                    {s}
                   </span>
                 ))}
               </div>
             </Card>
 
-            {/* Acciones */}
+            {/* Actions */}
             <div className="flex gap-4 mt-6">
+
               <Button
                 variant="primary"
                 fullWidth
-                onClick={() => handleContactCandidate(selectedCandidate)}
+                onClick={() => contact(selectedCandidate)}
               >
-                <div className="flex items-center justify-center gap-2">
-                  <Mail size={18} />
-                  Contactar Candidato
-                </div>
+                <Mail size={16} /> Contactar
               </Button>
+
               <Button
                 variant="outline"
                 fullWidth
-                onClick={() => handleScheduleInterview(selectedCandidate)}
+                onClick={() => openInterviewModal(selectedCandidate)}
               >
-                <div className="flex items-center justify-center gap-2">
-                  <Briefcase size={18} />
-                  Programar Entrevista
-                </div>
+                <Briefcase size={16} /> Programar Entrevista
               </Button>
+
+              <Button
+                variant="outline"
+                disabled
+                fullWidth
+              >
+                <Download size={16} /> CV (Próximamente)
+              </Button>
+
             </div>
+
           </Card>
         </div>
       )}
+
+      {/* ================================
+           MODAL ENTREVISTA
+      ================================= */}
+      {interviewModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <Card className="p-6 w-full max-w-md">
+
+            <h2 className="text-xl font-bold mb-4">
+              Programar Entrevista
+            </h2>
+
+            <input
+              type="datetime-local"
+              value={interviewDate}
+              onChange={(e) => setInterviewDate(e.target.value)}
+              className="w-full p-3 border rounded-xl mb-4"
+            />
+
+            <div className="flex gap-2">
+              <Button fullWidth variant="primary" onClick={sendInterview}>
+                Confirmar
+              </Button>
+
+              <Button
+                fullWidth
+                variant="outline"
+                onClick={() => setInterviewModal(null)}
+              >
+                Cancelar
+              </Button>
+            </div>
+
+          </Card>
+        </div>
+      )}
+
     </div>
   );
 };
