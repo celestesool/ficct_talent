@@ -9,7 +9,6 @@ import { RegistroPage } from './pages/RegistroPage';
 
 // Páginas de Estudiante
 import { CertificacionesPage } from './pages/estudiante/CertificacionesPage';
-import { CVGeneratorPage } from './pages/estudiante/CVGeneratorPage';
 import { DashboardEstudiante } from './pages/estudiante/DashboardEstudiante';
 import { HabilidadesPage } from './pages/estudiante/HabilidadesPage';
 import { InfoAcademicaPage } from './pages/estudiante/InfoAcademicaPage';
@@ -51,12 +50,10 @@ function App() {
                 <Route path="certificaciones" element={<CertificacionesPage />} />
                 <Route path="habilidades" element={<HabilidadesPage />} />
                 <Route path="academico" element={<InfoAcademicaPage />} />
-                <Route path="cv-generator" element={<CVGeneratorPage />} />
                 <Route path="ofertas" element={<JobSearch />} />
                 <Route path="postulaciones" element={<PostulacionesPage />} />
+                <Route path="cv-generator" element={<CVEditor studentId="c1528cb3-fecd-4427-8d81-055214884fc3" />} />
 
-
-                <Route path="cv-editor" element={<CVEditor studentId="c1528cb3-fecd-4427-8d81-055214884fc3" />} />
                 {/*<Route path="cv-editor" element={<CVEditor studentId={student.id} />} />*/}
               </Route>
 

@@ -69,6 +69,7 @@ export const useCVStore = create((set, get) => ({
       }
     });
   },
+  setEditedData: (newData) => set({ editedData: newData }),
 
   resetChanges: () => {
     const { cvData } = get();
