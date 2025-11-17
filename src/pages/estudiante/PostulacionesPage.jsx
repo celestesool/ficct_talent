@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { applicationService } from '../../api/services/applicationService';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
+import { ApplicationDetailsModal } from '../../components/estudiante/ApplicationDetailsModal'; // Nuevo import
 import { AptitudeTestModal } from '../../components/estudiante/AptitudeTest/AptitudeTestModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -27,10 +28,10 @@ export const PostulacionesPage = () => {
   const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedApplication, setSelectedApplication] = useState(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showAptitudeTestModal, setShowAptitudeTestModal] = useState(false); // Nuevo estado
+  const [showAptitudeTestModal, setShowAptitudeTestModal] = useState(false);
   const [selectedJobForTest, setSelectedJobForTest] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false); // Estado para el nuevo modal
+  const [selectedApplicationId, setSelectedApplicationId] = useState(null); // Solo el ID
   const studentId = user?.id;
 
   useEffect(() => {
@@ -53,8 +54,8 @@ export const PostulacionesPage = () => {
     setLoading(false);
   };
 
-  const handleViewDetails = (application) => {
-    setSelectedApplication(application);
+  const handleViewDetails = (applicationId) => {
+    setSelectedApplicationId(applicationId);
     setShowDetailsModal(true);
   };
 
@@ -78,6 +79,10 @@ export const PostulacionesPage = () => {
             ? { ...app, status: 'withdrawn', decided_at: new Date().toISOString() }
             : app
         ));
+        // Cerrar modal si está abierto
+        if (showDetailsModal && selectedApplicationId === applicationId) {
+          setShowDetailsModal(false);
+        }
       } else {
         alert(result.error);
       }
@@ -204,7 +209,7 @@ export const PostulacionesPage = () => {
                         <Brain size={16} className={isDark ? 'text-green-400' : 'text-green-600'} />
                       </button>
                       <button
-                        onClick={() => handleViewDetails(application)}
+                        onClick={() => handleViewDetails(application.id)} // Ahora pasa solo el ID
                         className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
                           }`}
                       >
@@ -275,131 +280,16 @@ export const PostulacionesPage = () => {
         )}
       </div>
 
-      {/* Modal de Detalles */}
-      {showDetailsModal && selectedApplication && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Detalles de la Postulación
-              </h2>
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className={`p-2 rounded-lg ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
-              >
-                <XCircle size={24} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Información del Puesto */}
-              <div>
-                <h3 className={`text-lg font-semibold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  Información del Puesto
-                </h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Título:</span>
-                    <p className={isDark ? 'text-white' : 'text-slate-900'}>{selectedApplication.job.title}</p>
-                  </div>
-                  <div>
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Empresa:</span>
-                    <p className={isDark ? 'text-white' : 'text-slate-900'}>{selectedApplication.job.company.name}</p>
-                  </div>
-                  <div>
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Ubicación:</span>
-                    <p className={isDark ? 'text-white' : 'text-slate-900'}>{selectedApplication.job.location}</p>
-                  </div>
-                  <div>
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Salario:</span>
-                    <p className={isDark ? 'text-white' : 'text-slate-900'}>{selectedApplication.job.salary_range || 'No especificado'}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Estado de la Aplicación */}
-              <div>
-                <h3 className={`text-lg font-semibold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  Estado de la Aplicación
-                </h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Estado actual:</span>
-                    <div className="flex items-center gap-2 mt-1">
-                      {(() => {
-                        const statusConfig = getStatusConfig(selectedApplication.status);
-                        const StatusIcon = statusConfig.icon;
-                        return (
-                          <>
-                            <StatusIcon size={16} className={`text-${statusConfig.color}-600`} />
-                            <span className={isDark ? 'text-white' : 'text-slate-900'}>
-                              {statusConfig.label}
-                            </span>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                  <div>
-                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Fecha de aplicación:</span>
-                    <p className={isDark ? 'text-white' : 'text-slate-900'}>{formatDate(selectedApplication.applied_at)}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Carta de Presentación */}
-              {selectedApplication.cover_letter && (
-                <div>
-                  <h3 className={`text-lg font-semibold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Carta de Presentación
-                  </h3>
-                  <p className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                    {selectedApplication.cover_letter}
-                  </p>
-                </div>
-              )}
-
-              {/* CV */}
-              {selectedApplication.resume_url && (
-                <div>
-                  <h3 className={`text-lg font-semibold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Curriculum Vitae
-                  </h3>
-                  <a
-                    href={selectedApplication.resume_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 flex items-center gap-2"
-                  >
-                    <FileText size={16} />
-                    Ver CV enviado
-                  </a>
-                </div>
-              )}
-
-              <div className="flex gap-4 mt-6">
-                <Button variant="outline" onClick={() => setShowDetailsModal(false)} fullWidth>
-                  Cerrar
-                </Button>
-                {!['accepted', 'rejected', 'withdrawn'].includes(selectedApplication.status) && (
-                  <Button
-                    variant="danger"
-                    onClick={() => {
-                      handleWithdrawApplication(selectedApplication.id);
-                      setShowDetailsModal(false);
-                    }}
-                    fullWidth
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <Trash2 size={18} />
-                      Cancelar Postulación
-                    </div>
-                  </Button>
-                )}
-              </div>
-            </div>
-          </Card>
-        </div>
+      {/* Nuevo Modal de Detalles */}
+      {showDetailsModal && selectedApplicationId && (
+        <ApplicationDetailsModal
+          applicationId={selectedApplicationId}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setSelectedApplicationId(null);
+          }}
+          onWithdraw={handleWithdrawApplication} // Pasar la función para cancelar desde el modal
+        />
       )}
 
       {showAptitudeTestModal && selectedJobForTest && (
@@ -411,7 +301,6 @@ export const PostulacionesPage = () => {
           }}
         />
       )}
-
     </div>
   );
 };

@@ -38,7 +38,7 @@ export const applicationService = {
     }
   },
 
-  // Método para cancelar una postulación
+  // Método para cancelar una postulación falta en el backend
   withdrawApplication: async (applicationId, studentId) => {
     try {
       const response = await axios.delete(`${API_BASE}/applications/${applicationId}/withdraw`, {
@@ -72,6 +72,42 @@ export const applicationService = {
         data: null,
         error: error.response?.data?.message || 'Error al cargar el historial',
         success: false
+      };
+    }
+  },
+
+  // Método para obtener los detalles de una aplicación por ID
+  getApplicationById: async (applicationId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/applications/${applicationId}`);
+
+      // Mapeo de estados del backend (español) a frontend (inglés) para consistencia
+      const statusMap = {
+        'aplicado': 'applied',
+        'revisado': 'reviewed',
+        'entrevista': 'interview',
+        'prueba_tecnica': 'technical_test',
+        'entrevista_final': 'final_interview',
+        'aceptado': 'accepted',
+        'rechazado': 'rejected',
+        'cancelado': 'withdrawn'
+      };
+
+      let data = response.data;
+      if (data && data.status) {
+        data.status = statusMap[data.status] || data.status;
+      }
+
+      return {
+        success: true,
+        data: data,
+        error: null
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error.response?.data?.message || 'Error al cargar los detalles de la postulación'
       };
     }
   }
