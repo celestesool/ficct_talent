@@ -53,9 +53,7 @@ function App() {
                 <Route path="academico" element={<InfoAcademicaPage />} />
                 <Route path="ofertas" element={<JobSearch />} />
                 <Route path="postulaciones" element={<PostulacionesPage />} />
-                <Route path="cv-generator" element={<CVEditor studentId="c1528cb3-fecd-4427-8d81-055214884fc3" />} />
-
-                {/*<Route path="cv-editor" element={<CVEditor studentId={student.id} />} />*/}
+                <Route path="cv-generator" element={<CVEditor />} />
               </Route>
 
               {/* Rutas de Empresa */}

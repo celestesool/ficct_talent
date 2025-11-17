@@ -2,6 +2,24 @@ import axios from 'axios';
 import { API_BASE } from '../api';
 
 export const applicationService = {
+
+  applyToJob: async (applicationData) => {
+    try {
+      const response = await axios.post(`${API_BASE}/applications`, applicationData);
+      return {
+        success: true,
+        data: response.data,
+        error: null
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null,
+        error: error.response?.data?.message || 'Error al enviar la postulación'
+      };
+    }
+  },
+
   // Método para obtener todas las postulaciones del estudiante
   getStudentApplications: async (studentId) => {
     try {

@@ -17,7 +17,8 @@ import { emailService } from '../../services/emailService';
 import { useCVStore } from '../../store/cvStore';
 import { exportToPDF } from '../../utils/pdfExporter';
 
-export const CVEditor = ({ studentId }) => {
+export const CVEditor = () => {
+  const studentId = localStorage.getItem('user_id');
   const {
     cvData,
     editedData,
@@ -88,6 +89,27 @@ export const CVEditor = ({ studentId }) => {
       }
     } catch (error) {
       setLinkMessage('Error inesperado');
+    } finally {
+      setIsGeneratingLink(false);
+    }
+  };
+
+  // GUARDAR LINK TEMPORAL
+  const handleSaveTempLink = async () => {
+    setIsGeneratingLink(true);
+    try {
+      const studentName = `${editedData.student?.first_name || ''} ${editedData.student?.last_name || ''}`.trim() || 'Estudiante';
+      const result = await cvSharingService.generateCVLink(editedData, studentName);
+
+      if (result.success) {
+        const expiration = Date.now() + 24 * 60 * 60 * 1000; // 24 horas
+        localStorage.setItem('temp_cv_link', JSON.stringify({ url: result.url, expires: expiration }));
+        alert('Link de CV guardado temporalmente por 24 horas');
+      } else {
+        alert(result.message || 'Error al generar enlace');
+      }
+    } catch (error) {
+      alert('Error inesperado al generar el enlace');
     } finally {
       setIsGeneratingLink(false);
     }
@@ -257,8 +279,11 @@ export const CVEditor = ({ studentId }) => {
           <Button variant="secondary" onClick={handleExportPDF}>
             <Download size={18} className="mr-2" /> Descargar PDF
           </Button>
-          <Button variant="success" onClick={() => setShowLinkModal(true)}>
+          <Button variant="success" onClick={() => setShowLinkModal(true)} disabled={isGeneratingLink}>
             <Link size={18} className="mr-2" /> Compartir Enlace
+          </Button>
+          <Button variant="info" onClick={handleSaveTempLink} disabled={isGeneratingLink}>
+            <Link size={18} className="mr-2" /> Guardar Link Temporal (24h)
           </Button>
         </div>
       </div>
