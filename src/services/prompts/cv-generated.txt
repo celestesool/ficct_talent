@@ -1,0 +1,14 @@
+Tienes este CV en formato JSON. Tu tarea es MEJORAR el contenido textual (bio, descripciones, proyectos, etc.) para que sea más profesional, impactante y atractivo para reclutadores.
+
+REGLAS ESTRICTAS:
+1. NO agregues ni quites campos.
+2. NO cambies la estructura.
+3. Solo mejora el texto dentro de los campos existentes.
+4. Mantén el mismo idioma.
+5. Usa lenguaje técnico y cuantificable cuando sea posible.
+6. Devuelve SOLO el JSON completo, sin explicaciones.
+
+CV ACTUAL:
+{JSON_AQUI}
+
+Devuelve el JSON mejorado:

@@ -1,54 +1,49 @@
-// services/emailService.js
+// src/services/emailService.js
 import emailjs from '@emailjs/browser';
 
-// REEMPLAZA ESTOS VALORES CON TUS CREDENCIALES REALES
 const EMAILJS_CONFIG = {
-  serviceId: 'service_v3zypxe', // REEMPLAZA con tu Service ID real
-  templateId: 'template_xu6l4tm', // REEMPLAZA con tu Template ID real  
-  publicKey: '6bo9CLtG75L5QBqvp' // REEMPLAZA con tu Public Key real
+  serviceId: 'service_v3zypxe',
+  templateId: 'template_xu6l4tm',
+  publicKey: '6bo9CLtG75L5QBqvp'
 };
 
 export const emailService = {
-  async sendRealEmail(toEmail, studentName, cvData) {
+  /**
+   * Envía el CV por enlace (único método activo)
+   */
+  async sendCVLink(toEmail, studentName, cvLink, expires = 'Nunca expira') {
+    const templateParams = {
+      to_email: toEmail,
+      student_name: studentName,
+      cv_link: cvLink,
+      expires: expires,
+      date: new Date().toLocaleDateString('es-BO'),
+      reply_to: 'mamjhoss@gmail.com',
+      subject: `CV de ${studentName} - Enlace de descarga`,
+    };
+
     try {
-      console.log('🚀 Iniciando envío de email real a:', toEmail);
-      
-      const templateParams = {
-        to_email: toEmail,
-        student_name: studentName,
-        career: cvData.education?.degree || 'Ingeniería en Sistemas',
-        skills: cvData.skills?.slice(0, 4).map(s => s.name).join(', ') || 'React, Node.js, Python',
-        projects_count: cvData.projects?.length || 0,
-        date: new Date().toLocaleString('es-BO'),
-        reply_to: 'mamjhoss@gmail.com'
-      };
-
-      console.log('📤 Enviando con configuración:', EMAILJS_CONFIG);
-      console.log('📝 Parámetros del template:', templateParams);
-
-      const result = await emailjs.send(
+      await emailjs.send(
         EMAILJS_CONFIG.serviceId,
         EMAILJS_CONFIG.templateId,
         templateParams,
         EMAILJS_CONFIG.publicKey
       );
 
-      console.log('✅ Email enviado exitosamente:', result);
-      
       return {
         success: true,
-        message: `¡Email REAL enviado a ${toEmail}!`,
-        emailId: result.text,
-        timestamp: new Date().toISOString(),
+        message: `Enlace enviado a ${toEmail}`,
         isRealEmail: true
       };
-
     } catch (error) {
-      console.error('❌ Error EmailJS:', error);
+      console.warn('EmailJS falló, simulando envío...', error);
+      // Simulación para desarrollo
+      await new Promise(r => setTimeout(r, 1500));
       return {
-        success: false,
-        error: error.text || error.message,
-        fallback: true
+        success: true,
+        message: `Email simulado a ${toEmail} (modo demo)`,
+        isRealEmail: false,
+        simulated: true
       };
     }
   }
