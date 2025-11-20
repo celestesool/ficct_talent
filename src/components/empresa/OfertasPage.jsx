@@ -1,6 +1,6 @@
 import {
   AlertCircle,
-  ArrowLeft // ⭐ AÑADIDO: Icono para volver
+  ArrowLeft 
   ,
 
   Briefcase,
@@ -29,18 +29,18 @@ import { Navbar } from '../common/Navbar';
 
 export const OfertasPage = () => {
   const { isDark } = useTheme();
-  const navigate = useNavigate(); // ⭐ ACTUALIZADO: useNavigate hook
+  const navigate = useNavigate(); //  ACTUALIZADO: useNavigate hook
   const [showModal, setShowModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  // ⭐ NUEVO: Función para navegar al dashboard
+  //  NUEVO: Función para navegar al dashboard
   const handleBackToDashboard = () => {
     navigate('/empresa/dashboard');
   };
 
-  // ⭐ NUEVO: Función para ver detalles de oferta
+  //  NUEVO: Función para ver detalles de oferta
   const handleViewOfferDetails = (offerId) => {
     navigate(`/empresa/ofertas/${offerId}`);
   };
