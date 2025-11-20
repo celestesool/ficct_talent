@@ -7,6 +7,7 @@ import { ConfirmEmailPage } from './pages/ConfirmEmailPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegistroPage } from './pages/RegistroPage';
+import { SobreNosotrosPage } from "./pages/SobreNosotrosPage";
 
 // Páginas de Estudiante
 import { CertificacionesPage } from './pages/estudiante/CertificacionesPage';
@@ -38,6 +39,7 @@ function App() {
             <Routes>
               {/* Rutas públicas */}
               <Route path="/" element={<HomePage />} />
+              <Route path="/sobre-nosotros" element={<SobreNosotrosPage />} />
               <Route path="/:userType/login" element={<LoginPage />} />
               <Route path="/:userType/registro" element={<RegistroPage />} />
               <Route path="/confirmar" element={<ConfirmEmailPage />} />

@@ -47,32 +47,48 @@ export const HomePage = () => {
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
       
-      {/* Header con navegación */}
-      <header className="relative border-b" style={{
-        borderColor: isDark ? 'rgba(51, 65, 85, 0.5)' : 'rgba(226, 232, 240, 0.8)'
-      }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <img
-                src="/images/logo.png"
-                alt="FICCT TALENT"
-                className="w-18 h-14 object-contain cursor-pointer"
-                onClick={() => navigate('/')}
-              />
-              <div>
-                <h1 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                  UAGRM
-                </h1>
-                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones
-                </p>
-              </div>
+    {/* Header con navegación */}
+    <header className="relative border-b" style={{
+      borderColor: isDark ? 'rgba(51, 65, 85, 0.5)' : 'rgba(226, 232, 240, 0.8)'
+    }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
+        <div className="flex justify-between items-center">
+
+          {/* Logo + texto institucional */}
+          <div className="flex items-center gap-4">
+            <img
+              src="/images/logo.png"
+              alt="FICCT TALENT"
+              className="w-18 h-14 object-contain cursor-pointer"
+              onClick={() => navigate('/')}
+            />
+            <div>
+              <h1 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                UAGRM
+              </h1>
+              <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones
+              </p>
             </div>
+          </div>
+
+          {/* Navegación */}
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => navigate('/sobre-nosotros')}
+              className={`${isDark ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-900'} 
+              text-sm font-medium transition-colors`}
+            >
+              Sobre Nosotros
+            </button>
+
             <ThemeToggle />
           </div>
+
         </div>
-      </header>
+      </div>
+    </header>
+
 
       {/* Hero Section */}
       <section className="relative py-16 lg:py-24">
@@ -271,6 +287,60 @@ export const HomePage = () => {
           </div>
         </div>
       </section>
+      {/* Sobre Nosotros - Sección Resumida */}
+      <section className={`py-16 lg:py-24 ${isDark ? 'bg-slate-900' : 'bg-white'}`}>
+        <div className="max-w-6xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className={`text-3xl lg:text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Sobre Nosotros
+            </h2>
+            <p className={`text-lg max-w-3xl mx-auto ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              Somos la Bolsa de Trabajo Oficial de la Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones de la UAGRM. 
+              Conectamos talento con oportunidades mediante una plataforma segura, moderna y diseñada exclusivamente para la comunidad FICCT.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="p-6">
+              <h3 className={`text-xl font-semibold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Identidad
+              </h3>
+              <p className={`${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                Proyecto institucional respaldado por la FICCT, enfocado en vincular estudiantes con oportunidades reales y pertinentes.
+              </p>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className={`text-xl font-semibold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Misión
+              </h3>
+              <p className={`${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                Ser el canal más eficiente para conectar a estudiantes FICCT con empresas y oportunidades laborales vinculadas a su formación.
+              </p>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className={`text-xl font-semibold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Visión
+              </h3>
+              <p className={`${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                Convertirnos en el modelo líder en Bolivia de vinculación universidad–empresa para perfiles tecnológicos.
+              </p>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <Button
+              variant="primary"
+              onClick={() => navigate('/sobre-nosotros')}
+              className="px-6 py-3"
+            >
+              Conocer más sobre el proyecto
+            </Button>
+          </div>
+        </div>
+      </section>
+
 
       {/* CTA Section */}
       <section className="py-16 lg:py-24">

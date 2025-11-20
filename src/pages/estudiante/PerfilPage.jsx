@@ -15,6 +15,7 @@ import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from "../../contexts/AuthContext";
 
 export const PerfilPage = () => {
   const { isDark } = useTheme();
@@ -24,7 +25,9 @@ export const PerfilPage = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const studentId = "ab4ea2c5-0261-4696-9e05-6edb2459f030";
+  
+const { user } = useAuth();
+const studentId = user?.id;
 
   const [profileData, setProfileData] = useState({
     id: '',
@@ -42,6 +45,7 @@ export const PerfilPage = () => {
   });
 
   useEffect(() => {
+     if (!studentId) return;
     const fetchStudentData = async () => {
       setLoading(true);
       setError(null);
@@ -115,7 +119,7 @@ export const PerfilPage = () => {
     }
   };
 
-  // ⭐⭐ ACTUALIZADO: Funciones de navegación
+  //  ACTUALIZADO: Funciones de navegación
   const handleGoToAcademicInfo = () => {
     navigate('/estudiante/academico');
   };
