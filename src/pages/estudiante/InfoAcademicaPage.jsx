@@ -267,13 +267,13 @@ export const InfoAcademicaPage = () => {
                     <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                       Créditos completados
                     </span>
-                    <span className="text-sm font-bold text-blue-600">
+                    <span className="text-sm font-bold text-primary-600">
                       {creditsProgress.toFixed(1)}%
                     </span>
                   </div>
                   <div className={`w-full h-2 rounded-full ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}>
                     <div
-                      className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                      className="h-full bg-primary-600 rounded-full transition-all duration-300"
                       style={{ width: `${creditsProgress}%` }}
                     ></div>
                   </div>

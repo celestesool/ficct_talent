@@ -1,7 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ================================================================
+   PALETA TURQUESA PROFESIONAL CENTRALIZADA
+   ================================================================ */
+
+:root {
+  /* COLORES PRINCIPALES */
+  --color-primary: 140 177 185;
+  /* #8CB1B9 - Turquesa suave */
+  --color-primary-hover: 106 154 165;
+  /* #6A9AA5 - Hover oscuro */
+
+  --color-border: 209 215 215;
+  /* #D1D7D7 - Bordes */
+  --color-white: 255 255 255;
+  /* #FFFFFF - Fondo */
+
+  --color-text-primary: 51 51 51;
+  /* #333333 - Texto principal */
+  --color-text-secondary: 102 102 102;
+  /* #666666 - Texto secundario */
+  --color-text-light: 153 153 153;
+  /* #999999 - Texto terciario */
+
+  /* FONDOS Y SUPERFICIES */
+  --bg-primary: 255 255 255;
+  /* Blanco SIEMPRE */
+  --bg-secondary: 250 250 250;
+  /* Gris muy claro */
+  --bg-card: 255 255 255;
+  /* Cards blancas */
+
+  /* MEDIDAS ESTANDARIZADAS */
+  --border-radius-default: 4px;
+  --border-radius-max: 5px;
+  --border-width-normal: 2px;
+  --border-width-separator: 3px;
+
+  --spacing-section: 40px;
+  --spacing-card: 40px;
+  --spacing-between-cards: 20px;
+
+  --btn-padding-y: 16px;
+  --btn-padding-x: 45px;
+  --btn-font-size: 1.1rem;
+}
+
+/* MODO OSCURO (Opcional) */
+.dark {
+  --bg-primary: 30 30 30;
+  --bg-secondary: 45 45 45;
+  --color-text-primary: 240 240 240;
+  --color-text-secondary: 180 180 180;
+}
+
+/* ================================================================
+   ESTILOS BASE
+   ================================================================ */
 
 * {
   margin: 0;
@@ -10,45 +69,326 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: rgb(var(--bg-primary));
+  color: rgb(var(--color-text-primary));
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+h1 {
+  font-size: 3.25rem;
+  font-weight: 700;
+  color: rgb(var(--color-text-primary));
 }
 
-/* Scrollbar personalizado */
+h2 {
+  font-size: 2.65rem;
+  font-weight: 700;
+  color: rgb(var(--color-text-primary));
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: rgb(var(--color-text-primary));
+}
+
+p {
+  line-height: 1.7;
+}
+
+/* ================================================================
+   SCROLLBAR MINIMALISTA
+   ================================================================ */
+
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: rgb(var(--bg-primary));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 5px;
+  background: rgb(var(--color-border));
+  border-radius: var(--border-radius-default);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: rgb(var(--color-primary));
 }
 
-/* Modo claro scrollbar */
-.light ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+/* ================================================================
+   UTILIDADES PROFESIONALES
+   ================================================================ */
+
+@layer utilities {
+  .text-gradient-primary {
+    background: linear-gradient(135deg,
+        rgb(var(--color-primary)),
+        rgb(var(--color-primary-hover)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .shadow-turquoise {
+    box-shadow: 0 4px 16px rgba(140, 177, 185, 0.15);
+  }
+
+  .border-turquoise {
+    border-color: rgb(var(--color-primary));
+  }
 }
 
-.light ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+/* ================================================================
+   SISTEMA DE BOTONES PROFESIONAL
+   ================================================================ */
+
+@layer components {
+
+  /* BOTON PRIMARIO SOLIDO */
+  .btn-primary {
+    font-weight: 600;
+    font-size: var(--btn-font-size);
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    border-radius: var(--border-radius-default);
+    transition: all 0.3s ease;
+    border: var(--border-width-normal) solid rgb(var(--color-primary));
+    background-color: rgb(var(--color-primary));
+    color: white;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: rgb(var(--color-primary-hover));
+    border-color: rgb(var(--color-primary-hover));
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* BOTON PRIMARIO OUTLINE */
+  .btn-primary-outline {
+    font-weight: 600;
+    font-size: var(--btn-font-size);
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    border-radius: var(--border-radius-default);
+    transition: all 0.3s ease;
+    border: var(--border-width-normal) solid rgb(var(--color-primary));
+    background-color: transparent;
+    color: rgb(var(--color-primary));
+    cursor: pointer;
+  }
+
+  .btn-primary-outline:hover:not(:disabled) {
+    background-color: rgb(var(--color-primary));
+    color: white;
+  }
+
+  /* BOTON SECUNDARIO */
+  .btn-secondary {
+    font-weight: 600;
+    font-size: var(--btn-font-size);
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    border-radius: var(--border-radius-default);
+    transition: all 0.3s ease;
+    border: var(--border-width-normal) solid rgb(var(--color-border));
+    background-color: rgb(var(--color-border));
+    color: rgb(var(--color-text-primary));
+    cursor: pointer;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: rgb(var(--color-primary));
+    border-color: rgb(var(--color-primary));
+    color: white;
+  }
+
+  /* BOTON PEQUENO */
+  .btn-sm {
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+
+  /* ================================================================
+     TARJETAS/CARDS
+     ================================================================ */
+
+  .card {
+    background-color: rgb(var(--bg-card));
+    border: var(--border-width-normal) solid rgb(var(--color-border));
+    border-radius: var(--border-radius-default);
+    padding: var(--spacing-card);
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(140, 177, 185, 0.08);
+  }
+
+  .card:hover {
+    transform: translateY(-8px);
+    border-color: rgb(var(--color-primary));
+    box-shadow: 0 4px 16px rgba(140, 177, 185, 0.15);
+  }
+
+  /* ================================================================
+     INPUTS Y FORMULARIOS
+     ================================================================ */
+
+  .input-field {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: var(--border-radius-default);
+    border: var(--border-width-normal) solid rgb(var(--color-border));
+    background-color: rgb(var(--bg-primary));
+    color: rgb(var(--color-text-primary));
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: rgb(var(--color-primary));
+    box-shadow: 0 0 0 3px rgba(140, 177, 185, 0.1);
+  }
+
+  .input-field::placeholder {
+    color: rgb(var(--color-text-light));
+  }
+
+  /* ================================================================
+     ENLACES
+     ================================================================ */
+
+  a {
+    color: rgb(var(--color-text-primary));
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  a:hover {
+    color: rgb(var(--color-primary));
+  }
+
+  .link-primary {
+    color: rgb(var(--color-primary));
+    font-weight: 600;
+  }
+
+  .link-primary:hover {
+    color: rgb(var(--color-primary-hover));
+    text-decoration: underline;
+  }
+
+  /* ================================================================
+     ESTRUCTURA Y LAYOUT
+     ================================================================ */
+
+  .container-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .section-spacing {
+    padding: var(--spacing-section) 0;
+  }
+
+  /* ================================================================
+     HEADER Y FOOTER
+     ================================================================ */
+
+  header {
+    background-color: rgb(var(--bg-primary));
+    border-bottom: var(--border-width-separator) solid rgb(var(--color-primary));
+    padding: 20px 0;
+  }
+
+  footer {
+    background-color: rgb(var(--bg-primary));
+    border-top: var(--border-width-separator) solid rgb(var(--color-primary));
+    padding: 40px 0;
+  }
+
+  footer h3 {
+    color: rgb(var(--color-primary));
+  }
+
+  /* ================================================================
+     HERO/BANNER
+     ================================================================ */
+
+  .hero-gradient {
+    background: linear-gradient(135deg,
+        rgba(140, 177, 185, 0.95),
+        rgba(106, 154, 165, 0.9));
+    color: white;
+  }
+
+  /* ================================================================
+     ELEMENTOS ESPECIALES
+     ================================================================ */
+
+  .stat-number {
+    color: rgb(var(--color-primary));
+    font-size: 3rem;
+    font-weight: 700;
+  }
+
+  .badge-primary {
+    background-color: rgb(var(--color-primary));
+    color: white;
+    padding: 6px 14px;
+    border-radius: var(--border-radius-default);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .date-meta {
+    color: rgb(var(--color-primary));
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .icon-circle {
+    width: 50px;
+    height: 50px;
+    background-color: rgb(var(--color-primary));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
 }
 
-.light ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+/* ================================================================
+   EFECTOS Y ANIMACIONES
+   ================================================================ */
+
+.hover-lift {
+  transition: transform 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

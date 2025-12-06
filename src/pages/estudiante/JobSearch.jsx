@@ -208,7 +208,7 @@ const JobSearch = () => {
             <Button variant="outline" onClick={handleBackToDashboard}>
               <ArrowLeft size={18} />
             </Button>
-            <div className="w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500"></div>
+            <div className="w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-accent-3000"></div>
             <h1 className={`text-3xl lg:text-4xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Buscador de Empleos
             </h1>
@@ -233,7 +233,7 @@ const JobSearch = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Ej: React developer, Python backend..."
-                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'} focus:border-blue-500`}
+                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'} focus:border-primary-500`}
                     disabled={loading}
                   />
                 </div>
@@ -249,7 +249,7 @@ const JobSearch = () => {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Ej: Bolivia, Remoto..."
-                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'} focus:border-blue-500`}
+                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'} focus:border-primary-500`}
                     disabled={loading}
                   />
                 </div>
@@ -282,7 +282,7 @@ const JobSearch = () => {
           <div className="flex flex-wrap gap-3">
             {quickSearches.map((s, i) => (
               <button key={i} onClick={() => handleQuickSearch(s.term, s.location)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${isDark ? 'bg-slate-800 border-slate-600 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-blue-50'}`}>
+                className={`flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${isDark ? 'bg-slate-800 border-slate-600 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-primary-50'}`}>
                 <span className="text-lg">{s.icon}</span>
                 <span>{s.term}</span>
                 <span className="text-xs opacity-75">• {s.location}</span>
@@ -306,11 +306,11 @@ const JobSearch = () => {
             <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
               <div className="flex gap-2">
                 <button onClick={() => setShowLinkedInView(false)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${!showLinkedInView ? 'bg-blue-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${!showLinkedInView ? 'bg-primary-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                   <LayoutGrid size={18} /> Vista App
                 </button>
                 <button onClick={() => setShowLinkedInView(true)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${showLinkedInView ? 'bg-purple-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${showLinkedInView ? 'bg-accent-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                   <Eye size={18} /> Vista LinkedIn
                 </button>
               </div>
@@ -347,7 +347,7 @@ const JobSearch = () => {
                     {job.featured && <span className="px-2 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold rounded-full">Destacado</span>}
                     {job.urgent && <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full">Urgente</span>}
                     {job.remote && <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full">Remoto</span>}
-                    {job.isMock === false && <span className="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">Local</span>}
+                    {job.isMock === false && <span className="px-2 py-1 bg-primary-500 text-white text-xs font-bold rounded-full">Local</span>}
                   </div>
 
                   <div className="flex justify-between items-start mb-4">
@@ -364,7 +364,7 @@ const JobSearch = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       {job.match && (
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${job.match > 85 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'}`}>
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${job.match > 85 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'}`}>
                           {job.match}% match
                         </span>
                       )}
@@ -395,7 +395,7 @@ const JobSearch = () => {
 
                   <div className="flex justify-between items-center">
                     <div className="flex gap-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${isDark ? 'bg-accent-3000/20 text-accent-400' : 'bg-accent-300 text-accent-700'}`}>
                         {job.job_type ? (job.job_type === 'full-time' ? 'Tiempo completo' : job.job_type === 'part-time' ? 'Medio tiempo' : 'Freelance') : job.type}
                       </span>
                     </div>
@@ -436,8 +436,8 @@ const JobSearch = () => {
         {/* Estado vacío */}
         {!loading && !loadingReal && jobs.length === 0 && (
           <Card className="text-center py-16">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center">
-              <Search size={40} className="text-blue-600 dark:text-blue-400" />
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary-100 dark:bg-primary-500/10 flex items-center justify-center">
+              <Search size={40} className="text-primary-600 dark:text-primary-400" />
             </div>
             <h3 className={`text-2xl font-bold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {realJobs.length > 0 ? 'Explora las ofertas disponibles' : 'Encuentra tu próximo empleo'}

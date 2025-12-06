@@ -160,9 +160,9 @@ export const ProyectosPage = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div className={`
                     p-3 rounded-lg
-                    ${isDark ? 'bg-blue-900/20' : 'bg-blue-100'}
+                    ${isDark ? 'bg-primary-900/20' : 'bg-primary-100'}
                   `}>
-                    <Code size={24} className="text-blue-600" />
+                    <Code size={24} className="text-primary-600" />
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -207,7 +207,7 @@ export const ProyectosPage = () => {
                       href={project.project_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
+                      className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
                     >
                       <LinkIcon size={16} />
                       Ver proyecto
@@ -279,10 +279,10 @@ export const ProyectosPage = () => {
                   rows="4"
                   required
                   className={`
-                    w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                    w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-primary-500/20
                     ${isDark
-                      ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-blue-500'
-                      : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-blue-500'
+                      ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-primary-500'
+                      : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-primary-500'
                     }
                   `}
                 />

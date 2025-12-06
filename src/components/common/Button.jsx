@@ -1,52 +1,78 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 
-export const Button = ({ 
-  children, 
-  variant = 'primary', 
-  onClick, 
-  className = '', 
+/**
+ * Sistema de Botones Profesional - Paleta Turquesa
+ * 
+ * VARIANTES:
+ * - primary: Sólido turquesa (#8CB1B9) - Para acciones principales o sin jerarquía (opción 1)
+ * - primary-outline: Outline turquesa - Para sin jerarquía (opción 2, MISMA importancia que primary)
+ * - secondary: Gris (#D1D7D7) - Solo cuando SÍ hay jerarquía (acción menos importante)
+ * - success/danger: Estados especiales
+ * 
+ * REGLA: Si "Estudiantes" y "Empresas" tienen la misma importancia,
+ * usar primary + primary-outline. NO usar secondary.
+ */
+
+export const Button = ({
+  children,
+  variant = 'primary',
+  onClick,
+  className = '',
   fullWidth = false,
   disabled = false,
   size = 'md'
 }) => {
   const { isDark } = useTheme();
-  
+
   const sizes = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg'
+    sm: 'px-[30px] py-[12px] text-base',
+    md: 'px-[45px] py-[16px] text-[1.1rem]',  // Estándar según specs
+    lg: 'px-[50px] py-[18px] text-[1.15rem]'
   };
-  
+
   const baseStyles = `
     font-semibold transition-all duration-300 
-    rounded-xl border-2
+    rounded
     ${sizes[size]}
     ${fullWidth ? 'w-full' : ''}
-    ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:translate-y-[-2px] hover:shadow-lg'}
+    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
   `;
-  
+
   const variants = {
+    // 🌊 PRIMARY SÓLIDO - Turquesa (#8CB1B9)
+    // Para acciones principales o sin jerarquía (opción 1 de 2)
     primary: isDark
-      ? 'bg-blue-600 border-blue-600 hover:bg-blue-700 hover:border-blue-700 text-white shadow-lg shadow-blue-600/25'
-      : 'bg-blue-600 border-blue-600 hover:bg-blue-700 hover:border-blue-700 text-white shadow-lg shadow-blue-600/25',
+      ? 'bg-primary-500 border-2 border-primary-500 hover:bg-primary-600 hover:border-primary-600 text-white'
+      : 'bg-primary-500 border-2 border-primary-500 hover:bg-primary-600 hover:border-primary-600 text-white',
+
+    // 🔲 PRIMARY OUTLINE - Turquesa borde
+    // Para sin jerarquía (opción 2 de 2) - MISMA importancia que primary sólido
+    'primary-outline': isDark
+      ? 'bg-transparent border-2 border-primary-500 hover:bg-primary-500 hover:border-primary-500 text-primary-500 hover:text-white'
+      : 'bg-transparent border-2 border-primary-500 hover:bg-primary-500 hover:border-primary-500 text-primary-500 hover:text-white',
+
+    // 🌫️ SECONDARY - Gris (#D1D7D7)
+    // Solo cuando SÍ hay jerarquía (acción menos importante)
     secondary: isDark
-      ? 'bg-purple-600 border-purple-600 hover:bg-purple-700 hover:border-purple-700 text-white shadow-lg shadow-purple-600/25'
-      : 'bg-purple-600 border-purple-600 hover:bg-purple-700 hover:border-purple-700 text-white shadow-lg shadow-purple-600/25',
+      ? 'bg-secondary-200 border-2 border-secondary-200 hover:bg-primary-500 hover:border-primary-500 text-secondary-600 hover:text-white'
+      : 'bg-secondary-200 border-2 border-secondary-200 hover:bg-primary-500 hover:border-primary-500 text-secondary-600 hover:text-white',
+
+    // 🔲 OUTLINE NEUTRO - Borde gris
     outline: isDark
-      ? 'border-slate-600 hover:border-blue-500 hover:bg-blue-600/10 text-slate-200'
-      : 'border-slate-300 hover:border-blue-500 hover:bg-blue-50 text-slate-700',
-    success: isDark
-      ? 'bg-emerald-600 border-emerald-600 hover:bg-emerald-700 hover:border-emerald-700 text-white shadow-lg shadow-emerald-600/25'
-      : 'bg-emerald-600 border-emerald-600 hover:bg-emerald-700 hover:border-emerald-700 text-white shadow-lg shadow-emerald-600/25',
-    danger: isDark
-      ? 'bg-rose-600 border-rose-600 hover:bg-rose-700 hover:border-rose-700 text-white shadow-lg shadow-rose-600/25'
-      : 'bg-rose-600 border-rose-600 hover:bg-rose-700 hover:border-rose-700 text-white shadow-lg shadow-rose-600/25',
+      ? 'bg-transparent border-2 border-secondary-200 hover:border-primary-500 hover:bg-primary-50 text-secondary-600'
+      : 'bg-transparent border-2 border-secondary-200 hover:border-primary-500 hover:bg-primary-50 text-secondary-600',
+
+    // 🟢 SUCCESS
+    success: 'bg-success-500 border-2 border-success-500 hover:bg-success-600 hover:border-success-600 text-white',
+
+    // 🔴 DANGER
+    danger: 'bg-error-500 border-2 border-error-500 hover:bg-error-600 hover:border-error-600 text-white',
   };
 
   return (
-    <button 
-      onClick={onClick} 
+    <button
+      onClick={onClick}
       disabled={disabled}
       className={`${baseStyles} ${variants[variant]} ${className}`}
     >

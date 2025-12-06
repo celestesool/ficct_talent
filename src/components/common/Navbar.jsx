@@ -115,7 +115,7 @@ export const Navbar = () => {
                   className={`
                     flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium
                     ${isActiveRoute('/estudiante/dashboard')
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
+                      ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
                       : isDark
                         ? 'text-slate-300 hover:bg-slate-800 hover:text-white hover:shadow-lg'
                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-lg'
@@ -159,7 +159,7 @@ export const Navbar = () => {
                               className={`
                                 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
                                 ${isActiveRoute(route.path)
-                                  ? 'bg-blue-500/20 text-blue-600 border border-blue-500/30'
+                                  ? 'bg-primary-500/20 text-primary-600 border border-primary-500/30'
                                   : isDark
                                     ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
                                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -188,7 +188,7 @@ export const Navbar = () => {
                       className={`
                         flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium
                         ${isActiveRoute(route.path)
-                          ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
+                          ? 'bg-accent-600 text-white shadow-lg shadow-accent-3000/25'
                           : isDark
                             ? 'text-slate-300 hover:bg-slate-800 hover:text-white hover:shadow-lg'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-lg'
@@ -223,8 +223,8 @@ export const Navbar = () => {
                   <div className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
                     ${isEstudiante
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-purple-500 text-white'
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-accent-3000 text-white'
                     }
                   `}>
                     {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
@@ -309,7 +309,7 @@ export const Navbar = () => {
                       className={`
                         w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
                         ${isActiveRoute('/estudiante/dashboard')
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-primary-600 text-white'
                           : isDark
                             ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -336,7 +336,7 @@ export const Navbar = () => {
                               className={`
                                 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
                                 ${isActiveRoute(route.path)
-                                  ? 'bg-blue-500/20 text-blue-600 border border-blue-500/30'
+                                  ? 'bg-primary-500/20 text-primary-600 border border-primary-500/30'
                                   : isDark
                                     ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
                                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -362,7 +362,7 @@ export const Navbar = () => {
                         className={`
                           w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
                           ${isActiveRoute(route.path)
-                            ? 'bg-purple-600 text-white'
+                            ? 'bg-accent-600 text-white'
                             : isDark
                               ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
                               : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'

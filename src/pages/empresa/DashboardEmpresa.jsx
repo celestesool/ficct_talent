@@ -198,15 +198,15 @@ export const DashboardEmpresa = () => {
                   </p>
                 </div>
                 <div className={`p-3 rounded-lg ${
-                  stat.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/20' :
-                  stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/20' :
+                  stat.color === 'purple' ? 'bg-accent-300 dark:bg-accent-700/20' :
+                  stat.color === 'blue' ? 'bg-primary-100 dark:bg-primary-900/20' :
                   stat.color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
                   'bg-orange-100 dark:bg-orange-900/20'
                 }`}>
                   <stat.icon
                     className={`${
-                      stat.color === 'purple' ? 'text-purple-600' :
-                      stat.color === 'blue' ? 'text-blue-600' :
+                      stat.color === 'purple' ? 'text-accent-600' :
+                      stat.color === 'blue' ? 'text-primary-600' :
                       stat.color === 'green' ? 'text-green-600' :
                       'text-orange-600'
                     }`}
@@ -241,8 +241,8 @@ export const DashboardEmpresa = () => {
                     key={offer.id}
                     className={`p-4 rounded-lg border-2 cursor-pointer transition-all
                       ${isDark
-                        ? 'border-slate-700 hover:border-purple-500 hover:bg-slate-700'
-                        : 'border-slate-200 hover:border-purple-400 hover:bg-purple-50'
+                        ? 'border-slate-700 hover:border-accent-3000 hover:bg-slate-700'
+                        : 'border-slate-200 hover:border-accent-400 hover:bg-accent-300'
                       }`}
                     onClick={() => handleViewOfferDetails(offer.id)}
                   >
@@ -308,7 +308,7 @@ export const DashboardEmpresa = () => {
                   <div
                     key={idx}
                     className={`p-3 rounded-lg cursor-pointer ${
-                      isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'
+                      isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-accent-300 hover:bg-accent-300'
                     }`}
                     onClick={() => handleViewCandidateDetails(candidate.id)}
                   >
@@ -316,7 +316,7 @@ export const DashboardEmpresa = () => {
                       <p className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                         {candidate.name}
                       </p>
-                      <span className="text-sm font-bold text-purple-600">
+                      <span className="text-sm font-bold text-accent-600">
                         {candidate.match}%
                       </span>
                     </div>
@@ -346,7 +346,7 @@ export const DashboardEmpresa = () => {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Plus size={20} className="text-purple-600" />
+                    <Plus size={20} className="text-accent-600" />
                     <span className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       Publicar Oferta
                     </span>
@@ -360,7 +360,7 @@ export const DashboardEmpresa = () => {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Users size={20} className="text-blue-600" />
+                    <Users size={20} className="text-primary-600" />
                     <span className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       Buscar Candidatos
                     </span>

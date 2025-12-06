@@ -225,7 +225,7 @@ export const CVEditor = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="reclutador@empresa.com"
-                      className="flex-1 px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       disabled={isSharing}
                     />
                     <Button
@@ -246,7 +246,7 @@ export const CVEditor = () => {
                 ? 'bg-emerald-100 text-emerald-800'
                 : linkMessage.includes('Error')
                   ? 'bg-red-100 text-red-800'
-                  : 'bg-blue-100 text-blue-800'
+                  : 'bg-primary-100 text-primary-800'
                 }`}>
                 {linkMessage.includes('enviado') || linkMessage.includes('copiado') ? (
                   <CheckCircle size={18} />

@@ -192,7 +192,7 @@ const studentId = user?.id;
                   ) : (
                     <div className={`
                       w-32 h-32 rounded-full flex items-center justify-center text-4xl font-bold
-                      ${isDark ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600'}
+                      ${isDark ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-600'}
                     `}>
                       {profileData.first_name.charAt(0)}{profileData.last_name.charAt(0)}
                     </div>
@@ -203,7 +203,7 @@ const studentId = user?.id;
                       ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-white hover:bg-slate-100'}
                       border-2 ${isDark ? 'border-slate-600' : 'border-slate-300'}
                     `}>
-                      <Camera size={18} className="text-blue-600" />
+                      <Camera size={18} className="text-primary-600" />
                     </button>
                   )}
                 </div>
@@ -347,7 +347,7 @@ const studentId = user?.id;
                     disabled={!isEditing}
                     rows="4"
                     className={`
-                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-primary-500/20
                       ${isDark
                         ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400'
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'

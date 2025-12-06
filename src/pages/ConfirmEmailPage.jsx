@@ -34,7 +34,7 @@ export const ConfirmEmailPage = () => {
   }, [params, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-accent-300 dark:from-slate-900 dark:to-slate-800">
       <div className="text-center">
         <p className="text-xl font-medium text-slate-700 dark:text-slate-200">{status}</p>
       </div>

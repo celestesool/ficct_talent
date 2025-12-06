@@ -111,7 +111,7 @@ export const CandidatosPage = () => {
   const statusColor = (s) => {
     switch (s) {
       case "aplicado":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300";
+        return "bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300";
       case "revisado":
         return "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300";
       default:
@@ -164,7 +164,7 @@ export const CandidatosPage = () => {
             <ArrowLeft size={18} />
           </Button>
 
-          <div className="w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500"></div>
+          <div className="w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-accent-3000"></div>
 
           <div>
             <h1 className={`text-3xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
@@ -246,7 +246,7 @@ export const CandidatosPage = () => {
                 <div className="flex items-center gap-4 mb-4">
                   <div className={`
                     w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold
-                    ${isDark ? "bg-purple-600 text-white" : "bg-purple-100 text-purple-700"}
+                    ${isDark ? "bg-accent-600 text-white" : "bg-accent-300 text-accent-700"}
                   `}>
                     {c.name
                       .split(" ")
@@ -329,7 +329,7 @@ export const CandidatosPage = () => {
 
                 <div className={`
                   w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold
-                  ${isDark ? "bg-purple-600 text-white" : "bg-purple-100 text-purple-700"}
+                  ${isDark ? "bg-accent-600 text-white" : "bg-accent-300 text-accent-700"}
                 `}>
                   {selectedCandidate.name.split(" ").map((n) => n[0]).join("")}
                 </div>
@@ -437,7 +437,7 @@ export const CandidatosPage = () => {
                     key={idx}
                     className={`
                       px-3 py-2 rounded-lg text-sm font-medium
-                      ${isDark ? "bg-purple-900/20 text-purple-300" : "bg-purple-100 text-purple-700"}
+                      ${isDark ? "bg-accent-700/20 text-accent-400" : "bg-accent-300 text-accent-700"}
                     `}
                   >
                     {s}

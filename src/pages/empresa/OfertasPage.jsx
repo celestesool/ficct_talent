@@ -289,8 +289,8 @@ const OfertasPage = () => {
 
                     {/* Main Info */}
                     <div className="flex gap-4">
-                      <div className={`p-3 rounded-lg ${isDark ? 'bg-purple-900/20' : 'bg-purple-100'}`}>
-                        <Briefcase className="text-purple-600" size={24} />
+                      <div className={`p-3 rounded-lg ${isDark ? 'bg-accent-700/20' : 'bg-accent-300'}`}>
+                        <Briefcase className="text-accent-600" size={24} />
                       </div>
 
                       <div>

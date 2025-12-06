@@ -26,20 +26,20 @@ export const DashboardEstudiante = () => {
       value: '5',
       icon: Code,
       color: 'blue',
-      bgLight: 'bg-blue-50',
-      bgDark: 'bg-blue-500/10',
-      textColor: 'text-blue-600',
-      borderColor: 'border-blue-200 dark:border-blue-500/30'
+      bgLight: 'bg-primary-50',
+      bgDark: 'bg-primary-500/10',
+      textColor: 'text-primary-600',
+      borderColor: 'border-primary-200 dark:border-primary-500/30'
     },
     {
       label: 'Certificaciones',
       value: '3',
       icon: Award,
       color: 'purple',
-      bgLight: 'bg-purple-50',
-      bgDark: 'bg-purple-500/10',
-      textColor: 'text-purple-600',
-      borderColor: 'border-purple-200 dark:border-purple-500/30'
+      bgLight: 'bg-accent-300',
+      bgDark: 'bg-accent-3000/10',
+      textColor: 'text-accent-600',
+      borderColor: 'border-accent-400 dark:border-accent-3000/30'
     },
     {
       label: 'Habilidades',
@@ -69,20 +69,20 @@ export const DashboardEstudiante = () => {
       desc: 'Actualiza tu información personal',
       icon: User,
       path: '/estudiante/perfil',
-      gradient: 'from-blue-500 to-blue-600',
-      bgLight: 'bg-blue-50',
-      bgDark: 'bg-blue-500/10',
-      hoverBorder: 'hover:border-blue-400 dark:hover:border-blue-500'
+      gradient: 'from-primary-500 to-primary-600',
+      bgLight: 'bg-primary-50',
+      bgDark: 'bg-primary-500/10',
+      hoverBorder: 'hover:border-primary-400 dark:hover:border-primary-500'
     },
     {
       title: 'Proyectos',
       desc: 'Gestiona tu portafolio',
       icon: Code,
       path: '/estudiante/proyectos',
-      gradient: 'from-purple-500 to-purple-600',
-      bgLight: 'bg-purple-50',
-      bgDark: 'bg-purple-500/10',
-      hoverBorder: 'hover:border-purple-400 dark:hover:border-purple-500'
+      gradient: 'from-accent-3000 to-accent-600',
+      bgLight: 'bg-accent-300',
+      bgDark: 'bg-accent-3000/10',
+      hoverBorder: 'hover:border-accent-400 dark:hover:border-accent-3000'
     },
     {
       title: 'Certificaciones',
@@ -133,13 +133,13 @@ export const DashboardEstudiante = () => {
       company: 'Tech Corp',
       time: 'Hace 2 horas',
       icon: Briefcase,
-      color: 'text-blue-600'
+      color: 'text-primary-600'
     },
     {
       text: 'Agregaste el proyecto "Sistema de Ventas"',
       time: 'Hace 1 día',
       icon: Code,
-      color: 'text-purple-600'
+      color: 'text-accent-600'
     },
     {
       text: 'Empresa XYZ vio tu perfil',
@@ -155,14 +155,14 @@ export const DashboardEstudiante = () => {
       company: 'Tech Solutions',
       type: 'Pasantía',
       match: '95%',
-      gradient: 'from-blue-500 to-cyan-500'
+      gradient: 'from-primary-500 to-cyan-500'
     },
     {
       title: 'Data Analyst Intern',
       company: 'DataCorp',
       type: 'Tiempo Completo',
       match: '88%',
-      gradient: 'from-purple-500 to-pink-500'
+      gradient: 'from-accent-3000 to-pink-500'
     }
   ];
 
@@ -176,7 +176,7 @@ export const DashboardEstudiante = () => {
         {/* Header - MEJORADO */}
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-3">
-            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500`}></div>
+            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-accent-3000`}></div>
             <h1 className={`text-3xl lg:text-4xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Dashboard
             </h1>
@@ -223,7 +223,7 @@ export const DashboardEstudiante = () => {
             <Card className="p-6 lg:p-8">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className={`w-1.5 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500`}></div>
+                  <div className={`w-1.5 h-8 rounded-full bg-gradient-to-b from-primary-500 to-accent-3000`}></div>
                   <h2 className={`text-xl lg:text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     Acciones Rápidas
                   </h2>
@@ -277,7 +277,7 @@ export const DashboardEstudiante = () => {
                       {action.desc}
                     </p>
 
-                    <div className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+                    <div className="flex items-center gap-2 text-sm font-medium text-primary-600 dark:text-primary-400">
                       <span>Ir ahora</span>
                       <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </div>
@@ -297,7 +297,7 @@ export const DashboardEstudiante = () => {
                 </div>
                 <span className={`
                   px-3 py-1 rounded-full text-sm font-bold
-                  ${isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'}
+                  ${isDark ? 'bg-primary-500/20 text-primary-400' : 'bg-primary-100 text-primary-600'}
                 `}>
                   75%
                 </span>
@@ -308,7 +308,7 @@ export const DashboardEstudiante = () => {
                 <div>
                   <div className={`relative w-full h-3 rounded-full overflow-hidden ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}>
                     <div
-                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
+                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary-500 to-accent-3000 rounded-full transition-all duration-500"
                       style={{ width: '75%' }}
                     >
                       <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
@@ -424,7 +424,7 @@ export const DashboardEstudiante = () => {
             {/* Ofertas Recomendadas - MEJORADA */}
             <Card className="p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className={`w-1.5 h-6 rounded-full bg-gradient-to-b from-purple-500 to-pink-500`}></div>
+                <div className={`w-1.5 h-6 rounded-full bg-gradient-to-b from-accent-3000 to-pink-500`}></div>
                 <h2 className={`text-lg lg:text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Para Ti
                 </h2>

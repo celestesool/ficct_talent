@@ -61,7 +61,7 @@ export const LoginPage = () => {
   return (
     <div
       className={`min-h-screen transition-colors duration-200 ${
-        isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-blue-50 to-purple-50'
+        isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-white to-white'
       }`}
     >
       <div className="absolute top-4 right-4">
@@ -81,22 +81,22 @@ export const LoginPage = () => {
               className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
                 isEstudiante
                   ? isDark
-                    ? 'bg-blue-600'
-                    : 'bg-blue-100'
+                    ? 'bg-primary-600'
+                    : 'bg-primary-100'
                   : isDark
-                  ? 'bg-purple-600'
-                  : 'bg-purple-100'
+                  ? 'bg-primary-600'
+                  : 'bg-primary-100'
               }`}
             >
               {isEstudiante ? (
                 <GraduationCap
                   size={32}
-                  className={isDark ? 'text-white' : 'text-blue-600'}
+                  className={isDark ? 'text-white' : 'text-primary-500'}
                 />
               ) : (
                 <Building2
                   size={32}
-                  className={isDark ? 'text-white' : 'text-purple-600'}
+                  className={isDark ? 'text-white' : 'text-primary-500'}
                 />
               )}
             </div>
@@ -161,8 +161,8 @@ export const LoginPage = () => {
                 type="button"
                 className={`text-sm ${
                   isEstudiante
-                    ? 'text-blue-600 hover:text-blue-700'
-                    : 'text-purple-600 hover:text-purple-700'
+                    ? 'text-primary-500 hover:text-primary-600'
+                    : 'text-primary-500 hover:text-primary-600'
                 } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 disabled={loading}
               >
@@ -191,8 +191,8 @@ export const LoginPage = () => {
                 onClick={() => navigate(`/${userType}/registro`)}
                 className={`font-semibold ${
                   isEstudiante
-                    ? 'text-blue-600 hover:text-blue-700'
-                    : 'text-purple-600 hover:text-purple-700'
+                    ? 'text-primary-500 hover:text-primary-600'
+                    : 'text-primary-500 hover:text-primary-600'
                 } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 disabled={loading}
               >

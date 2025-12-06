@@ -136,7 +136,7 @@ export const CandidatosPage = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Nuevo':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300';
+        return 'bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-300';
       case 'Revisado':
         return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
       case 'En proceso':
@@ -168,7 +168,7 @@ export const CandidatosPage = () => {
             >
               <ArrowLeft size={18} />
             </Button>
-            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500`}></div>
+            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-accent-3000`}></div>
             <div className="flex-1">
               <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Candidatos
@@ -201,8 +201,8 @@ export const CandidatosPage = () => {
                 className={`
                   w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all duration-200
                   ${isDark
-                    ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500'
-                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-blue-500'
+                    ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-primary-500'
+                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-primary-500'
                   }
                 `}
               />
@@ -211,7 +211,7 @@ export const CandidatosPage = () => {
             <div className="flex gap-4 w-full md:w-auto">
               <select
                 className={`
-                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20
                   ${isDark
                     ? 'bg-slate-800 border-slate-600 text-white'
                     : 'bg-white border-slate-200 text-slate-900'
@@ -226,7 +226,7 @@ export const CandidatosPage = () => {
 
               <select
                 className={`
-                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20
                   ${isDark
                     ? 'bg-slate-800 border-slate-600 text-white'
                     : 'bg-white border-slate-200 text-slate-900'
@@ -264,13 +264,13 @@ export const CandidatosPage = () => {
             <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Excelente Match</div>
           </Card>
           <Card className="p-4 text-center">
-            <div className={`text-2xl font-bold mb-1 text-blue-600`}>
+            <div className={`text-2xl font-bold mb-1 text-primary-600`}>
               {candidates.filter(c => c.status === 'Nuevo').length}
             </div>
             <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Nuevos</div>
           </Card>
           <Card className="p-4 text-center">
-            <div className={`text-2xl font-bold mb-1 text-purple-600`}>
+            <div className={`text-2xl font-bold mb-1 text-accent-600`}>
               {candidates.filter(c => c.location.includes('Santa Cruz')).length}
             </div>
             <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>De Santa Cruz</div>
@@ -307,7 +307,7 @@ export const CandidatosPage = () => {
                 <div className="flex items-start gap-4 mb-4 pt-2">
                   <div className={`
                     w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold
-                    ${isDark ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-600'}
+                    ${isDark ? 'bg-accent-600 text-white' : 'bg-accent-300 text-accent-600'}
                   `}>
                     {candidate.name.split(' ').map(n => n[0]).join('')}
                   </div>
@@ -417,7 +417,7 @@ export const CandidatosPage = () => {
               <div className="flex items-start gap-4">
                 <div className={`
                   w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold
-                  ${isDark ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-600'}
+                  ${isDark ? 'bg-accent-600 text-white' : 'bg-accent-300 text-accent-600'}
                 `}>
                   {selectedCandidate.name.split(' ').map(n => n[0]).join('')}
                 </div>
@@ -529,8 +529,8 @@ export const CandidatosPage = () => {
                     className={`
                       px-3 py-2 rounded-lg font-medium
                       ${isDark
-                        ? 'bg-purple-900/20 text-purple-300 border border-purple-700'
-                        : 'bg-purple-100 text-purple-700 border border-purple-200'
+                        ? 'bg-accent-700/20 text-accent-400 border border-accent-700'
+                        : 'bg-accent-300 text-accent-700 border border-accent-400'
                       }
                     `}
                   >

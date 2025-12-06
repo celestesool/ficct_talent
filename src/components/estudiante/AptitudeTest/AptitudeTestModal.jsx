@@ -198,7 +198,7 @@ export const AptitudeTestModal = ({ jobData, onClose }) => {
             </h2>
           </div>
           <div className="flex justify-center items-center py-12 flex-col">
-            <Loader className="animate-spin h-12 w-12 text-blue-600 mb-4" />
+            <Loader className="animate-spin h-12 w-12 text-primary-600 mb-4" />
             <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
               {generatingTest
                 ? 'Personalizando la prueba para el puesto...'
@@ -236,7 +236,7 @@ export const AptitudeTestModal = ({ jobData, onClose }) => {
         <div className="flex-1 overflow-y-auto p-6">
           {!testStarted && !testCompleted && (
             <div className="text-center py-8">
-              <Brain size={64} className={`mx-auto mb-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              <Brain size={64} className={`mx-auto mb-4 ${isDark ? 'text-primary-400' : 'text-primary-600'}`} />
               <h3 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Preparado para la prueba
               </h3>
@@ -268,7 +268,7 @@ export const AptitudeTestModal = ({ jobData, onClose }) => {
               {/* Timer y Progreso */}
               <div className="flex justify-between items-center mb-6 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
                 <div className="flex items-center gap-2">
-                  <Clock size={20} className={timeLeft < 300 ? 'text-red-500' : 'text-blue-500'} />
+                  <Clock size={20} className={timeLeft < 300 ? 'text-red-500' : 'text-primary-500'} />
                   <span className={`font-mono text-lg ${timeLeft < 300 ? 'text-red-500' : 'text-slate-700 dark:text-slate-300'}`}>
                     {formatTime(timeLeft)}
                   </span>
@@ -291,7 +291,7 @@ export const AptitudeTestModal = ({ jobData, onClose }) => {
                         key={index}
                         onClick={() => handleAnswerSelect(testData.questions[currentQuestion].id, index)}
                         className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${userAnswers[testData.questions[currentQuestion].id] === index
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                           : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
                           } ${isDark ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'}`}
                       >

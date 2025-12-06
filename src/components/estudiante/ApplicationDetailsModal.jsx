@@ -120,7 +120,7 @@ export const ApplicationDetailsModal = ({ applicationId, onClose, onWithdraw }) 
         <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <div className="flex justify-center items-center h-64">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
               <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Cargando detalles...</p>
             </div>
           </div>
@@ -169,7 +169,7 @@ export const ApplicationDetailsModal = ({ applicationId, onClose, onWithdraw }) 
 
         <div className="space-y-8">
           {/* Énfasis en Estado de la Aplicación - Sección Principal */}
-          <div className="border-l-4 border-blue-500 pl-4">
+          <div className="border-l-4 border-primary-500 pl-4">
             <div className="flex items-center gap-3 mb-2">
               <div className={`p-2 rounded-full bg-${statusConfig.color}-100 ${statusConfig.color === 'gray' ? 'border border-gray-200' : ''}`}>
                 <StatusIcon size={24} className={`text-${statusConfig.color}-600`} />
@@ -323,7 +323,7 @@ export const ApplicationDetailsModal = ({ applicationId, onClose, onWithdraw }) 
                     href={application.job.company.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 flex items-center gap-2 mt-1"
+                    className="text-primary-600 hover:text-primary-700 flex items-center gap-2 mt-1"
                   >
                     <Globe size={16} />
                     Visitar sitio
@@ -373,7 +373,7 @@ export const ApplicationDetailsModal = ({ applicationId, onClose, onWithdraw }) 
                 href={application.resume_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`text-blue-600 hover:text-blue-700 flex items-center gap-2 p-3 rounded-lg border ${isDark ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}
+                className={`text-primary-600 hover:text-primary-700 flex items-center gap-2 p-3 rounded-lg border ${isDark ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}
               >
                 <FileText size={20} />
                 Ver CV Enviado ({formatDate(application.created_at)})
