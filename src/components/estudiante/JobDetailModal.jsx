@@ -12,7 +12,7 @@ import {
   Users,
   X
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { applicationService } from '../../api/services/applicationService';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Button } from '../common/Button';
@@ -446,7 +446,7 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
         </div>
       </div>
 
-      <ApplicationModal />
+      {ApplicationModal()}
     </>
   );
 };

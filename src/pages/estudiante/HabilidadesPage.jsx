@@ -6,29 +6,73 @@ import {
   TrendingUp,
   X
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
 import { Navbar } from '../../components/common/Navbar';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
 
 export const HabilidadesPage = () => {
   const { isDark } = useTheme();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [newSkill, setNewSkill] = useState('');
   const [skillLevel, setSkillLevel] = useState(3);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [skills, setSkills] = useState([
-    { id: '1', name: 'JavaScript', level: 5, category: 'Lenguaje de Programación' },
-    { id: '2', name: 'React', level: 4, category: 'Framework' },
-    { id: '3', name: 'Node.js', level: 4, category: 'Backend' },
-    { id: '4', name: 'Python', level: 3, category: 'Lenguaje de Programación' },
-    { id: '5', name: 'MongoDB', level: 3, category: 'Base de Datos' },
-    { id: '6', name: 'Git', level: 4, category: 'Herramienta' },
-  ]);
+  const [skills, setSkills] = useState([]);
+
+  // Fetch skills from API
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        if (!user?.id) {
+          setError('Usuario no autenticado');
+          setLoading(false);
+          return;
+        }
+
+        // Fetch student skills
+        const response = await api.get(`/skills/student/${user.id}`);
+        
+        if (response.data && Array.isArray(response.data)) {
+          // Map proficiency level names to numeric values (1-5)
+          const levelMap = {
+            'principiante': 1,
+            'basico': 2,
+            'intermedio': 3,
+            'avanzado': 4,
+            'experto': 5
+          };
+          
+          const formattedSkills = response.data.map(studentSkill => ({
+            id: studentSkill.id,
+            name: studentSkill.skill?.name || 'Sin nombre',
+            level: levelMap[studentSkill.level?.toLowerCase()] || 3,
+            category: 'Lenguaje de Programación', // Default category
+            years_experience: studentSkill.years_experience || 0
+          }));
+          setSkills(formattedSkills);
+        }
+      } catch (err) {
+        console.error('Error fetching skills:', err);
+        setError('No se pudieron cargar las habilidades');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSkills();
+  }, [user?.id]);
 
   const categories = [
     'Lenguaje de Programación',
@@ -66,8 +110,8 @@ export const HabilidadesPage = () => {
   };
 
   const filteredSkills = skills.filter(skill =>
-    skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    skill.category.toLowerCase().includes(searchTerm.toLowerCase())
+    skill.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    skill.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getLevelStars = (level) => {
@@ -106,6 +150,19 @@ export const HabilidadesPage = () => {
           </div>
         </div>
 
+        {error && (
+          <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-red-900/20 border border-red-500/50' : 'bg-red-50 border border-red-200'}`}>
+            <p className="text-red-600">⚠️ {error}</p>
+          </div>
+        )}
+
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          </div>
+        )}
+
+        {!loading && (
         <div className="grid lg:grid-cols-4 gap-6">
           {/* Panel de Agregar Habilidad */}
           <div className="lg:col-span-1">
@@ -278,6 +335,7 @@ export const HabilidadesPage = () => {
             </Card>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

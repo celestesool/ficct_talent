@@ -79,7 +79,7 @@ export const companyJobService = {
     // Obtener candidatos de una oferta
     getJobCandidates: async (jobId) => {
         try {
-            const response = await axios.get(`${API_BASE}/applications/job/${jobId}`);
+            const response = await axios.get(`${API_BASE}/jobs/${jobId}/applications`);
             return {
                 data: response.data,
                 error: null,

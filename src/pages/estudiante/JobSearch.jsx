@@ -119,8 +119,6 @@ const JobSearch = () => {
 
       if (response.data) {
         setLinkedInHtml(response.data);
-        //const mockJobs = generateMockJobs(searchTerm, location);
-        //setJobs(mockJobs);
       }
     } catch (err) {
       console.error('Error LinkedIn:', err);
@@ -129,31 +127,6 @@ const JobSearch = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const generateMockJobs = (searchTerm, location) => {
-    const technologies = ['React', 'JavaScript', 'Node.js', 'Python', 'Java', 'Vue', 'Angular', 'TypeScript'];
-    const companies = ['Tech Solutions Bolivia', 'DinoTech', 'UAGRM', 'Innovation Labs', 'Global Tech S.A.'];
-    const locations = ['La Paz', 'Santa Cruz', 'Cochabamba', 'Remoto', 'Híbrido'];
-
-    return Array.from({ length: 12 }, (_, i) => ({
-      id: `mock-${Date.now()}-${i}`,
-      title: `${['Senior', 'Mid-Level', 'Junior'][i % 3]} ${technologies[i % technologies.length]} Developer`,
-      company: companies[i % companies.length],
-      location: location || locations[i % locations.length],
-      salary: `$${(60000 + i * 5000).toLocaleString()} - $${(90000 + i * 5000).toLocaleString()}`,
-      posted: `${i % 7 + 1} días`,
-      type: ['Tiempo Completo', 'Contrato', 'Medio Tiempo'][i % 3],
-      match: Math.floor(Math.random() * 30) + 70,
-      experience: ['Junior', 'Mid-Level', 'Senior'][i % 3],
-      description: `Buscamos desarrollador apasionado por ${technologies[i % technologies.length]}. ¡Únete a nuestro equipo en crecimiento!`,
-      skills: technologies.slice(i % 3, (i % 3) + 4),
-      remote: i % 2 === 0,
-      urgent: i < 3,
-      featured: i < 2,
-      applyUrl: `https://linkedin.com/jobs/search/?keywords=${encodeURIComponent(searchTerm)}`,
-      isMock: true
-    }));
   };
 
   const getLinkedInIframeSrc = () => {

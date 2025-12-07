@@ -11,19 +11,22 @@ import {
   Sparkles,
   X
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Navbar } from '../../components/common/Navbar';
 import { CVPreview } from '../../components/estudiante/CVPreview';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import api from '../../services/api';
 import { aiService } from '../../services/aiService';
 import { emailService } from '../../services/emailService';
 import { exportToPDF } from '../../utils/pdfExporter';
 
 export const CVGeneratorPage = () => {
   const { isDark } = useTheme();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -34,79 +37,102 @@ export const CVGeneratorPage = () => {
   const [shareMessage, setShareMessage] = useState('');
   const [shareStatus, setShareStatus] = useState(''); // 'sending', 'success', 'error'
   const [isRealEmail, setIsRealEmail] = useState(false);
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [generationError, setGenerationError] = useState('');
 
-  // Mock data del estudiante
-  const [studentProfile] = useState({
-    personalInfo: {
-      first_name: 'Juan Carlos',
-      last_name: 'Pérez García',
-      email: 'juan.perez@uagrm.edu.bo',
-      phone_number: '70123456',
-      ci: '12345678',
-      registration_number: '2021000000'
-    },
-    academicInfo: {
-      degree: 'Ingeniería en Sistemas',
-      major: 'Desarrollo de Software',
-      institution: 'Universidad Autónoma Gabriel René Moreno',
-      start_year: '2021',
-      estimated_graduation_year: '2026',
-      graduation_year: null,
-      GPA: 85
-    },
-    skills: [
-      { name: 'React', level: 'Avanzado', years_experience: 2 },
-      { name: 'Node.js', level: 'Intermedio', years_experience: 2 },
-      { name: 'Python', level: 'Avanzado', years_experience: 3 },
-      { name: 'MongoDB', level: 'Intermedio', years_experience: 1 },
-      { name: 'JavaScript', level: 'Avanzado', years_experience: 3 },
-      { name: 'SQL', level: 'Intermedio', years_experience: 2 }
-    ],
-    projects: [
-      {
-        id: '1',
-        title: 'Sistema de Gestión Universitaria',
-        description: 'Desarrollo de plataforma web para gestión académica',
-        start_date: '2023-03-01',
-        end_date: '2023-08-15',
-        project_url: 'https://github.com/usuario/proyecto1',
-        technologies: ['React', 'Node.js', 'MongoDB']
-      },
-      {
-        id: '2',
-        title: 'App de Delivery',
-        description: 'Aplicación móvil para pedidos de comida',
-        start_date: '2023-09-01',
-        end_date: '2023-12-20',
-        project_url: 'https://github.com/usuario/proyecto2',
-        technologies: ['React Native', 'Firebase']
+  // Fetch real student data from backend
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      if (!user?.email) {
+        setLoadingProfile(false);
+        setGenerationError('No se pudo identificar al usuario');
+        return;
       }
-    ],
-    certifications: [
-      {
-        id: '1',
-        name: 'AWS Certified Solutions Architect',
-        issuing_organization: 'Amazon Web Services',
-        issue_date: '2023-06-15',
-        expiration_date: '2026-06-15'
-      },
-      {
-        id: '2',
-        name: 'Professional Scrum Master I',
-        issuing_organization: 'Scrum.org',
-        issue_date: '2023-09-20'
-      }
-    ]
-  });
 
-  const [cvData, setCvData] = useState({
-    personalInfo: studentProfile.personalInfo,
-    summary: '',
-    education: studentProfile.academicInfo,
-    skills: studentProfile.skills,
-    projects: studentProfile.projects,
-    certifications: studentProfile.certifications
-  });
+      try {
+        // First, get student by email to get the correct student ID
+        const studentResponse = await api.get(`/students/email/${user.email}`);
+        if (!studentResponse.data) {
+          setGenerationError('No se encontró un estudiante registrado con este email');
+          setLoadingProfile(false);
+          return;
+        }
+
+        const studentId = studentResponse.data.id;
+
+        // Now get the complete CV data using the student ID
+        const response = await api.get(`/students/${studentId}/cv-data`);
+        const data = response.data;
+
+        const profile = {
+          personalInfo: {
+            first_name: data.first_name || '',
+            last_name: data.last_name || '',
+            email: data.email || '',
+            phone_number: data.phone_number || '',
+            ci: data.CI?.toString() || '',
+            registration_number: data.registration_number?.toString() || ''
+          },
+          academicInfo: data.academicInfo && data.academicInfo.length > 0 ? {
+            degree: data.academicInfo[0].degree || '',
+            major: data.academicInfo[0].major || '',
+            institution: data.academicInfo[0].institution || '',
+            start_year: data.academicInfo[0].start_year?.toString() || '',
+            estimated_graduation_year: data.academicInfo[0].estimated_graduation_year?.toString() || '',
+            graduation_year: data.academicInfo[0].graduation_year?.toString() || null,
+            GPA: data.academicInfo[0].GPA || 0
+          } : null,
+          skills: data.skills?.map(s => ({
+            name: s.skill?.name || 'Sin nombre',
+            level: s.level || 'Intermedio',
+            years_experience: s.years_experience || 0
+          })) || [],
+          projects: data.projects?.map(p => ({
+            id: p.id,
+            title: p.title || '',
+            description: p.description || '',
+            start_date: p.start_date || '',
+            end_date: p.end_date || '',
+            project_url: p.project_url || '',
+            technologies: p.technologies?.map(t => t.name) || []
+          })) || [],
+          certifications: data.certifications?.map(c => ({
+            id: c.id,
+            name: c.name || '',
+            issuing_organization: c.issuing_organization || '',
+            issue_date: c.issue_date || '',
+            expiration_date: c.expiration_date || null
+          })) || []
+        };
+
+        setStudentProfile(profile);
+      } catch (error) {
+        console.error('Error fetching CV data:', error);
+        setGenerationError('No se pudo cargar tu información de perfil. Por favor, completa tu perfil primero.');
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    fetchStudentData();
+  }, [user?.email]);
+
+  const [cvData, setCvData] = useState(null);
+
+  // Initialize cvData when studentProfile is loaded
+  useEffect(() => {
+    if (studentProfile) {
+      setCvData({
+        personalInfo: studentProfile.personalInfo,
+        summary: '',
+        education: studentProfile.academicInfo,
+        skills: studentProfile.skills,
+        projects: studentProfile.projects,
+        certifications: studentProfile.certifications
+      });
+    }
+  }, [studentProfile]);
 
   const handleGenerateCV = async () => {
     setIsGenerating(true);
@@ -123,7 +149,7 @@ export const CVGeneratorPage = () => {
   };
 
 
-  // ✅ NUEVA FUNCIÓN MEJORADA PARA COMPARTIR
+  //  NUEVA FUNCIÓN MEJORADA PARA COMPARTIR
   const handleShareCV = async () => {
     if (!email) {
       setShareMessage('Por favor ingresa un correo electrónico');
@@ -413,9 +439,44 @@ export const CVGeneratorPage = () => {
     );
   };
 
+  // Show loading state
+  if (loadingProfile) {
+    return (
+      <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
+        <Navbar />
+        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
+          <div className="text-center">
+            <Loader className="animate-spin h-12 w-12 mx-auto mb-4 text-primary-600" />
+            <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Cargando tu perfil...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if profile couldn't be loaded
+  if (generationError || !studentProfile) {
+    return (
+      <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
+        <Navbar />
+        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
+          <Card className="p-8 max-w-md">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <p className={`text-center mb-4 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              {generationError || 'No se pudo cargar tu perfil.'}
+            </p>
+            <Button variant="primary" fullWidth onClick={() => navigate('/estudiante/perfil')}>
+              Completar Perfil
+            </Button>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
-
+      <Navbar />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">

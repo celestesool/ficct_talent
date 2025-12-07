@@ -7,38 +7,78 @@ import {
   TrendingUp,
   X
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
 import { Navbar } from '../../components/common/Navbar';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
 
 export const InfoAcademicaPage = () => {
   const { isDark } = useTheme();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [academicInfo, setAcademicInfo] = useState({
-    career: 'Ingeniería en Sistemas',
-    faculty: 'Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones',
-    university: 'Universidad Autónoma Gabriel René Moreno',
-    current_semester: '8vo',
-    enrollment_year: '2020',
-    estimated_graduation: '2024',
-    current_gpa: '85.5',
-    total_credits: '180',
-    completed_credits: '150'
+    career: '',
+    faculty: '',
+    university: '',
+    current_semester: '',
+    enrollment_year: '',
+    estimated_graduation: '',
+    current_gpa: '',
+    total_credits: '',
+    completed_credits: ''
   });
 
-  const [courses, setCourses] = useState([
-    { id: '1', name: 'Algoritmos y Estructuras de Datos', grade: '95', semester: '3ro' },
-    { id: '2', name: 'Base de Datos I', grade: '88', semester: '4to' },
-    { id: '3', name: 'Ingeniería de Software', grade: '92', semester: '5to' },
-    { id: '4', name: 'Sistemas Operativos', grade: '85', semester: '6to' },
-    { id: '5', name: 'Redes de Computadoras', grade: '90', semester: '7mo' },
-  ]);
+  const [courses, setCourses] = useState([]);
+
+  // Fetch academic info from API
+  useEffect(() => {
+    const fetchAcademicInfo = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        if (!user?.id) {
+          setError('Usuario no autenticado');
+          setLoading(false);
+          return;
+        }
+
+        // Fetch academic info
+        const response = await api.get(`/academic-info/student/${user.id}`);
+        
+        if (response.data && response.data.length > 0) {
+          const info = response.data[0];
+          setAcademicInfo({
+            career: info.major || '',
+            faculty: info.faculty || '',
+            university: info.institution || '',
+            current_semester: info.current_semester || '',
+            enrollment_year: info.start_year?.toString() || '',
+            estimated_graduation: info.estimated_graduation_year?.toString() || '',
+            current_gpa: info.GPA?.toString() || '',
+            total_credits: '180',
+            completed_credits: '150'
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching academic info:', err);
+        setError('No se pudo cargar la información académica');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAcademicInfo();
+  }, [user?.id]);
 
   const handleChange = (field, value) => {
     setAcademicInfo(prev => ({ ...prev, [field]: value }));
@@ -95,6 +135,19 @@ export const InfoAcademicaPage = () => {
           </div>
         </div>
 
+        {error && (
+          <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-red-900/20 border border-red-500/50' : 'bg-red-50 border border-red-200'}`}>
+            <p className="text-red-600">⚠️ {error}</p>
+          </div>
+        )}
+
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          </div>
+        )}
+
+        {!loading && (
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Información Principal */}
           <div className="lg:col-span-2">
@@ -346,6 +399,7 @@ export const InfoAcademicaPage = () => {
             </Card>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
