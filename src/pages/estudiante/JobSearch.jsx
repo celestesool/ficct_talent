@@ -125,7 +125,7 @@ const JobSearch = () => {
     } catch (err) {
       console.error('Error LinkedIn:', err);
       setError('No se pudo conectar con LinkedIn. Mostrando ofertas locales.');
-      setJobs(realJobs.length > 0 ? realJobs : generateMockJobs(searchTerm, location));
+      setJobs(realJobs);
     } finally {
       setLoading(false);
     }

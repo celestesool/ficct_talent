@@ -12,6 +12,7 @@ import {
   Filter,
   MapPin,
   Plus,
+  Power,
   Save,
   Search,
   Trash2,
@@ -49,9 +50,6 @@ const OfertasPage = () => {
     expires_at: ''
   });
 
-  // -------------------------------------------------------
-  // LOAD ALL REAL JOBS FROM BACKEND
-  // -------------------------------------------------------
   useEffect(() => {
     loadOffers();
   }, []);
@@ -60,16 +58,24 @@ const OfertasPage = () => {
     try {
       const companyId = localStorage.getItem("user_id") || "1";
 
-      // 🎨 Usar servicio mock
       const result = await companyJobService.getCompanyJobs(companyId);
 
       if (result.success && result.data) {
-        // Agregar contador de aplicantes a cada oferta
-        const jobsWithApplicants = result.data.map(job => ({
-          ...job,
-          is_active: job.status === 'active',
-          applicants: job.id === 1 ? 2 : 0 // Mock: oferta 1 tiene 2 aplicantes
-        }));
+        const today = new Date();
+        
+        // Agregar contador de aplicantes y verificar expiración
+        const jobsWithApplicants = result.data.map(job => {
+          const deadline = new Date(job.deadline);
+          const isExpired = deadline < today;
+          
+          return {
+            ...job,
+            applicants: job.applications?.length || 0,
+            isExpired: isExpired,
+            // Si está expirada, forzar is_active a false en UI
+            is_active: isExpired ? false : job.is_active
+          };
+        });
 
         setOffers(jobsWithApplicants);
       }
@@ -78,9 +84,7 @@ const OfertasPage = () => {
     }
   }
 
-  // -------------------------------------------------------
-  // OPEN MODAL (mapped to backend fields)
-  // -------------------------------------------------------
+
   const handleOpenModal = (offer = null) => {
     if (offer) {
       setEditingOffer(offer);
@@ -109,28 +113,29 @@ const OfertasPage = () => {
     setShowModal(true);
   };
 
-  // -------------------------------------------------------
-  // SAVE OFFER → CREATE / UPDATE
-  // -------------------------------------------------------
+
   const handleSaveOffer = async () => {
     const companyId = localStorage.getItem("user_id") || "1";
+
+    const deadlineISO = newOffer.expires_at 
+      ? new Date(newOffer.expires_at + 'T23:59:59.999Z').toISOString()
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // Default: 30 días
 
     const payload = {
       title: newOffer.title,
       description: newOffer.description,
       requirements: newOffer.requirements,
+      responsibilities: newOffer.responsibilities || '',
       salary_range: newOffer.salary,
       job_type: newOffer.type,
       location: newOffer.location,
-      deadline: newOffer.expires_at,
-      company_id: companyId,
-      status: 'active'
+      deadline: deadlineISO,
+      company_id: companyId
     };
 
     try {
       let result;
 
-      // 🎨 Usar servicio mock
       if (editingOffer) {
         result = await companyJobService.updateJob(editingOffer.id, payload);
       } else {
@@ -139,7 +144,7 @@ const OfertasPage = () => {
 
       if (result.success) {
         setShowModal(false);
-        alert('✅ Oferta guardada correctamente (MOCK)');
+        alert('✅ Oferta guardada correctamente');
         loadOffers();
       }
     } catch (err) {
@@ -147,19 +152,35 @@ const OfertasPage = () => {
       alert("Error al guardar la oferta");
     }
   };
+  const handleToggleActive = async (offer) => {
+    const newStatus = !offer.is_active;
+    const action = newStatus ? "activar" : "pausar";
+    
+    if (!window.confirm(`¿Seguro que deseas ${action} esta oferta?`)) return;
 
-  // -------------------------------------------------------
-  // DELETE OFFER
-  // -------------------------------------------------------
+    try {
+      const result = await companyJobService.updateJob(offer.id, {
+        is_active: newStatus
+      });
+
+      if (result.success) {
+        alert(`✅ Oferta ${newStatus ? 'activada' : 'pausada'} correctamente`);
+        loadOffers();
+      }
+    } catch (err) {
+      console.error("Toggle active error:", err);
+      alert(`Error al ${action} la oferta`);
+    }
+  };
+
   const handleDeleteOffer = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar esta oferta?")) return;
 
     try {
-      // 🎨 Usar servicio mock
       const result = await companyJobService.deleteJob(id);
 
       if (result.success) {
-        alert('✅ Oferta eliminada correctamente (MOCK)');
+        alert('✅ Oferta eliminada correctamente');
         loadOffers();
       }
     } catch (err) {
@@ -193,8 +214,9 @@ const OfertasPage = () => {
   });
 
   // Status mapping
-  const getStatusInfo = (isActive) => {
-    if (isActive) return { color: 'green', text: 'Activa', icon: CheckCircle };
+  const getStatusInfo = (offer) => {
+    if (offer.isExpired) return { color: 'red', text: 'Expirada', icon: Clock };
+    if (offer.is_active) return { color: 'green', text: 'Activa', icon: CheckCircle };
     return { color: 'yellow', text: 'Pausada', icon: Clock };
   };
 
@@ -206,9 +228,6 @@ const OfertasPage = () => {
     return Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
   };
 
-  // -------------------------------------------------------
-  // UI (NOT MODIFIED)
-  // -------------------------------------------------------
   return (
     <div className={`min-h-screen ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
 
@@ -289,7 +308,7 @@ const OfertasPage = () => {
         ) : (
           <div className="grid gap-6">
             {filteredOffers.map((offer) => {
-              const info = getStatusInfo(offer.is_active);
+              const info = getStatusInfo(offer);
               const days = getDaysUntilExpiry(offer.deadline);
 
               return (
@@ -315,6 +334,14 @@ const OfertasPage = () => {
 
                     {/* Actions */}
                     <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleToggleActive(offer)}
+                        disabled={offer.isExpired}
+                        title={offer.isExpired ? "No se puede activar una oferta expirada" : (offer.is_active ? "Pausar oferta" : "Activar oferta")}
+                        className={offer.isExpired ? "opacity-50 cursor-not-allowed" : ""}
+                      >
+                        {offer.is_active ? <Power size={16} className="text-yellow-600" /> : <Power size={16} className="text-green-600" />}
+                      </button>
                       <button onClick={() => handleViewOfferDetails(offer.id)}>
                         <Eye size={16} />
                       </button>
@@ -447,6 +474,7 @@ const OfertasPage = () => {
                   icon={Calendar}
                   type="date"
                   value={newOffer.expires_at}
+                  min={new Date().toISOString().split('T')[0]}
                   onChange={(e) => setNewOffer({ ...newOffer, expires_at: e.target.value })}
                 />
 

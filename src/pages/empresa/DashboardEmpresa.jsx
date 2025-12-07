@@ -15,7 +15,7 @@ import { Navbar } from '../../components/common/Navbar';
 import { useTheme } from '../../contexts/ThemeContext';
 
 import { useEffect, useState } from 'react';
-import api from '../../services/api';
+import { companyJobService } from '../../api/services/companyService';
 
 export const DashboardEmpresa = () => {
   const { isDark } = useTheme();
@@ -23,6 +23,7 @@ export const DashboardEmpresa = () => {
 
   const [offers, setOffers] = useState([]);
   const [candidates, setCandidates] = useState([]);
+  const [profileViews, setProfileViews] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // =====================================================
@@ -44,10 +45,10 @@ export const DashboardEmpresa = () => {
       }
 
       // 1) Load this company's jobs
-      const jobsResponse = await api.get(`/jobs/company/${companyId}`);
+      const jobsResult = await companyJobService.getCompanyJobs(companyId);
 
       // Ensure jobs is always an array
-      const jobList = Array.isArray(jobsResponse) ? jobsResponse : [];
+      const jobList = jobsResult.success && Array.isArray(jobsResult.data) ? jobsResult.data : [];
 
       // ===========================
       //  AUTOMAP JOB DATA
@@ -71,30 +72,40 @@ export const DashboardEmpresa = () => {
       setOffers(mappedJobs);
 
       // ===========================
-      // 2) LOAD APPLICANTS PER JOB
+      // 2) LOAD APPLICANTS FROM JOBS
       // ===========================
 
       const applicantList = [];
 
       for (const job of jobList) {
-        const apps = await api.get(`/applications/job/${job.id}`);
-
-        // Map real applications → UI format
-        apps.forEach(app => {
-          const s = app.student;
-
-          applicantList.push({
-            id: app.id,
-            name: `${s.first_name} ${s.last_name}`,
-            skills: s.skills ? s.skills.split(',') : [],
-            match: 80, // placeholder
-            appliedFor: job.title,
-            email: s.email,
+        // Las aplicaciones ya vienen en job.applications
+        if (job.applications && Array.isArray(job.applications)) {
+          job.applications.forEach(app => {
+            if (app.student) {
+              const s = app.student;
+              applicantList.push({
+                id: app.id,
+                name: `${s.first_name || ''} ${s.last_name || ''}`.trim(),
+                skills: [], // TODO: obtener skills reales del estudiante
+                match: 80, // placeholder
+                appliedFor: job.title,
+                email: s.email || s.user?.email || '',
+              });
+            }
           });
-        });
+        }
       }
 
       setCandidates(applicantList);
+
+      // 3) CARGAR VISTAS DE PERFIL
+      try {
+        const viewsResult = await companyJobService.getViewsCount(companyId);
+        setProfileViews(viewsResult || 0);
+      } catch (viewError) {
+        console.error("Error loading profile views:", viewError);
+        setProfileViews(0);
+      }
 
     } catch (error) {
       console.error("Error loading dashboard:", error);
@@ -116,6 +127,13 @@ export const DashboardEmpresa = () => {
   // =====================================================
   // UPDATED STATS (REAL DATA)
   // =====================================================
+  
+  // Contar contrataciones (status = 'aceptado')
+  const hiredCount = offers.reduce((total, offer) => {
+    const hired = offer.raw?.applications?.filter(app => app.status === 'aceptado').length || 0;
+    return total + hired;
+  }, 0);
+
   const stats = [
     {
       label: 'Ofertas Activas',
@@ -131,13 +149,13 @@ export const DashboardEmpresa = () => {
     },
     {
       label: 'Vistas del Perfil',
-      value: '0',
+      value: profileViews,
       icon: Eye,
       color: 'green'
     },
     {
       label: 'Contrataciones',
-      value: '0',
+      value: hiredCount,
       icon: CheckCircle,
       color: 'orange'
     },
@@ -187,7 +205,7 @@ export const DashboardEmpresa = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, idx) => (
-            <Card key={idx}>
+            <Card key={idx} title={stat.tooltip || ''}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -236,16 +254,24 @@ export const DashboardEmpresa = () => {
               </div>
 
               <div className="space-y-4">
-                {recentOffers.map((offer) => (
-                  <div
-                    key={offer.id}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all
-                      ${isDark
-                        ? 'border-slate-700 hover:border-accent-3000 hover:bg-slate-700'
-                        : 'border-slate-200 hover:border-accent-400 hover:bg-accent-300'
-                      }`}
-                    onClick={() => handleViewOfferDetails(offer.id)}
-                  >
+                {recentOffers.length === 0 ? (
+                  <div className={`text-center py-8 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    <p>No hay ofertas publicadas aún</p>
+                    <Button variant="secondary" onClick={handleNewOffer} className="mt-4">
+                      Publicar primera oferta
+                    </Button>
+                  </div>
+                ) : (
+                  recentOffers.map((offer) => (
+                    <div
+                      key={offer.id}
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all
+                        ${isDark
+                          ? 'border-slate-700 hover:border-accent-3000 hover:bg-slate-700'
+                          : 'border-slate-200 hover:border-accent-400 hover:bg-accent-300'
+                        }`}
+                      onClick={() => handleViewOfferDetails(offer.id)}
+                    >
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -276,7 +302,8 @@ export const DashboardEmpresa = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </Card>
 

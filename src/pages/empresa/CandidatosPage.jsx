@@ -43,31 +43,61 @@ export const CandidatosPage = () => {
   // ===============================================
   const loadCandidates = async () => {
     try {
-      // 🎨 Usar servicio mock para todos los candidatos (jobId = 1 por defecto)
-      const result = await companyJobService.getJobCandidates(1);
+      const companyId = localStorage.getItem("user_id");
+      if (!companyId) {
+        console.error("No company ID found");
+        return;
+      }
 
-      if (result.success && result.data) {
-        const mapped = result.data.map((c) => ({
-          id: c.id,
-          studentId: c.student_id,
-          name: `${c.student.first_name} ${c.student.last_name}`,
-          email: c.student.email,
+      // Obtener todos los jobs de la empresa
+      const jobsResult = await companyJobService.getCompanyJobs(companyId);
+      
+      if (!jobsResult.success || !jobsResult.data) {
+        setCandidates([]);
+        return;
+      }
+
+      // Extraer todos los candidatos de todas las ofertas
+      const allCandidates = [];
+      
+      jobsResult.data.forEach(job => {
+        if (job.applications && Array.isArray(job.applications)) {
+          job.applications.forEach(app => {
+            if (app.student) {
+              allCandidates.push({
+                application: app,
+                student: app.student,
+                job: job
+              });
+            }
+          });
+        }
+      });
+
+      if (allCandidates.length > 0) {
+        const mapped = allCandidates.map((c) => ({
+          id: c.application.id,
+          studentId: c.student.id,
+          name: `${c.student.first_name || ''} ${c.student.last_name || ''}`.trim() || 'Nombre no disponible',
+          email: c.student.email || c.student.user?.email || 'Email no disponible',
           phone: c.student.phone_number || 'No especificado',
-          birthDate: '2000-05-15',
-          appliedFor: 'Desarrollador Frontend React',
-          appliedDate: new Date(c.applied_at).toLocaleDateString(),
-          gpa: 85,
-          institution: 'Universidad Mayor de San Simón',
-          certifications: 2,
-          projects: 3,
-          skills: c.skills_match || ['React', 'JavaScript', 'CSS'],
-          match: c.match_percentage,
-          status: c.status,
-          location: 'Santa Cruz',
+          birthDate: c.student.birth_date || 'No especificado',
+          appliedFor: c.job.title,
+          appliedDate: c.application.applied_at ? new Date(c.application.applied_at).toLocaleDateString() : 'N/A',
+          gpa: 85, // TODO: obtener de academic_info
+          institution: 'Universidad Mayor de San Simón', // TODO: obtener de academic_info
+          certifications: 0, // TODO: contar certificaciones reales
+          projects: 0, // TODO: contar proyectos reales
+          skills: [], // TODO: obtener skills reales del estudiante
+          match: 80, // TODO: calcular match real
+          status: c.application.status || 'aplicado',
+          location: 'Santa Cruz', // TODO: obtener ubicación real
           raw: c,
         }));
 
         setCandidates(mapped);
+      } else {
+        setCandidates([]);
       }
     } catch (err) {
       console.error("Error loading candidates:", err);
