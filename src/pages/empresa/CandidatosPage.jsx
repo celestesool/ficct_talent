@@ -38,9 +38,6 @@ export const CandidatosPage = () => {
   const [interviewModal, setInterviewModal] = useState(null);
   const [interviewDate, setInterviewDate] = useState("");
 
-  // ===============================================
-  // LOAD REAL CANDIDATES FROM BACKEND
-  // ===============================================
   const loadCandidates = async () => {
     try {
       const companyId = localStorage.getItem("user_id");
@@ -331,8 +328,8 @@ export const CandidatosPage = () => {
 
                 {/* Buttons */}
                 <div className="flex gap-2">
-                  <Button fullWidth variant="primary" onClick={() => setSelectedCandidate(c)}>
-                    <Eye size={16} /> Ver Perfil
+                  <Button fullWidth variant="primary" onClick={() => navigate(`/empresa/candidatos/${c.studentId}`)}>
+                    <Eye size={16} /> Ver Perfil Completo
                   </Button>
 
                   <Button variant="outline" onClick={() => contact(c)}>

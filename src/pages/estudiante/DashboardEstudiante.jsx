@@ -18,6 +18,8 @@ import { Card } from '../../components/common/Card';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../services/api';
+import { adminService } from '../../api/services/adminService';
+import { Megaphone } from 'lucide-react';
 
 export const DashboardEstudiante = () => {
   const { isDark } = useTheme();
@@ -30,24 +32,44 @@ export const DashboardEstudiante = () => {
     applications: 0
   });
   const [loading, setLoading] = useState(true);
-
+  const [announcements, setAnnouncements] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [profileViewCount, setProfileViewCount] = useState(0);
 
   useEffect(() => {
     const fetchCounts = async () => {
-      if (!user?.id) {
+      if (!user?.email) {
+        console.log('No user email found');
         setLoading(false);
         return;
       }
 
       try {
+        // First get student by email to get correct student ID
+        const studentRes = await api.get(`/students/email/${user.email}`);
+        const studentId = studentRes.data?.id;
+
+        if (!studentId) {
+          console.error('Student ID not found for email:', user.email);
+          setLoading(false);
+          return;
+        }
+
         // Fetch all counts in parallel
         const [projectsRes, certsRes, skillsRes, applicationsRes] = await Promise.all([
-          api.get(`/projects/student/${user.id}`),
-          api.get(`/certifications/student/${user.id}`),
-          api.get(`/skills/student/${user.id}`),
-          api.get(`/applications/student/${user.id}`)
+          api.get(`/projects/student/${studentId}`),
+          api.get(`/certifications/student/${studentId}`),
+          api.get(`/skills/student/${studentId}`),
+          api.get(`/applications/student/${studentId}`)
         ]);
+
+        // Fetch profile viewers separately (may fail if not implemented)
+        let viewersRes = { data: [] };
+        try {
+          viewersRes = await api.get(`/students/${studentId}/recent-viewers`, { params: { limit: 3 } });
+        } catch (viewerError) {
+          console.log('Profile viewers endpoint not available yet:', viewerError);
+        }
 
         setCounts({
           projects: projectsRes.data?.length || 0,
@@ -58,7 +80,19 @@ export const DashboardEstudiante = () => {
 
         // Build recent activity from real data
         const activities = [];
-        
+
+        // Add profile viewers
+        if (viewersRes.data?.length > 0) {
+          viewersRes.data.forEach(viewer => {
+            activities.push({
+              text: `${viewer.company?.name || 'Una empresa'} vio tu perfil`,
+              time: formatTimeAgo(viewer.viewed_at),
+              icon: Eye,
+              color: 'text-purple-600'
+            });
+          });
+        }
+
         // Add recent applications
         if (applicationsRes.data?.length > 0) {
           applicationsRes.data.slice(0, 2).forEach(app => {
@@ -83,7 +117,18 @@ export const DashboardEstudiante = () => {
           });
         }
 
-        setRecentActivity(activities.slice(0, 3));
+        setRecentActivity(activities.slice(0, 5));
+
+        // Get profile view count for last 7 days (may fail if not implemented)
+        try {
+          const viewCountRes = await api.get(`/students/${studentId}/views/count`, {
+            params: { days: 7 }
+          });
+          setProfileViewCount(viewCountRes.data?.count || 0);
+        } catch (viewCountError) {
+          console.log('Profile view count endpoint not available yet:', viewCountError);
+          setProfileViewCount(0);
+        }
       } catch (error) {
         console.error('Error fetching dashboard counts:', error);
       } finally {
@@ -91,16 +136,29 @@ export const DashboardEstudiante = () => {
       }
     };
 
+    const fetchAnnouncements = async () => {
+      try {
+        const response = await adminService.getAnnouncements();
+        // Filtrar solo anuncios para estudiantes o todos
+        const filtered = response.filter(a => a.target === 'students' || a.target === 'all');
+        setAnnouncements(filtered.slice(0, 3)); // Mostrar máximo 3
+      } catch (error) {
+        console.error('Error fetching announcements:', error);
+      }
+    };
+
+    fetchAnnouncements();
+
     fetchCounts();
   }, [user?.id]);
 
   const formatTimeAgo = (dateString) => {
     if (!dateString) return 'Hace un momento';
-    
+
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
-    
+
     if (diffInSeconds < 60) return 'Hace un momento';
     if (diffInSeconds < 3600) return `Hace ${Math.floor(diffInSeconds / 60)} minutos`;
     if (diffInSeconds < 86400) return `Hace ${Math.floor(diffInSeconds / 3600)} horas`;
@@ -148,6 +206,17 @@ export const DashboardEstudiante = () => {
       bgDark: 'bg-orange-500/10',
       textColor: 'text-orange-600',
       borderColor: 'border-orange-200 dark:border-orange-500/30'
+    },
+    {
+      label: 'Vistas de Perfil',
+      value: loading ? '...' : profileViewCount.toString(),
+      icon: Eye,
+      color: 'purple',
+      bgLight: 'bg-purple-50',
+      bgDark: 'bg-purple-500/10',
+      textColor: 'text-purple-600',
+      borderColor: 'border-purple-200 dark:border-purple-500/30',
+      subtitle: '(Últimos 7 días)'
     },
   ];
 
@@ -234,6 +303,45 @@ export const DashboardEstudiante = () => {
             Bienvenido de nuevo, gestiona tu perfil y encuentra nuevas oportunidades
           </p>
         </div>
+        {/* Anuncios */}
+        {announcements.length > 0 && (
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 rounded-full bg-gradient-to-b from-blue-500 to-indigo-500"></div>
+                <h2 className={`text-lg lg:text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Anuncios
+                </h2>
+              </div>
+              <Megaphone size={20} className={`${isDark ? 'text-slate-400' : 'text-slate-600'}`} />
+            </div>
+
+            <div className="space-y-4">
+              {announcements.map((announcement, idx) => (
+                <div
+                  key={announcement.id}
+                  className={`
+            p-4 rounded-lg border-l-4
+            ${announcement.type === 'info' ? 'border-blue-500' :
+                      announcement.type === 'warning' ? 'border-yellow-500' :
+                        announcement.type === 'success' ? 'border-green-500' : 'border-red-500'}
+            ${isDark ? 'bg-slate-800/50' : 'bg-slate-50'}
+          `}
+                >
+                  <h3 className={`font-bold text-sm mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    {announcement.title}
+                  </h3>
+                  <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                    {announcement.message}
+                  </p>
+                  <p className={`text-xs mt-2 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                    {new Date(announcement.created_at).toLocaleDateString('es-ES')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Stats Grid - MEJORADO */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10">
@@ -254,6 +362,11 @@ export const DashboardEstudiante = () => {
                   <p className={`text-3xl lg:text-4xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {stat.value}
                   </p>
+                  {stat.subtitle && (
+                    <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                      {stat.subtitle}
+                    </p>
+                  )}
                 </div>
                 <div className={`
                   p-4 rounded-2xl
@@ -383,6 +496,7 @@ export const DashboardEstudiante = () => {
                               {activity.time}
                             </p>
                           </div>
+
                         </div>
                       </div>
                     </div>
@@ -396,8 +510,10 @@ export const DashboardEstudiante = () => {
                   </p>
                 </div>
               )}
+
             </Card>
           </div>
+
         </div>
       </div>
     </div>

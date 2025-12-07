@@ -20,16 +20,18 @@ import { PerfilPage } from './pages/estudiante/PerfilPage';
 import { ProyectosPage } from './pages/estudiante/ProyectosPage';
 import { CVEditor } from './pages/estudiante/CVEditor';
 import { PostulacionesPage } from './pages/estudiante/PostulacionesPage';
+import { CompanyProfilePage } from './pages/estudiante/CompanyProfilePage';
 
 // Páginas de Empresa
 import { CandidatosPage } from './pages/empresa/CandidatosPage';
+import { StudentProfilePage } from './pages/empresa/StudentProfilePage';
 import { DashboardEmpresa } from './pages/empresa/DashboardEmpresa';
 import { OfertasPage } from './pages/empresa/OfertasPage';
 import { NotificationsPage } from './pages/empresa/NotificationsPage';
 import { RecommendationsPage } from './pages/empresa/RecommendationsPage';
 
 // Páginas de Admin
-import { DashboardAdmin } from './pages/admin/DashboardAdmin';
+import { DashboardAdmin } from './pages/admin/DashboardAdminNew';
 import { ModerationPage } from './pages/admin/ModerationPage';
 import { AnnouncementsPage } from './pages/admin/AnnouncementsPage';
 
@@ -66,6 +68,7 @@ function App() {
                 <Route path="ofertas" element={<JobSearch />} />
                 <Route path="postulaciones" element={<PostulacionesPage />} />
                 <Route path="cv-generator" element={<CVEditor />} />
+                <Route path="empresas/:companyId" element={<CompanyProfilePage />} />
               </Route>
 
               {/* Rutas de Empresa */}
@@ -76,7 +79,7 @@ function App() {
                 <Route path="ofertas/nueva" element={<OfertasPage />} />
                 <Route path="ofertas/:id" element={<OfertasPage />} />
                 <Route path="candidatos" element={<CandidatosPage />} />
-                <Route path="candidatos/:id" element={<CandidatosPage />} />
+                <Route path="candidatos/:studentId" element={<StudentProfilePage />} />
                 <Route path="notificaciones" element={<NotificationsPage />} />
                 <Route path="recomendaciones" element={<RecommendationsPage />} />
               </Route>

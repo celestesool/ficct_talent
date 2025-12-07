@@ -13,7 +13,8 @@ import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Navbar } from '../../components/common/Navbar';
 import { useTheme } from '../../contexts/ThemeContext';
-
+import { adminService } from '../../api/services/adminService';
+import { Megaphone } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { companyJobService } from '../../api/services/companyService';
 
@@ -25,6 +26,7 @@ export const DashboardEmpresa = () => {
   const [candidates, setCandidates] = useState([]);
   const [profileViews, setProfileViews] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [announcements, setAnnouncements] = useState([]);
 
   // =====================================================
   // LOAD DASHBOARD DATA FROM BACKEND (WITH AUTOMAPPING)
@@ -102,6 +104,14 @@ export const DashboardEmpresa = () => {
       try {
         const viewsResult = await companyJobService.getViewsCount(companyId);
         setProfileViews(viewsResult || 0);
+        try {
+          const response = await adminService.getAnnouncements();
+          // Filtrar solo anuncios para empresas o todos
+          const filtered = response.filter(a => a.target === 'companies' || a.target === 'all');
+          setAnnouncements(filtered.slice(0, 3)); // Mostrar máximo 3
+        } catch (announcementError) {
+          console.error("Error loading announcements:", announcementError);
+        }
       } catch (viewError) {
         console.error("Error loading profile views:", viewError);
         setProfileViews(0);
@@ -127,7 +137,7 @@ export const DashboardEmpresa = () => {
   // =====================================================
   // UPDATED STATS (REAL DATA)
   // =====================================================
-  
+
   // Contar contrataciones (status = 'aceptado')
   const hiredCount = offers.reduce((total, offer) => {
     const hired = offer.raw?.applications?.filter(app => app.status === 'aceptado').length || 0;
@@ -202,6 +212,43 @@ export const DashboardEmpresa = () => {
           </div>
         </div>
 
+        {/* Anuncios */}
+        {announcements.length > 0 && (
+          <Card className="mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                Anuncios
+              </h2>
+              <Megaphone size={20} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
+            </div>
+
+            <div className="space-y-3">
+              {announcements.map((announcement) => (
+                <div
+                  key={announcement.id}
+                  className={`
+            p-3 rounded-lg border-l-4
+            ${announcement.type === 'info' ? 'border-blue-500' :
+                      announcement.type === 'warning' ? 'border-yellow-500' :
+                        announcement.type === 'success' ? 'border-green-500' : 'border-red-500'}
+            ${isDark ? 'bg-slate-700' : 'bg-slate-100'}
+          `}
+                >
+                  <h3 className={`font-bold text-sm mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    {announcement.title}
+                  </h3>
+                  <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                    {announcement.message}
+                  </p>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                    {new Date(announcement.created_at).toLocaleDateString('es-ES')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, idx) => (
@@ -215,19 +262,17 @@ export const DashboardEmpresa = () => {
                     {stat.value}
                   </p>
                 </div>
-                <div className={`p-3 rounded-lg ${
-                  stat.color === 'purple' ? 'bg-accent-300 dark:bg-accent-700/20' :
+                <div className={`p-3 rounded-lg ${stat.color === 'purple' ? 'bg-accent-300 dark:bg-accent-700/20' :
                   stat.color === 'blue' ? 'bg-primary-100 dark:bg-primary-900/20' :
-                  stat.color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
-                  'bg-orange-100 dark:bg-orange-900/20'
-                }`}>
+                    stat.color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
+                      'bg-orange-100 dark:bg-orange-900/20'
+                  }`}>
                   <stat.icon
-                    className={`${
-                      stat.color === 'purple' ? 'text-accent-600' :
+                    className={`${stat.color === 'purple' ? 'text-accent-600' :
                       stat.color === 'blue' ? 'text-primary-600' :
-                      stat.color === 'green' ? 'text-green-600' :
-                      'text-orange-600'
-                    }`}
+                        stat.color === 'green' ? 'text-green-600' :
+                          'text-orange-600'
+                      }`}
                     size={24}
                   />
                 </div>
@@ -235,9 +280,6 @@ export const DashboardEmpresa = () => {
             </Card>
           ))}
         </div>
-
-        {/* Rest of UI stays EXACTLY the same */}
-        {/* -------------------------------------------- */}
 
         <div className="grid lg:grid-cols-3 gap-6">
 
@@ -272,36 +314,36 @@ export const DashboardEmpresa = () => {
                         }`}
                       onClick={() => handleViewOfferDetails(offer.id)}
                     >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                          {offer.title}
-                        </h3>
-                        <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                          {offer.posted}
-                        </p>
-                      </div>
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            {offer.title}
+                          </h3>
+                          <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                            {offer.posted}
+                          </p>
+                        </div>
 
-                      <span className={`
+                        <span className={`
                         px-3 py-1 rounded-full text-xs font-semibold
                         ${offer.statusColor === 'green'
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                          : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                        }
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          }
                       `}>
-                        {offer.status}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <Users size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
-                        <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                          {offer.applicants} candidatos
+                          {offer.status}
                         </span>
                       </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <Users size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
+                          <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                            {offer.applicants} candidatos
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
                   ))
                 )}
               </div>
@@ -334,9 +376,8 @@ export const DashboardEmpresa = () => {
                 {topCandidates.map((candidate, idx) => (
                   <div
                     key={idx}
-                    className={`p-3 rounded-lg cursor-pointer ${
-                      isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-accent-300 hover:bg-accent-300'
-                    }`}
+                    className={`p-3 rounded-lg cursor-pointer ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-accent-300 hover:bg-accent-300'
+                      }`}
                     onClick={() => handleViewCandidateDetails(candidate.id)}
                   >
                     <div className="flex justify-between items-start mb-2">
@@ -368,9 +409,8 @@ export const DashboardEmpresa = () => {
               <div className="space-y-3">
                 <button
                   onClick={handleNewOffer}
-                  className={`w-full p-3 rounded-lg text-left ${
-                    isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'
-                  }`}
+                  className={`w-full p-3 rounded-lg text-left ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <Plus size={20} className="text-accent-600" />
@@ -382,9 +422,8 @@ export const DashboardEmpresa = () => {
 
                 <button
                   onClick={handleViewAllCandidates}
-                  className={`w-full p-3 rounded-lg text-left ${
-                    isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'
-                  }`}
+                  className={`w-full p-3 rounded-lg text-left ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <Users size={20} className="text-primary-600" />
@@ -396,9 +435,8 @@ export const DashboardEmpresa = () => {
 
                 <button
                   onClick={handleViewReports}
-                  className={`w-full p-3 rounded-lg text-left ${
-                    isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'
-                  }`}
+                  className={`w-full p-3 rounded-lg text-left ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <FileText size={20} className="text-green-600" />

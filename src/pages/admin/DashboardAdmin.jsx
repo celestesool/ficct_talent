@@ -1,4 +1,3 @@
-// Dashboard Administrativo (CU15)
 import { useState, useEffect } from 'react';
 import { Users, Briefcase, FileText, TrendingUp, AlertTriangle, CheckCircle, Building } from 'lucide-react';
 import { Card } from '../../components/common/Card';

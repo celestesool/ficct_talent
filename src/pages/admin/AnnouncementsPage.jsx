@@ -1,5 +1,5 @@
 // Página de Comunicados Masivos (CU16)
-import { Send, Users, Building, Globe, MessageSquare, Eye, Plus, X, AlertCircle } from 'lucide-react';
+import { Send, Users, Building, Globe, MessageSquare, Eye, Plus, X, AlertCircle, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
@@ -60,6 +60,19 @@ export const AnnouncementsPage = () => {
             alert('❌ Error al enviar comunicado');
         } finally {
             setSending(false);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('¿Estás seguro de eliminar este comunicado?')) return;
+
+        try {
+            await adminService.deleteAnnouncement(id);
+            await fetchAnnouncements();
+            alert('✅ Comunicado eliminado');
+        } catch (err) {
+            console.error('Error al eliminar:', err);
+            alert('❌ Error al eliminar comunicado');
         }
     };
 
@@ -174,12 +187,24 @@ export const AnnouncementsPage = () => {
                                             <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                                                 {announcement.title}
                                             </h3>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${announcement.target === 'students' ? 'bg-primary-100 text-primary-800' :
+                                            <div className="flex items-center gap-2">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${announcement.target === 'students' ? 'bg-primary-100 text-primary-800' :
                                                     announcement.target === 'companies' ? 'bg-accent-100 text-accent-800' :
                                                         'bg-green-100 text-green-800'
-                                                }`}>
-                                                {targetInfo.label}
-                                            </span>
+                                                    }`}>
+                                                    {targetInfo.label}
+                                                </span>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDelete(announcement.id);
+                                                    }}
+                                                    className="p-1 text-red-500 hover:bg-red-100 rounded-full transition-colors"
+                                                    title="Eliminar comunicado"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <p className={`mb-4 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
@@ -260,8 +285,8 @@ export const AnnouncementsPage = () => {
                                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                         placeholder="Ej: Bienvenida al nuevo semestre"
                                         className={`w-full px-4 py-3 rounded-lg border-2 transition-colors ${isDark
-                                                ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400'
-                                                : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                                            ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400'
+                                            : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
                                             } focus:border-primary-500 focus:outline-none`}
                                     />
                                 </div>
@@ -277,8 +302,8 @@ export const AnnouncementsPage = () => {
                                         placeholder="Escribe tu mensaje aquí..."
                                         rows={6}
                                         className={`w-full px-4 py-3 rounded-lg border-2 transition-colors ${isDark
-                                                ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400'
-                                                : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                                            ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400'
+                                            : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
                                             } focus:border-primary-500 focus:outline-none`}
                                     />
                                 </div>
@@ -292,8 +317,8 @@ export const AnnouncementsPage = () => {
                                         value={formData.type}
                                         onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                                         className={`w-full px-4 py-3 rounded-lg border-2 transition-colors ${isDark
-                                                ? 'bg-slate-800 border-slate-600 text-white'
-                                                : 'bg-white border-slate-300 text-slate-900'
+                                            ? 'bg-slate-800 border-slate-600 text-white'
+                                            : 'bg-white border-slate-300 text-slate-900'
                                             } focus:border-primary-500 focus:outline-none`}
                                     >
                                         <option value="info">Información</option>
@@ -312,10 +337,10 @@ export const AnnouncementsPage = () => {
                                         <button
                                             onClick={() => setFormData({ ...formData, target: 'students' })}
                                             className={`p-4 rounded-lg border-2 transition-all ${formData.target === 'students'
-                                                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                                                    : isDark
-                                                        ? 'border-slate-600 hover:border-slate-500'
-                                                        : 'border-slate-300 hover:border-slate-400'
+                                                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                                                : isDark
+                                                    ? 'border-slate-600 hover:border-slate-500'
+                                                    : 'border-slate-300 hover:border-slate-400'
                                                 }`}
                                         >
                                             <Users className={formData.target === 'students' ? 'text-primary-600' : 'text-slate-500'} size={24} style={{ margin: '0 auto 0.5rem' }} />
@@ -327,10 +352,10 @@ export const AnnouncementsPage = () => {
                                         <button
                                             onClick={() => setFormData({ ...formData, target: 'companies' })}
                                             className={`p-4 rounded-lg border-2 transition-all ${formData.target === 'companies'
-                                                    ? 'border-accent-500 bg-accent-50 dark:bg-accent-900/20'
-                                                    : isDark
-                                                        ? 'border-slate-600 hover:border-slate-500'
-                                                        : 'border-slate-300 hover:border-slate-400'
+                                                ? 'border-accent-500 bg-accent-50 dark:bg-accent-900/20'
+                                                : isDark
+                                                    ? 'border-slate-600 hover:border-slate-500'
+                                                    : 'border-slate-300 hover:border-slate-400'
                                                 }`}
                                         >
                                             <Building className={formData.target === 'companies' ? 'text-accent-600' : 'text-slate-500'} size={24} style={{ margin: '0 auto 0.5rem' }} />
@@ -342,10 +367,10 @@ export const AnnouncementsPage = () => {
                                         <button
                                             onClick={() => setFormData({ ...formData, target: 'all' })}
                                             className={`p-4 rounded-lg border-2 transition-all ${formData.target === 'all'
-                                                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                                                    : isDark
-                                                        ? 'border-slate-600 hover:border-slate-500'
-                                                        : 'border-slate-300 hover:border-slate-400'
+                                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                                                : isDark
+                                                    ? 'border-slate-600 hover:border-slate-500'
+                                                    : 'border-slate-300 hover:border-slate-400'
                                                 }`}
                                         >
                                             <Globe className={formData.target === 'all' ? 'text-green-600' : 'text-slate-500'} size={24} style={{ margin: '0 auto 0.5rem' }} />

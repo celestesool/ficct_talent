@@ -37,7 +37,8 @@ export const Navbar = () => {
   //  DETECTAR TIPO DE USUARIO POR LA RUTA ACTUAL
   const currentPath = location.pathname;
   const isEstudiante = currentPath.includes('/estudiante');
-  const userType = isEstudiante ? 'estudiante' : 'empresa';
+  const isAdmin = currentPath.includes('/admin');
+  const userType = isAdmin ? 'admin' : isEstudiante ? 'estudiante' : 'empresa';
 
   // Rutas para Estudiante - Agrupadas por categoría (igual que tenías)
   const estudianteRoutes = [
@@ -65,18 +66,25 @@ export const Navbar = () => {
     }
   ];
 
-  // Rutas para Empresa (igual que tenías)
+  // Rutas para Empresa
   const empresaRoutes = [
     { path: '/empresa/dashboard', label: 'Dashboard', icon: Home },
     { path: '/empresa/ofertas', label: 'Ofertas', icon: Briefcase },
     { path: '/empresa/candidatos', label: 'Candidatos', icon: Users },
   ];
 
+  // Rutas para Admin
+  const adminRoutes = [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: Home },
+    { path: '/admin/moderation', label: 'Moderación', icon: Users },
+    { path: '/admin/announcements', label: 'Anuncios', icon: Briefcase },
+  ];
+
   const getEstudianteRoutes = () => {
     return estudianteRoutes.flatMap(group => group.routes || []);
   };
 
-  const routes = isEstudiante ? getEstudianteRoutes() : empresaRoutes;
+  const routes = isAdmin ? adminRoutes : isEstudiante ? getEstudianteRoutes() : empresaRoutes;
 
   // REEMPLAZO: Detectar ruta activa con useLocation
   const isActiveRoute = (path) => {
@@ -177,9 +185,9 @@ export const Navbar = () => {
                 ))}
               </div>
             ) : (
-              // Navegación simple para empresa 
+              // Navegación simple para empresa y admin
               <div className="flex items-center gap-2">
-                {empresaRoutes.map((route) => {
+                {routes.map((route) => {
                   const Icon = route.icon;
                   return (
                     <button
@@ -188,7 +196,9 @@ export const Navbar = () => {
                       className={`
                         flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium
                         ${isActiveRoute(route.path)
-                          ? 'bg-accent-600 text-white shadow-lg shadow-accent-3000/25'
+                          ? isAdmin 
+                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
+                            : 'bg-accent-600 text-white shadow-lg shadow-accent-3000/25'
                           : isDark
                             ? 'text-slate-300 hover:bg-slate-800 hover:text-white hover:shadow-lg'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-lg'

@@ -421,9 +421,21 @@ const JobSearch = () => {
                       </h3>
                       <div className="flex items-center gap-2 mb-2">
                         <Building size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
-                        <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                          {job.company?.name || job.company}
-                        </span>
+                        {job.company?.id ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/estudiante/empresas/${job.company.id}`);
+                            }}
+                            className={`${isDark ? 'text-slate-300 hover:text-primary-400' : 'text-slate-700 hover:text-primary-600'} hover:underline transition-colors`}
+                          >
+                            {job.company.name}
+                          </button>
+                        ) : (
+                          <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
+                            {job.company?.name || job.company}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
