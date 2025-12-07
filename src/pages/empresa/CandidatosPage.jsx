@@ -22,7 +22,7 @@ import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { Navbar } from "../../components/common/Navbar";
 import { useTheme } from "../../contexts/ThemeContext";
-import { apiService } from "../../services/api";
+import { companyJobService } from "../../api/services/companyService";
 
 export const CandidatosPage = () => {
   const { isDark } = useTheme();
@@ -43,33 +43,32 @@ export const CandidatosPage = () => {
   // ===============================================
   const loadCandidates = async () => {
     try {
-      const companyId = localStorage.getItem("user_id");
-      if (!companyId) return;
+      // 🎨 Usar servicio mock para todos los candidatos (jobId = 1 por defecto)
+      const result = await companyJobService.getJobCandidates(1);
 
-      const res = await apiService.get(`/applications/company/${companyId}`);
-      const data = Array.isArray(res.data) ? res.data : [];
+      if (result.success && result.data) {
+        const mapped = result.data.map((c) => ({
+          id: c.id,
+          studentId: c.student_id,
+          name: `${c.student.first_name} ${c.student.last_name}`,
+          email: c.student.email,
+          phone: c.student.phone_number || 'No especificado',
+          birthDate: '2000-05-15',
+          appliedFor: 'Desarrollador Frontend React',
+          appliedDate: new Date(c.applied_at).toLocaleDateString(),
+          gpa: 85,
+          institution: 'Universidad Mayor de San Simón',
+          certifications: 2,
+          projects: 3,
+          skills: c.skills_match || ['React', 'JavaScript', 'CSS'],
+          match: c.match_percentage,
+          status: c.status,
+          location: 'Santa Cruz',
+          raw: c,
+        }));
 
-      const mapped = data.map((c) => ({
-        id: c.application_id,
-        studentId: c.student.id,
-        name: c.student.first_name + " " + c.student.last_name,
-        email: c.student.email,
-        phone: c.student.phone_number,
-        birthDate: c.student.birthDate,
-        appliedFor: c.job_title,
-        appliedDate: new Date(c.applied_at).toLocaleDateString(),
-        gpa: c.academicInfo?.[0]?.GPA ?? 0,
-        institution: c.academicInfo?.[0]?.institution ?? "No especificado",
-        certifications: c.certifications.length,
-        projects: c.projects.length,
-        skills: c.skills.map((s) => s.skill.name),
-        match: c.match,
-        status: c.status,
-        location: "Santa Cruz",
-        raw: c,
-      }));
-
-      setCandidates(mapped);
+        setCandidates(mapped);
+      }
     } catch (err) {
       console.error("Error loading candidates:", err);
     }
@@ -135,15 +134,18 @@ export const CandidatosPage = () => {
 
   const sendInterview = async () => {
     try {
-      await apiService.patch(
-        `/applications/${interviewModal.id}/status`,
-        { status: "interview" }
-      );
+      // 🎨 MODO MOCK: Simular actualización de estado
+      alert(`✅ Entrevista programada para ${interviewModal.name} (MOCK)\nFecha: ${interviewDate}`);
 
-      alert("Entrevista programada correctamente.");
+      // Actualizar estado localmente
+      setCandidates(candidates.map(c =>
+        c.id === interviewModal.id
+          ? { ...c, status: 'interview' }
+          : c
+      ));
+
       setInterviewModal(null);
       setInterviewDate("");
-      loadCandidates();
     } catch (err) {
       console.error(err);
       alert("Error al programar entrevista.");

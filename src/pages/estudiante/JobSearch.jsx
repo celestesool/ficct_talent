@@ -13,6 +13,7 @@ import {
   MapPin,
   Search,
   Sparkles,
+  TrendingUp,
   X,
   Zap
 } from 'lucide-react';
@@ -23,6 +24,7 @@ import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import JobDetailModal from '../../components/estudiante/JobDetailModal';
 import { useTheme } from '../../contexts/ThemeContext';
+import { recommendationService } from '../../services/recommendationService';
 
 const JobSearch = () => {
 
@@ -32,8 +34,10 @@ const JobSearch = () => {
 
   const [jobs, setJobs] = useState([]);           // Jobs que se muestran actualmente
   const [realJobs, setRealJobs] = useState([]);   // Jobs del backend
+  const [recommendedJobs, setRecommendedJobs] = useState([]); // Jobs recomendados por IA
   const [loading, setLoading] = useState(false);  // Búsqueda LinkedIn
   const [loadingReal, setLoadingReal] = useState(true);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('Bolivia');
@@ -61,6 +65,26 @@ const JobSearch = () => {
     };
     loadRealJobs();
   }, []);
+
+  // Cargar recomendaciones inteligentes
+  useEffect(() => {
+    if (studentId) {
+      loadRecommendations();
+    }
+  }, [studentId]);
+
+  const loadRecommendations = async () => {
+    try {
+      setLoadingRecommendations(true);
+      const recommendations = await recommendationService.getRecommendedJobsForStudent(studentId, 5);
+      setRecommendedJobs(recommendations || []);
+    } catch (error) {
+      console.error('Error loading recommendations:', error);
+      setRecommendedJobs([]);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  };
 
   // Si se limpia la búsqueda y hay empleos reales → mostrarlos
   useEffect(() => {
@@ -290,6 +314,73 @@ const JobSearch = () => {
             ))}
           </div>
         </Card>
+
+        {/* Empleos Recomendados por IA */}
+        {!searchTerm && recommendedJobs.length > 0 && (
+          <Card className="mb-8 border-primary-200 dark:border-primary-700 bg-gradient-to-r from-primary-50/50 to-accent-50/50 dark:from-primary-900/20 dark:to-accent-900/20">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/50">
+                  <TrendingUp className="text-primary-600 dark:text-primary-400" size={24} />
+                </div>
+                <div>
+                  <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    Empleos Recomendados para ti
+                  </h2>
+                  <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    Seleccionados según tus habilidades
+                  </p>
+                </div>
+              </div>
+
+              {loadingRecommendations ? (
+                <div className="text-center py-8">
+                  <div className={`inline-block animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-primary-400' : 'border-primary-600'}`}></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  {recommendedJobs.slice(0, 5).map((rec, index) => (
+                    <div
+                      key={index}
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${isDark ? 'bg-slate-800 border-slate-700 hover:border-primary-500' : 'bg-white border-slate-200 hover:border-primary-500'}`}
+                      onClick={() => {
+                        const job = realJobs.find(j => j.id === rec.jobId);
+                        if (job) handleSeeDetails(job);
+                      }}
+                    >
+                      <div className="mb-3">
+                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-bold ${rec.matchScore >= 80 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'}`}>
+                          {rec.matchScore}% Match
+                        </span>
+                      </div>
+                      <h4 className={`font-bold text-sm mb-2 line-clamp-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        {rec.title}
+                      </h4>
+                      <p className={`text-xs mb-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        {rec.company}
+                      </p>
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {rec.matchedSkills.slice(0, 2).map((skill, i) => (
+                          <span key={i} className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-700'}`}>
+                            ✓ {skill}
+                          </span>
+                        ))}
+                        {rec.matchedSkills.length > 2 && (
+                          <span className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
+                            +{rec.matchedSkills.length - 2}
+                          </span>
+                        )}
+                      </div>
+                      <Button variant="outline" size="sm" className="w-full text-xs">
+                        <Eye size={14} className="mr-1" /> Ver detalles
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
 
         {error && (
           <Card className="mb-6 border-yellow-500/30 bg-yellow-500/5 p-4">

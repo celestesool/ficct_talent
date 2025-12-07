@@ -44,8 +44,6 @@ export const authService = {
     // Axios returns: { data: {...}, status: ... }
     const response = axiosResponse.data;
 
-    console.log("Backend normalized response:", response);
-
     if (!response || !response.user) {
       throw new Error('Login response is missing "user"');
     }

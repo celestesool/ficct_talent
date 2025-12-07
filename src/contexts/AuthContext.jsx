@@ -1,72 +1,81 @@
-import { createContext, useContext, useState } from 'react';
-// import { authService } from '../services/authService'; // ⚠️ Comentado para modo diseño
+import { createContext, useContext, useState, useEffect } from 'react';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // 🎨 MODO DISEÑO: Usuario simulado sin backend
-  const mockUser = {
-    id: 1,
-    email: 'estudiante@demo.com',
-    user_type: 'estudiante',
-    name: 'Juan Pérez',
-    first_name: 'Juan',
-    last_name: 'Pérez'
-  };
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const [user, setUser] = useState(mockUser);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  // Restaurar usuario del localStorage al cargar
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('access_token');
+
+    if (storedUser && token) {
+      try {
+        setUser(JSON.parse(storedUser));
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Error al restaurar usuario:', error);
+        localStorage.removeItem('user');
+        localStorage.removeItem('access_token');
+      }
+    }
+    setLoading(false);
+  }, []);
 
   const login = async (credentials, userType) => {
-    // 🎨 MODO DISEÑO: Login simulado
-    console.log('🎨 Login simulado (sin backend):', credentials, userType);
-
-    // Simular usuario según tipo
-    const simulatedUser = userType === 'empresa'
-      ? { id: 2, email: credentials.email, user_type: 'empresa', name: 'Empresa Demo' }
-      : { id: 1, email: credentials.email, user_type: 'estudiante', name: 'Estudiante Demo' };
-
-    setUser(simulatedUser);
-    setIsAuthenticated(true);
-    localStorage.setItem('user', JSON.stringify(simulatedUser));
-
-    return { user: simulatedUser };
-
-    /* ⚠️ Comentado: llamada real al backend
     try {
       const response = await authService.login(credentials, userType);
-      setUser(response.user);
-      setIsAuthenticated(true);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      return response;
+
+      if (response && response.user) {
+        setUser(response.user);
+        setIsAuthenticated(true);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        
+        return { user: response.user };
+      }
+
+      throw new Error('Respuesta inválida del servidor');
     } catch (error) {
+      console.error('❌ Error en login:', error.message);
       throw error;
     }
-    */
   };
 
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('user');
-    console.log('🎨 Logout simulado');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
   };
 
-  // 🎨 MODO DISEÑO: Registro simulado
   const registerStudent = async (studentData) => {
-    console.log('🎨 Registro estudiante simulado (sin backend):', studentData);
-    return { success: true, message: 'Registro simulado exitoso' };
+    try {
+      const response = await authService.registerStudent(studentData);
+      return response;
+    } catch (error) {
+      throw error;
+    }
   };
 
   const registerCompany = async (companyData) => {
-    console.log('🎨 Registro empresa simulado (sin backend):', companyData);
-    return { success: true, message: 'Registro simulado exitoso' };
+    try {
+      const response = await authService.registerCompany(companyData);
+      return response;
+    } catch (error) {
+      throw error;
+    }
   };
 
   return (
     <AuthContext.Provider value={{
       user,
       isAuthenticated,
+      loading,
       login,
       logout,
       registerStudent,

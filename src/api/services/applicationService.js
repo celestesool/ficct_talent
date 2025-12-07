@@ -38,7 +38,7 @@ export const applicationService = {
     }
   },
 
-  // Método para cancelar una postulación falta en el backend
+  // Método para cancelar una postulación
   withdrawApplication: async (applicationId, studentId) => {
     try {
       const response = await axios.delete(`${API_BASE}/applications/${applicationId}/withdraw`, {

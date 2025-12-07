@@ -19,6 +19,7 @@ export const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [adminClicks, setAdminClicks] = useState(0);
 
   const isEstudiante = userType === 'estudiante';
 
@@ -40,9 +41,7 @@ export const LoginPage = () => {
     setError('');
 
     try {
-      console.log('Intentando login como:', userType);
       const response = await login(formData, userType);
-      console.log('Respuesta login:', response);
 
       if (!response || !response.user) throw new Error('Error de autenticación.');
 
@@ -56,6 +55,20 @@ export const LoginPage = () => {
 
   const handleGoBack = () => {
     navigate('/');
+  };
+
+  // 🔐 Trigger secreto: 3 clics en el logo para ir a admin login
+  const handleLogoClick = () => {
+    const newClicks = adminClicks + 1;
+    setAdminClicks(newClicks);
+
+    if (newClicks === 3) {
+      navigate('/admin-login');
+      setAdminClicks(0);
+    }
+
+    // Reset después de 5 segundos
+    setTimeout(() => setAdminClicks(0), 5000);
   };
 
   return (
@@ -78,7 +91,8 @@ export const LoginPage = () => {
         <Card className="w-full max-w-md">
           <div className="text-center mb-8">
             <div
-              className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+              onClick={handleLogoClick}
+              className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-110 ${
                 isEstudiante
                   ? isDark
                     ? 'bg-primary-600'
@@ -87,6 +101,7 @@ export const LoginPage = () => {
                   ? 'bg-primary-600'
                   : 'bg-primary-100'
               }`}
+              title={adminClicks > 0 ? `${3 - adminClicks} clics para admin` : 'Panel de login'}
             >
               {isEstudiante ? (
                 <GraduationCap

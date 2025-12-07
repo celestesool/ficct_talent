@@ -6,6 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { ConfirmEmailPage } from './pages/ConfirmEmailPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
+import { AdminLoginPage } from './pages/AdminLoginPage';
 import { RegistroPage } from './pages/RegistroPage';
 import { SobreNosotrosPage } from "./pages/SobreNosotrosPage";
 
@@ -17,18 +18,26 @@ import { InfoAcademicaPage } from './pages/estudiante/InfoAcademicaPage';
 import JobSearch from './pages/estudiante/JobSearch';
 import { PerfilPage } from './pages/estudiante/PerfilPage';
 import { ProyectosPage } from './pages/estudiante/ProyectosPage';
+import { CVEditor } from './pages/estudiante/CVEditor';
+import { PostulacionesPage } from './pages/estudiante/PostulacionesPage';
 
 // Páginas de Empresa
 import { CandidatosPage } from './pages/empresa/CandidatosPage';
 import { DashboardEmpresa } from './pages/empresa/DashboardEmpresa';
 import { OfertasPage } from './pages/empresa/OfertasPage';
+import { NotificationsPage } from './pages/empresa/NotificationsPage';
+import { RecommendationsPage } from './pages/empresa/RecommendationsPage';
+
+// Páginas de Admin
+import { DashboardAdmin } from './pages/admin/DashboardAdmin';
+import { ModerationPage } from './pages/admin/ModerationPage';
+import { AnnouncementsPage } from './pages/admin/AnnouncementsPage';
 
 // Layouts
 import { CompanyLayout } from './components/layout/CompanyLayout';
 import { StudentLayout } from './components/layout/StudentLayout';
+import { AdminLayout } from './components/layout/AdminLayout';
 import { UserTypeProvider } from './contexts/userTypeContext';
-import { CVEditor } from './pages/estudiante/CVEditor';
-import { PostulacionesPage } from './pages/estudiante/PostulacionesPage';
 
 function App() {
   return (
@@ -41,6 +50,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/sobre-nosotros" element={<SobreNosotrosPage />} />
               <Route path="/:userType/login" element={<LoginPage />} />
+              <Route path="/admin-login" element={<AdminLoginPage />} />
               <Route path="/:userType/registro" element={<RegistroPage />} />
               <Route path="/confirmar" element={<ConfirmEmailPage />} />
 
@@ -67,6 +77,16 @@ function App() {
                 <Route path="ofertas/:id" element={<OfertasPage />} />
                 <Route path="candidatos" element={<CandidatosPage />} />
                 <Route path="candidatos/:id" element={<CandidatosPage />} />
+                <Route path="notificaciones" element={<NotificationsPage />} />
+                <Route path="recomendaciones" element={<RecommendationsPage />} />
+              </Route>
+
+              {/* Rutas de Administrador */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<DashboardAdmin />} />
+                <Route path="dashboard" element={<DashboardAdmin />} />
+                <Route path="moderation" element={<ModerationPage />} />
+                <Route path="announcements" element={<AnnouncementsPage />} />
               </Route>
 
               {/* Ruta por defecto */}

@@ -25,7 +25,7 @@ import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
 import { useTheme } from '../../contexts/ThemeContext';
-import apiService from '../../services/api.js';
+import { companyJobService } from '../../api/services/companyService';
 
 const OfertasPage = () => {
   const { isDark } = useTheme();
@@ -58,21 +58,21 @@ const OfertasPage = () => {
 
   async function loadOffers() {
     try {
-      const companyId = localStorage.getItem("user_id");
-      if (!companyId) return;
+      const companyId = localStorage.getItem("user_id") || "1";
 
-      const response = await apiService.get(`/jobs/company/${companyId}`);
-      const jobs = response.jobs || response.data || response.items || [];
-      setOffers(jobs);
+      // 🎨 Usar servicio mock
+      const result = await companyJobService.getCompanyJobs(companyId);
 
+      if (result.success && result.data) {
+        // Agregar contador de aplicantes a cada oferta
+        const jobsWithApplicants = result.data.map(job => ({
+          ...job,
+          is_active: job.status === 'active',
+          applicants: job.id === 1 ? 2 : 0 // Mock: oferta 1 tiene 2 aplicantes
+        }));
 
-      // Load applicants count per job
-      for (const job of jobs) {
-        const appsResp = await apiService.get(`/applications/job/${job.id}`);
-        job.applicants = Array.isArray(appsResp) ? appsResp.length : 0;
+        setOffers(jobsWithApplicants);
       }
-
-      setOffers(jobs);
     } catch (err) {
       console.error("Error loading jobs:", err);
     }
@@ -113,7 +113,7 @@ const OfertasPage = () => {
   // SAVE OFFER → CREATE / UPDATE
   // -------------------------------------------------------
   const handleSaveOffer = async () => {
-    const companyId = localStorage.getItem("user_id");
+    const companyId = localStorage.getItem("user_id") || "1";
 
     const payload = {
       title: newOffer.title,
@@ -123,18 +123,25 @@ const OfertasPage = () => {
       job_type: newOffer.type,
       location: newOffer.location,
       deadline: newOffer.expires_at,
-      company_id: companyId
+      company_id: companyId,
+      status: 'active'
     };
 
     try {
+      let result;
+
+      // 🎨 Usar servicio mock
       if (editingOffer) {
-        await apiService.patch(`/jobs/${editingOffer.id}`, payload);
+        result = await companyJobService.updateJob(editingOffer.id, payload);
       } else {
-        await apiService.post("/jobs", payload);
+        result = await companyJobService.createJob(payload);
       }
 
-      setShowModal(false);
-      loadOffers();
+      if (result.success) {
+        setShowModal(false);
+        alert('✅ Oferta guardada correctamente (MOCK)');
+        loadOffers();
+      }
     } catch (err) {
       console.error("Error saving job:", err);
       alert("Error al guardar la oferta");
@@ -148,8 +155,13 @@ const OfertasPage = () => {
     if (!window.confirm("¿Seguro que deseas eliminar esta oferta?")) return;
 
     try {
-      await apiService.delete(`/jobs/${id}`);
-      loadOffers();
+      // 🎨 Usar servicio mock
+      const result = await companyJobService.deleteJob(id);
+
+      if (result.success) {
+        alert('✅ Oferta eliminada correctamente (MOCK)');
+        loadOffers();
+      }
     } catch (err) {
       console.error("Delete error:", err);
       alert("Error al eliminar la oferta");
@@ -233,11 +245,10 @@ const OfertasPage = () => {
                 placeholder="Buscar ofertas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full pl-10 pr-4 py-2 rounded-lg border-2 ${
-                  isDark
-                    ? "bg-slate-700 border-slate-600 text-slate-100"
-                    : "bg-white border-slate-300 text-slate-900"
-                }`}
+                className={`w-full pl-10 pr-4 py-2 rounded-lg border-2 ${isDark
+                  ? "bg-slate-700 border-slate-600 text-slate-100"
+                  : "bg-white border-slate-300 text-slate-900"
+                  }`}
               />
             </div>
 
@@ -246,11 +257,10 @@ const OfertasPage = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className={`px-4 py-2 rounded-lg border-2 ${
-                  isDark
-                    ? "bg-slate-700 border-slate-600 text-slate-100"
-                    : "bg-white border-slate-300 text-slate-900"
-                }`}
+                className={`px-4 py-2 rounded-lg border-2 ${isDark
+                  ? "bg-slate-700 border-slate-600 text-slate-100"
+                  : "bg-white border-slate-300 text-slate-900"
+                  }`}
               >
                 <option value="all">Todas</option>
                 <option value="active">Activas</option>
