@@ -13,7 +13,7 @@ export const LoadingSpinner = ({
     <div className={`flex flex-col items-center justify-center ${overlay ? 'py-8' : 'p-4'}`}>
       <div
         className={`
-          animate-spin rounded-full border-4 border-solid border-blue-200 border-t-blue-600
+          animate-spin rounded-full border-4 border-solid border-primary-200 border-t-primary-600
           ${sizeClasses[size]}
         `}
       />

@@ -21,11 +21,11 @@ export const ErrorMessage = ({
       buttonClass: 'bg-yellow-600 hover:bg-yellow-700'
     },
     info: {
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-      textColor: 'text-blue-800',
+      bgColor: 'bg-primary-50',
+      borderColor: 'border-primary-200',
+      textColor: 'text-primary-800',
       icon: 'ℹ️',
-      buttonClass: 'bg-blue-600 hover:bg-blue-700'
+      buttonClass: 'bg-primary-600 hover:bg-primary-700'
     }
   };
 

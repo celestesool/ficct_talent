@@ -13,6 +13,7 @@ import {
   MapPin,
   Search,
   Sparkles,
+  TrendingUp,
   X,
   Zap
 } from 'lucide-react';
@@ -23,6 +24,7 @@ import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import JobDetailModal from '../../components/estudiante/JobDetailModal';
 import { useTheme } from '../../contexts/ThemeContext';
+import { recommendationService } from '../../services/recommendationService';
 
 const JobSearch = () => {
 
@@ -32,8 +34,10 @@ const JobSearch = () => {
 
   const [jobs, setJobs] = useState([]);           // Jobs que se muestran actualmente
   const [realJobs, setRealJobs] = useState([]);   // Jobs del backend
+  const [recommendedJobs, setRecommendedJobs] = useState([]); // Jobs recomendados por IA
   const [loading, setLoading] = useState(false);  // Búsqueda LinkedIn
   const [loadingReal, setLoadingReal] = useState(true);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('Bolivia');
@@ -61,6 +65,26 @@ const JobSearch = () => {
     };
     loadRealJobs();
   }, []);
+
+  // Cargar recomendaciones inteligentes
+  useEffect(() => {
+    if (studentId) {
+      loadRecommendations();
+    }
+  }, [studentId]);
+
+  const loadRecommendations = async () => {
+    try {
+      setLoadingRecommendations(true);
+      const recommendations = await recommendationService.getRecommendedJobsForStudent(studentId, 5);
+      setRecommendedJobs(recommendations || []);
+    } catch (error) {
+      console.error('Error loading recommendations:', error);
+      setRecommendedJobs([]);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  };
 
   // Si se limpia la búsqueda y hay empleos reales → mostrarlos
   useEffect(() => {
@@ -95,41 +119,14 @@ const JobSearch = () => {
 
       if (response.data) {
         setLinkedInHtml(response.data);
-        //const mockJobs = generateMockJobs(searchTerm, location);
-        //setJobs(mockJobs);
       }
     } catch (err) {
       console.error('Error LinkedIn:', err);
       setError('No se pudo conectar con LinkedIn. Mostrando ofertas locales.');
-      setJobs(realJobs.length > 0 ? realJobs : generateMockJobs(searchTerm, location));
+      setJobs(realJobs);
     } finally {
       setLoading(false);
     }
-  };
-
-  const generateMockJobs = (searchTerm, location) => {
-    const technologies = ['React', 'JavaScript', 'Node.js', 'Python', 'Java', 'Vue', 'Angular', 'TypeScript'];
-    const companies = ['Tech Solutions Bolivia', 'DinoTech', 'UAGRM', 'Innovation Labs', 'Global Tech S.A.'];
-    const locations = ['La Paz', 'Santa Cruz', 'Cochabamba', 'Remoto', 'Híbrido'];
-
-    return Array.from({ length: 12 }, (_, i) => ({
-      id: `mock-${Date.now()}-${i}`,
-      title: `${['Senior', 'Mid-Level', 'Junior'][i % 3]} ${technologies[i % technologies.length]} Developer`,
-      company: companies[i % companies.length],
-      location: location || locations[i % locations.length],
-      salary: `$${(60000 + i * 5000).toLocaleString()} - $${(90000 + i * 5000).toLocaleString()}`,
-      posted: `${i % 7 + 1} días`,
-      type: ['Tiempo Completo', 'Contrato', 'Medio Tiempo'][i % 3],
-      match: Math.floor(Math.random() * 30) + 70,
-      experience: ['Junior', 'Mid-Level', 'Senior'][i % 3],
-      description: `Buscamos desarrollador apasionado por ${technologies[i % technologies.length]}. ¡Únete a nuestro equipo en crecimiento!`,
-      skills: technologies.slice(i % 3, (i % 3) + 4),
-      remote: i % 2 === 0,
-      urgent: i < 3,
-      featured: i < 2,
-      applyUrl: `https://linkedin.com/jobs/search/?keywords=${encodeURIComponent(searchTerm)}`,
-      isMock: true
-    }));
   };
 
   const getLinkedInIframeSrc = () => {
@@ -208,7 +205,7 @@ const JobSearch = () => {
             <Button variant="outline" onClick={handleBackToDashboard}>
               <ArrowLeft size={18} />
             </Button>
-            <div className="w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500"></div>
+            <div className="w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-accent-3000"></div>
             <h1 className={`text-3xl lg:text-4xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Buscador de Empleos
             </h1>
@@ -233,7 +230,7 @@ const JobSearch = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Ej: React developer, Python backend..."
-                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'} focus:border-blue-500`}
+                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'} focus:border-primary-500`}
                     disabled={loading}
                   />
                 </div>
@@ -249,7 +246,7 @@ const JobSearch = () => {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Ej: Bolivia, Remoto..."
-                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'} focus:border-blue-500`}
+                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'} focus:border-primary-500`}
                     disabled={loading}
                   />
                 </div>
@@ -282,7 +279,7 @@ const JobSearch = () => {
           <div className="flex flex-wrap gap-3">
             {quickSearches.map((s, i) => (
               <button key={i} onClick={() => handleQuickSearch(s.term, s.location)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${isDark ? 'bg-slate-800 border-slate-600 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-blue-50'}`}>
+                className={`flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${isDark ? 'bg-slate-800 border-slate-600 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-primary-50'}`}>
                 <span className="text-lg">{s.icon}</span>
                 <span>{s.term}</span>
                 <span className="text-xs opacity-75">• {s.location}</span>
@@ -290,6 +287,73 @@ const JobSearch = () => {
             ))}
           </div>
         </Card>
+
+        {/* Empleos Recomendados por IA */}
+        {!searchTerm && recommendedJobs.length > 0 && (
+          <Card className="mb-8 border-primary-200 dark:border-primary-700 bg-gradient-to-r from-primary-50/50 to-accent-50/50 dark:from-primary-900/20 dark:to-accent-900/20">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/50">
+                  <TrendingUp className="text-primary-600 dark:text-primary-400" size={24} />
+                </div>
+                <div>
+                  <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    Empleos Recomendados para ti
+                  </h2>
+                  <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    Seleccionados según tus habilidades
+                  </p>
+                </div>
+              </div>
+
+              {loadingRecommendations ? (
+                <div className="text-center py-8">
+                  <div className={`inline-block animate-spin rounded-full h-8 w-8 border-b-2 ${isDark ? 'border-primary-400' : 'border-primary-600'}`}></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  {recommendedJobs.slice(0, 5).map((rec, index) => (
+                    <div
+                      key={index}
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${isDark ? 'bg-slate-800 border-slate-700 hover:border-primary-500' : 'bg-white border-slate-200 hover:border-primary-500'}`}
+                      onClick={() => {
+                        const job = realJobs.find(j => j.id === rec.jobId);
+                        if (job) handleSeeDetails(job);
+                      }}
+                    >
+                      <div className="mb-3">
+                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-bold ${rec.matchScore >= 80 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'}`}>
+                          {rec.matchScore}% Match
+                        </span>
+                      </div>
+                      <h4 className={`font-bold text-sm mb-2 line-clamp-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        {rec.title}
+                      </h4>
+                      <p className={`text-xs mb-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        {rec.company}
+                      </p>
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {rec.matchedSkills.slice(0, 2).map((skill, i) => (
+                          <span key={i} className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-700'}`}>
+                            ✓ {skill}
+                          </span>
+                        ))}
+                        {rec.matchedSkills.length > 2 && (
+                          <span className={`text-xs px-2 py-1 rounded ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
+                            +{rec.matchedSkills.length - 2}
+                          </span>
+                        )}
+                      </div>
+                      <Button variant="outline" size="sm" className="w-full text-xs">
+                        <Eye size={14} className="mr-1" /> Ver detalles
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
 
         {error && (
           <Card className="mb-6 border-yellow-500/30 bg-yellow-500/5 p-4">
@@ -306,11 +370,11 @@ const JobSearch = () => {
             <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
               <div className="flex gap-2">
                 <button onClick={() => setShowLinkedInView(false)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${!showLinkedInView ? 'bg-blue-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${!showLinkedInView ? 'bg-primary-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                   <LayoutGrid size={18} /> Vista App
                 </button>
                 <button onClick={() => setShowLinkedInView(true)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${showLinkedInView ? 'bg-purple-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${showLinkedInView ? 'bg-accent-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                   <Eye size={18} /> Vista LinkedIn
                 </button>
               </div>
@@ -347,7 +411,7 @@ const JobSearch = () => {
                     {job.featured && <span className="px-2 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold rounded-full">Destacado</span>}
                     {job.urgent && <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full">Urgente</span>}
                     {job.remote && <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full">Remoto</span>}
-                    {job.isMock === false && <span className="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">Local</span>}
+                    {job.isMock === false && <span className="px-2 py-1 bg-primary-500 text-white text-xs font-bold rounded-full">Local</span>}
                   </div>
 
                   <div className="flex justify-between items-start mb-4">
@@ -357,14 +421,26 @@ const JobSearch = () => {
                       </h3>
                       <div className="flex items-center gap-2 mb-2">
                         <Building size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
-                        <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                          {job.company?.name || job.company}
-                        </span>
+                        {job.company?.id ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/estudiante/empresas/${job.company.id}`);
+                            }}
+                            className={`${isDark ? 'text-slate-300 hover:text-primary-400' : 'text-slate-700 hover:text-primary-600'} hover:underline transition-colors`}
+                          >
+                            {job.company.name}
+                          </button>
+                        ) : (
+                          <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>
+                            {job.company?.name || job.company}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {job.match && (
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${job.match > 85 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'}`}>
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${job.match > 85 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'}`}>
                           {job.match}% match
                         </span>
                       )}
@@ -395,7 +471,7 @@ const JobSearch = () => {
 
                   <div className="flex justify-between items-center">
                     <div className="flex gap-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${isDark ? 'bg-accent-3000/20 text-accent-400' : 'bg-accent-300 text-accent-700'}`}>
                         {job.job_type ? (job.job_type === 'full-time' ? 'Tiempo completo' : job.job_type === 'part-time' ? 'Medio tiempo' : 'Freelance') : job.type}
                       </span>
                     </div>
@@ -436,8 +512,8 @@ const JobSearch = () => {
         {/* Estado vacío */}
         {!loading && !loadingReal && jobs.length === 0 && (
           <Card className="text-center py-16">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center">
-              <Search size={40} className="text-blue-600 dark:text-blue-400" />
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary-100 dark:bg-primary-500/10 flex items-center justify-center">
+              <Search size={40} className="text-primary-600 dark:text-primary-400" />
             </div>
             <h3 className={`text-2xl font-bold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {realJobs.length > 0 ? 'Explora las ofertas disponibles' : 'Encuentra tu próximo empleo'}

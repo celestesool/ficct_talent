@@ -16,6 +16,7 @@ import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from "../../contexts/AuthContext";
+import api from '../../services/api';
 
 export const PerfilPage = () => {
   const { isDark } = useTheme();
@@ -43,6 +44,8 @@ const studentId = user?.id;
     createdAt: '',
     updatedAt: ''
   });
+
+  const [academicInfo, setAcademicInfo] = useState(null);
 
   useEffect(() => {
      if (!studentId) return;
@@ -79,6 +82,24 @@ const studentId = user?.id;
 
     fetchStudentData();
   }, []);
+
+  // Fetch academic info
+  useEffect(() => {
+    const fetchAcademicInfo = async () => {
+      try {
+        if (!studentId) return;
+        
+        const response = await api.get(`/academic-info/student/${studentId}`);
+        if (response.data && response.data.length > 0) {
+          setAcademicInfo(response.data[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching academic info:', err);
+      }
+    };
+
+    fetchAcademicInfo();
+  }, [studentId]);
 
   const handleChange = (field, value) => {
     setProfileData(prev => ({ ...prev, [field]: value }));
@@ -192,7 +213,7 @@ const studentId = user?.id;
                   ) : (
                     <div className={`
                       w-32 h-32 rounded-full flex items-center justify-center text-4xl font-bold
-                      ${isDark ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600'}
+                      ${isDark ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-600'}
                     `}>
                       {profileData.first_name.charAt(0)}{profileData.last_name.charAt(0)}
                     </div>
@@ -203,7 +224,7 @@ const studentId = user?.id;
                       ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-white hover:bg-slate-100'}
                       border-2 ${isDark ? 'border-slate-600' : 'border-slate-300'}
                     `}>
-                      <Camera size={18} className="text-blue-600" />
+                      <Camera size={18} className="text-primary-600" />
                     </button>
                   )}
                 </div>
@@ -347,7 +368,7 @@ const studentId = user?.id;
                     disabled={!isEditing}
                     rows="4"
                     className={`
-                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-primary-500/20
                       ${isDark
                         ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400'
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
@@ -407,14 +428,48 @@ const studentId = user?.id;
                 </Button>
               </div>
 
-              <div className={`p-4 rounded-lg ${isDark ? 'bg-slate-700' : 'bg-slate-50'}`}>
-                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'} mb-2`}>
-                  Esta sección se gestiona en el módulo de Información Académica
-                </p>
-                <Button variant="primary" onClick={handleGoToAcademicInfo}>
-                  Ir a Información Académica
-                </Button>
-              </div>
+              {academicInfo ? (
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Carrera:</span>
+                    <span className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {academicInfo.major || 'No especificada'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Universidad:</span>
+                    <span className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {academicInfo.institution || 'No especificada'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Promedio:</span>
+                    <span className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {academicInfo.GPA || 'No especificado'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Años:</span>
+                    <span className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {academicInfo.start_year} - {academicInfo.estimated_graduation_year}
+                    </span>
+                  </div>
+                  <div className="mt-4">
+                    <Button variant="primary" onClick={handleGoToAcademicInfo} fullWidth>
+                      Ver Detalles Completos
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className={`p-4 rounded-lg ${isDark ? 'bg-slate-700' : 'bg-slate-50'}`}>
+                  <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'} mb-2`}>
+                    Cargando información académica...
+                  </p>
+                  <Button variant="primary" onClick={handleGoToAcademicInfo}>
+                    Ir a Información Académica
+                  </Button>
+                </div>
+              )}
             </Card>
           </div>
         </div>

@@ -24,17 +24,7 @@ export const jobService = {
   },
 
   parseJobsFromHTML(html) {
-    // Esto es solo un ejemplo - necesitarías ajustar los selectores
-    // En la práctica, esto es muy frágil
-    const mockParsedJobs = [
-      {
-        title: 'Senior React Developer',
-        company: 'Tech Company',
-        location: 'Remote',
-        date: '2024-01-15'
-      }
-    ];
-
-    return mockParsedJobs;
+    // Parser de trabajos desde HTML
+    return [];
   }
 };

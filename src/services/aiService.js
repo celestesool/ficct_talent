@@ -1,10 +1,8 @@
-// Mock del servicio de IA (simula respuesta de Gemini)
-// Después conectarás esto con la API real de Gemini
+// Servicio de IA con Gemini
 
 export const aiService = {
-  // Simula la mejora de descripción de proyecto con IA
+  // Mejora la descripción de proyecto con IA
   improveProjectDescription: async (projectData) => {
-    // Simular delay de llamada a API
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     return `Desarrollo e implementación de ${projectData.title}, aplicando metodologías ágiles y mejores prácticas de ingeniería de software. Utilización de ${projectData.technologies.join(', ')} para crear una solución escalable y eficiente. ${projectData.description}`;

@@ -57,7 +57,7 @@ export const SobreNosotrosPage = () => {
       </header>
 
       {/* HERO CON LOGO GRANDE */}
-      <section className={`py-20 bg-gradient-to-r ${isDark ? "from-blue-900 to-slate-900" : "from-blue-600 to-purple-600"}`}>
+      <section className={`py-20 bg-gradient-to-r ${isDark ? "from-primary-900 to-slate-900" : "from-primary-600 to-accent-600"}`}>
         <div className="max-w-6xl mx-auto px-6 text-center">
 
           <img
@@ -156,13 +156,13 @@ export const SobreNosotrosPage = () => {
 
           <div className="grid md:grid-cols-3 gap-10">
             <Card className="p-8">
-              <Code className={`${isDark ? "text-blue-400" : "text-blue-600"} mx-auto mb-4`} size={34} />
+              <Code className={`${isDark ? "text-primary-400" : "text-primary-600"} mx-auto mb-4`} size={34} />
               <h4 className={`text-xl font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>React</h4>
               <p className={`${isDark ? "text-slate-300" : "text-slate-600"}`}>Frontend moderno y responsivo</p>
             </Card>
 
             <Card className="p-8">
-              <Target className={`${isDark ? "text-purple-400" : "text-purple-600"} mx-auto mb-4`} size={34} />
+              <Target className={`${isDark ? "text-accent-400" : "text-accent-600"} mx-auto mb-4`} size={34} />
               <h4 className={`text-xl font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>NestJS</h4>
               <p className={`${isDark ? "text-slate-300" : "text-slate-600"}`}>Backend escalable y robusto</p>
             </Card>

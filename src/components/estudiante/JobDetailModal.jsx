@@ -12,7 +12,7 @@ import {
   Users,
   X
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { applicationService } from '../../api/services/applicationService';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Button } from '../common/Button';
@@ -54,8 +54,8 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
   const getStatusConfig = (status) => {
     switch (status) {
       case 'pendiente': return { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300', icon: Clock3 };
-      case 'revisada': return { label: 'En revisión', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300', icon: Clock3 };
-      case 'entrevista': return { label: 'Entrevista agendada', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300', icon: Calendar };
+      case 'revisada': return { label: 'En revisión', color: 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300', icon: Clock3 };
+      case 'entrevista': return { label: 'Entrevista agendada', color: 'bg-accent-300 text-accent-700 dark:bg-accent-700/40 dark:text-accent-400', icon: Calendar };
       case 'aceptado': return { label: '¡Aceptado!', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300', icon: CheckCircle2 };
       case 'rechazado': return { label: 'No seleccionado', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300', icon: AlertCircle };
       default: return { label: 'Sin estado', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300', icon: Clock3 };
@@ -144,7 +144,7 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
                 onChange={(e) => setCoverLetter(e.target.value)}
                 placeholder="Expresa tu interés en el puesto y por qué eres el candidato ideal..."
                 rows={6}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'border-slate-300'}`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'border-slate-300'}`}
                 disabled={isApplying}
               />
             </div>
@@ -160,7 +160,7 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
                   value={resumeUrl}
                   onChange={(e) => setResumeUrl(e.target.value)}
                   placeholder="https://ejemplo.com/tu-cv.pdf"
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'border-slate-300'}`}
+                  className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${isDark ? 'bg-slate-800 border-slate-600 text-white' : 'border-slate-300'}`}
                   disabled={isApplying}
                 />
                 {!resumeUrl && (
@@ -221,7 +221,7 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
               {job.company?.logo_url ? (
                 <img src={job.company.logo_url} alt={job.company.name} className="w-16 h-16 rounded-xl object-contain bg-white p-2 shadow-lg" />
               ) : (
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary-500 to-accent-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
                   {job.company?.name?.charAt(0) || '?'}
                 </div>
               )}
@@ -242,7 +242,7 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
           <div className="p-6 lg:p-8 space-y-8">
             {/* Badges principales + estadísticas */}
             <div className="flex flex-wrap items-center gap-4">
-              <span className="px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded-full font-medium">
+              <span className="px-4 py-2 bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 rounded-full font-medium">
                 {job.job_type === 'full-time' ? 'Tiempo completo' :
                   job.job_type === 'part-time' ? 'Medio tiempo' :
                     job.job_type === 'internship' ? 'Pasantía' :
@@ -267,8 +267,8 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
             {/* Info rápida */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                  <MapPin size={20} className="text-blue-600 dark:text-blue-400" />
+                <div className="p-3 rounded-lg bg-primary-100 dark:bg-primary-900/30">
+                  <MapPin size={20} className="text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
                   <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Ubicación</p>
@@ -287,8 +287,8 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                  <Calendar size={20} className="text-purple-600 dark:text-purple-400" />
+                <div className="p-3 rounded-lg bg-accent-300 dark:bg-accent-700/30">
+                  <Calendar size={20} className="text-accent-600 dark:text-accent-400" />
                 </div>
                 <div>
                   <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Fecha límite</p>
@@ -309,7 +309,7 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
 
             {/* Estado de MI aplicación */}
             {myApplication && (
-              <Card className="p-6 border-2 border-blue-500/30 bg-blue-50 dark:bg-blue-900/20">
+              <Card className="p-6 border-2 border-primary-500/30 bg-primary-50 dark:bg-primary-900/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`p-3 rounded-full ${getStatusConfig(myApplication.status).color}`}>
@@ -327,7 +327,7 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
                   </span>
                 </div>
                 {myApplication.interview_at && (
-                  <p className="mt-3 text-sm font-medium text-purple-600 dark:text-purple-400">
+                  <p className="mt-3 text-sm font-medium text-accent-600 dark:text-accent-400">
                     Entrevista programada: {formatDateTime(myApplication.interview_at)}
                   </p>
                 )}
@@ -357,7 +357,7 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {job.requirements.split(',').map((req, i) => (
-                    <span key={i} className="px-3 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded-full text-sm font-medium">
+                    <span key={i} className="px-3 py-2 bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 rounded-full text-sm font-medium">
                       {req.trim()}
                     </span>
                   ))}
@@ -378,7 +378,7 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
 
             {/* Sobre la empresa */}
             {job.company?.description && (
-              <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+              <Card className="p-6 bg-gradient-to-r from-primary-50 to-accent-300 dark:from-primary-900/20 dark:to-accent-700/20">
                 <h3 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Sobre {job.company.name}
                 </h3>
@@ -387,12 +387,12 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
                 </p>
                 <div className="flex flex-wrap gap-4 mt-4 text-sm">
                   {job.company.website && (
-                    <a href={job.company.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
+                    <a href={job.company.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary-600 hover:underline">
                       <ExternalLink size={16} /> Sitio web
                     </a>
                   )}
                   {job.company.email && (
-                    <a href={`mailto:${job.company.email}`} className="flex items-center gap-2 text-blue-600 hover:underline">
+                    <a href={`mailto:${job.company.email}`} className="flex items-center gap-2 text-primary-600 hover:underline">
                       Contacto
                     </a>
                   )}
@@ -446,7 +446,7 @@ const JobDetailModal = ({ job, isOpen, onClose, onSaveToggle, isSaved, currentSt
         </div>
       </div>
 
-      <ApplicationModal />
+      {ApplicationModal()}
     </>
   );
 };

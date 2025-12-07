@@ -20,12 +20,7 @@ export async function generateAptitudeTest(jobContext) {
   const job = jobContext.job || jobContext;
   const company = jobContext.company || jobContext.job?.company;
 
-  console.log('Job Context recibido:', jobContext);
-  console.log('Job data:', job);
-  console.log('Company data:', company);
-
   if (!job || !company) {
-    console.error('Estructura incorrecta:', { job, company });
     throw new Error('Estructura de datos incorrecta del backend');
   }
 

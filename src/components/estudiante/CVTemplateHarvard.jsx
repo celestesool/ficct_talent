@@ -170,7 +170,7 @@ export const CVTemplateHarvard = ({ cvData, isEditing, onEdit }) => {
                     href={project.project_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-sm text-primary-600 hover:underline"
                   >
                     🔗 Ver proyecto
                   </a>
@@ -216,7 +216,7 @@ export const CVTemplateHarvard = ({ cvData, isEditing, onEdit }) => {
                   href={cert.credential_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-blue-600 hover:underline"
+                  className="text-xs text-primary-600 hover:underline"
                 >
                   🔗 Ver certificado
                 </a>

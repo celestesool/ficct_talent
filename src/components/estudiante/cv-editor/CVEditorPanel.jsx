@@ -253,7 +253,7 @@ export const CVEditorPanel = ({ data, onUpdateSection }) => {
 
       {/* Sección personalizable 
       <button
-        className="add-section-btn w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-500 hover:text-blue-500 transition-colors"
+        className="add-section-btn w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-primary-500 hover:text-primary-500 transition-colors"
         onClick={() => onUpdateSection('customSections', [
           ...(data.customSections || []),
           { title: 'Nueva Sección', content: '' }

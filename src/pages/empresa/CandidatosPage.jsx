@@ -22,7 +22,7 @@ import { Button } from "../../components/common/Button";
 import { Card } from "../../components/common/Card";
 import { Navbar } from "../../components/common/Navbar";
 import { useTheme } from "../../contexts/ThemeContext";
-import { apiService } from "../../services/api";
+import { companyJobService } from "../../api/services/companyService";
 
 export const CandidatosPage = () => {
   const { isDark } = useTheme();
@@ -38,38 +38,64 @@ export const CandidatosPage = () => {
   const [interviewModal, setInterviewModal] = useState(null);
   const [interviewDate, setInterviewDate] = useState("");
 
-  // ===============================================
-  // LOAD REAL CANDIDATES FROM BACKEND
-  // ===============================================
   const loadCandidates = async () => {
     try {
       const companyId = localStorage.getItem("user_id");
-      if (!companyId) return;
+      if (!companyId) {
+        console.error("No company ID found");
+        return;
+      }
 
-      const res = await apiService.get(`/applications/company/${companyId}`);
-      const data = Array.isArray(res.data) ? res.data : [];
+      // Obtener todos los jobs de la empresa
+      const jobsResult = await companyJobService.getCompanyJobs(companyId);
+      
+      if (!jobsResult.success || !jobsResult.data) {
+        setCandidates([]);
+        return;
+      }
 
-      const mapped = data.map((c) => ({
-        id: c.application_id,
-        studentId: c.student.id,
-        name: c.student.first_name + " " + c.student.last_name,
-        email: c.student.email,
-        phone: c.student.phone_number,
-        birthDate: c.student.birthDate,
-        appliedFor: c.job_title,
-        appliedDate: new Date(c.applied_at).toLocaleDateString(),
-        gpa: c.academicInfo?.[0]?.GPA ?? 0,
-        institution: c.academicInfo?.[0]?.institution ?? "No especificado",
-        certifications: c.certifications.length,
-        projects: c.projects.length,
-        skills: c.skills.map((s) => s.skill.name),
-        match: c.match,
-        status: c.status,
-        location: "Santa Cruz",
-        raw: c,
-      }));
+      // Extraer todos los candidatos de todas las ofertas
+      const allCandidates = [];
+      
+      jobsResult.data.forEach(job => {
+        if (job.applications && Array.isArray(job.applications)) {
+          job.applications.forEach(app => {
+            if (app.student) {
+              allCandidates.push({
+                application: app,
+                student: app.student,
+                job: job
+              });
+            }
+          });
+        }
+      });
 
-      setCandidates(mapped);
+      if (allCandidates.length > 0) {
+        const mapped = allCandidates.map((c) => ({
+          id: c.application.id,
+          studentId: c.student.id,
+          name: `${c.student.first_name || ''} ${c.student.last_name || ''}`.trim() || 'Nombre no disponible',
+          email: c.student.email || c.student.user?.email || 'Email no disponible',
+          phone: c.student.phone_number || 'No especificado',
+          birthDate: c.student.birth_date || 'No especificado',
+          appliedFor: c.job.title,
+          appliedDate: c.application.applied_at ? new Date(c.application.applied_at).toLocaleDateString() : 'N/A',
+          gpa: 85, // TODO: obtener de academic_info
+          institution: 'Universidad Mayor de San Simón', // TODO: obtener de academic_info
+          certifications: 0, // TODO: contar certificaciones reales
+          projects: 0, // TODO: contar proyectos reales
+          skills: [], // TODO: obtener skills reales del estudiante
+          match: 80, // TODO: calcular match real
+          status: c.application.status || 'aplicado',
+          location: 'Santa Cruz', // TODO: obtener ubicación real
+          raw: c,
+        }));
+
+        setCandidates(mapped);
+      } else {
+        setCandidates([]);
+      }
     } catch (err) {
       console.error("Error loading candidates:", err);
     }
@@ -111,7 +137,7 @@ export const CandidatosPage = () => {
   const statusColor = (s) => {
     switch (s) {
       case "aplicado":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300";
+        return "bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300";
       case "revisado":
         return "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300";
       default:
@@ -135,15 +161,18 @@ export const CandidatosPage = () => {
 
   const sendInterview = async () => {
     try {
-      await apiService.patch(
-        `/applications/${interviewModal.id}/status`,
-        { status: "interview" }
-      );
+      // 🎨 MODO MOCK: Simular actualización de estado
+      alert(`✅ Entrevista programada para ${interviewModal.name} (MOCK)\nFecha: ${interviewDate}`);
 
-      alert("Entrevista programada correctamente.");
+      // Actualizar estado localmente
+      setCandidates(candidates.map(c =>
+        c.id === interviewModal.id
+          ? { ...c, status: 'interview' }
+          : c
+      ));
+
       setInterviewModal(null);
       setInterviewDate("");
-      loadCandidates();
     } catch (err) {
       console.error(err);
       alert("Error al programar entrevista.");
@@ -164,7 +193,7 @@ export const CandidatosPage = () => {
             <ArrowLeft size={18} />
           </Button>
 
-          <div className="w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500"></div>
+          <div className="w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-accent-3000"></div>
 
           <div>
             <h1 className={`text-3xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
@@ -246,7 +275,7 @@ export const CandidatosPage = () => {
                 <div className="flex items-center gap-4 mb-4">
                   <div className={`
                     w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold
-                    ${isDark ? "bg-purple-600 text-white" : "bg-purple-100 text-purple-700"}
+                    ${isDark ? "bg-accent-600 text-white" : "bg-accent-300 text-accent-700"}
                   `}>
                     {c.name
                       .split(" ")
@@ -299,8 +328,8 @@ export const CandidatosPage = () => {
 
                 {/* Buttons */}
                 <div className="flex gap-2">
-                  <Button fullWidth variant="primary" onClick={() => setSelectedCandidate(c)}>
-                    <Eye size={16} /> Ver Perfil
+                  <Button fullWidth variant="primary" onClick={() => navigate(`/empresa/candidatos/${c.studentId}`)}>
+                    <Eye size={16} /> Ver Perfil Completo
                   </Button>
 
                   <Button variant="outline" onClick={() => contact(c)}>
@@ -329,7 +358,7 @@ export const CandidatosPage = () => {
 
                 <div className={`
                   w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold
-                  ${isDark ? "bg-purple-600 text-white" : "bg-purple-100 text-purple-700"}
+                  ${isDark ? "bg-accent-600 text-white" : "bg-accent-300 text-accent-700"}
                 `}>
                   {selectedCandidate.name.split(" ").map((n) => n[0]).join("")}
                 </div>
@@ -437,7 +466,7 @@ export const CandidatosPage = () => {
                     key={idx}
                     className={`
                       px-3 py-2 rounded-lg text-sm font-medium
-                      ${isDark ? "bg-purple-900/20 text-purple-300" : "bg-purple-100 text-purple-700"}
+                      ${isDark ? "bg-accent-700/20 text-accent-400" : "bg-accent-300 text-accent-700"}
                     `}
                   >
                     {s}

@@ -11,39 +11,185 @@ import {
   TrendingUp,
   User
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import api from '../../services/api';
+import { adminService } from '../../api/services/adminService';
+import { Megaphone } from 'lucide-react';
 
 export const DashboardEstudiante = () => {
   const { isDark } = useTheme();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [counts, setCounts] = useState({
+    projects: 0,
+    certifications: 0,
+    skills: 0,
+    applications: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [announcements, setAnnouncements] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [profileViewCount, setProfileViewCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      if (!user?.email) {
+        console.log('No user email found');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // First get student by email to get correct student ID
+        const studentRes = await api.get(`/students/email/${user.email}`);
+        const studentId = studentRes.data?.id;
+
+        if (!studentId) {
+          console.error('Student ID not found for email:', user.email);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch all counts in parallel
+        const [projectsRes, certsRes, skillsRes, applicationsRes] = await Promise.all([
+          api.get(`/projects/student/${studentId}`),
+          api.get(`/certifications/student/${studentId}`),
+          api.get(`/skills/student/${studentId}`),
+          api.get(`/applications/student/${studentId}`)
+        ]);
+
+        // Fetch profile viewers separately (may fail if not implemented)
+        let viewersRes = { data: [] };
+        try {
+          viewersRes = await api.get(`/students/${studentId}/recent-viewers`, { params: { limit: 3 } });
+        } catch (viewerError) {
+          console.log('Profile viewers endpoint not available yet:', viewerError);
+        }
+
+        setCounts({
+          projects: projectsRes.data?.length || 0,
+          certifications: certsRes.data?.length || 0,
+          skills: skillsRes.data?.length || 0,
+          applications: applicationsRes.data?.length || 0
+        });
+
+        // Build recent activity from real data
+        const activities = [];
+
+        // Add profile viewers
+        if (viewersRes.data?.length > 0) {
+          viewersRes.data.forEach(viewer => {
+            activities.push({
+              text: `${viewer.company?.name || 'Una empresa'} vio tu perfil`,
+              time: formatTimeAgo(viewer.viewed_at),
+              icon: Eye,
+              color: 'text-purple-600'
+            });
+          });
+        }
+
+        // Add recent applications
+        if (applicationsRes.data?.length > 0) {
+          applicationsRes.data.slice(0, 2).forEach(app => {
+            activities.push({
+              text: `Postulaste a "${app.job?.title || 'Oferta laboral'}"`,
+              company: app.job?.company?.name || 'Empresa',
+              time: formatTimeAgo(app.created_at),
+              icon: Briefcase,
+              color: 'text-primary-600'
+            });
+          });
+        }
+
+        // Add recent projects
+        if (projectsRes.data?.length > 0) {
+          const recentProject = projectsRes.data[0];
+          activities.push({
+            text: `Agregaste el proyecto "${recentProject.title}"`,
+            time: formatTimeAgo(recentProject.created_at),
+            icon: Code,
+            color: 'text-accent-600'
+          });
+        }
+
+        setRecentActivity(activities.slice(0, 5));
+
+        // Get profile view count for last 7 days (may fail if not implemented)
+        try {
+          const viewCountRes = await api.get(`/students/${studentId}/views/count`, {
+            params: { days: 7 }
+          });
+          setProfileViewCount(viewCountRes.data?.count || 0);
+        } catch (viewCountError) {
+          console.log('Profile view count endpoint not available yet:', viewCountError);
+          setProfileViewCount(0);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard counts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchAnnouncements = async () => {
+      try {
+        const response = await adminService.getAnnouncements();
+        // Filtrar solo anuncios para estudiantes o todos
+        const filtered = response.filter(a => a.target === 'students' || a.target === 'all');
+        setAnnouncements(filtered.slice(0, 3)); // Mostrar máximo 3
+      } catch (error) {
+        console.error('Error fetching announcements:', error);
+      }
+    };
+
+    fetchAnnouncements();
+
+    fetchCounts();
+  }, [user?.id]);
+
+  const formatTimeAgo = (dateString) => {
+    if (!dateString) return 'Hace un momento';
+
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return 'Hace un momento';
+    if (diffInSeconds < 3600) return `Hace ${Math.floor(diffInSeconds / 60)} minutos`;
+    if (diffInSeconds < 86400) return `Hace ${Math.floor(diffInSeconds / 3600)} horas`;
+    if (diffInSeconds < 2592000) return `Hace ${Math.floor(diffInSeconds / 86400)} días`;
+    return `Hace ${Math.floor(diffInSeconds / 2592000)} meses`;
+  };
 
   const stats = [
     {
       label: 'Proyectos',
-      value: '5',
+      value: loading ? '...' : counts.projects.toString(),
       icon: Code,
       color: 'blue',
-      bgLight: 'bg-blue-50',
-      bgDark: 'bg-blue-500/10',
-      textColor: 'text-blue-600',
-      borderColor: 'border-blue-200 dark:border-blue-500/30'
+      bgLight: 'bg-primary-50',
+      bgDark: 'bg-primary-500/10',
+      textColor: 'text-primary-600',
+      borderColor: 'border-primary-200 dark:border-primary-500/30'
     },
     {
       label: 'Certificaciones',
-      value: '3',
+      value: loading ? '...' : counts.certifications.toString(),
       icon: Award,
       color: 'purple',
-      bgLight: 'bg-purple-50',
-      bgDark: 'bg-purple-500/10',
-      textColor: 'text-purple-600',
-      borderColor: 'border-purple-200 dark:border-purple-500/30'
+      bgLight: 'bg-accent-300',
+      bgDark: 'bg-accent-3000/10',
+      textColor: 'text-accent-600',
+      borderColor: 'border-accent-400 dark:border-accent-3000/30'
     },
     {
       label: 'Habilidades',
-      value: '12',
+      value: loading ? '...' : counts.skills.toString(),
       icon: TrendingUp,
       color: 'green',
       bgLight: 'bg-green-50',
@@ -53,13 +199,24 @@ export const DashboardEstudiante = () => {
     },
     {
       label: 'Postulaciones',
-      value: '8',
+      value: loading ? '...' : counts.applications.toString(),
       icon: Briefcase,
       color: 'orange',
       bgLight: 'bg-orange-50',
       bgDark: 'bg-orange-500/10',
       textColor: 'text-orange-600',
       borderColor: 'border-orange-200 dark:border-orange-500/30'
+    },
+    {
+      label: 'Vistas de Perfil',
+      value: loading ? '...' : profileViewCount.toString(),
+      icon: Eye,
+      color: 'purple',
+      bgLight: 'bg-purple-50',
+      bgDark: 'bg-purple-500/10',
+      textColor: 'text-purple-600',
+      borderColor: 'border-purple-200 dark:border-purple-500/30',
+      subtitle: '(Últimos 7 días)'
     },
   ];
 
@@ -69,20 +226,20 @@ export const DashboardEstudiante = () => {
       desc: 'Actualiza tu información personal',
       icon: User,
       path: '/estudiante/perfil',
-      gradient: 'from-blue-500 to-blue-600',
-      bgLight: 'bg-blue-50',
-      bgDark: 'bg-blue-500/10',
-      hoverBorder: 'hover:border-blue-400 dark:hover:border-blue-500'
+      gradient: 'from-primary-500 to-primary-600',
+      bgLight: 'bg-primary-50',
+      bgDark: 'bg-primary-500/10',
+      hoverBorder: 'hover:border-primary-400 dark:hover:border-primary-500'
     },
     {
       title: 'Proyectos',
       desc: 'Gestiona tu portafolio',
       icon: Code,
       path: '/estudiante/proyectos',
-      gradient: 'from-purple-500 to-purple-600',
-      bgLight: 'bg-purple-50',
-      bgDark: 'bg-purple-500/10',
-      hoverBorder: 'hover:border-purple-400 dark:hover:border-purple-500'
+      gradient: 'from-accent-3000 to-accent-600',
+      bgLight: 'bg-accent-300',
+      bgDark: 'bg-accent-3000/10',
+      hoverBorder: 'hover:border-accent-400 dark:hover:border-accent-3000'
     },
     {
       title: 'Certificaciones',
@@ -127,45 +284,6 @@ export const DashboardEstudiante = () => {
     },
   ];
 
-  const recentActivity = [
-    {
-      text: 'Postulaste a "Desarrollador Frontend"',
-      company: 'Tech Corp',
-      time: 'Hace 2 horas',
-      icon: Briefcase,
-      color: 'text-blue-600'
-    },
-    {
-      text: 'Agregaste el proyecto "Sistema de Ventas"',
-      time: 'Hace 1 día',
-      icon: Code,
-      color: 'text-purple-600'
-    },
-    {
-      text: 'Empresa XYZ vio tu perfil',
-      time: 'Hace 2 días',
-      icon: Eye,
-      color: 'text-green-600'
-    },
-  ];
-
-  const recommendedOffers = [
-    {
-      title: 'Desarrollador React',
-      company: 'Tech Solutions',
-      type: 'Pasantía',
-      match: '95%',
-      gradient: 'from-blue-500 to-cyan-500'
-    },
-    {
-      title: 'Data Analyst Intern',
-      company: 'DataCorp',
-      type: 'Tiempo Completo',
-      match: '88%',
-      gradient: 'from-purple-500 to-pink-500'
-    }
-  ];
-
   const handleActionClick = (path) => {
     navigate(path);
   };
@@ -176,7 +294,7 @@ export const DashboardEstudiante = () => {
         {/* Header - MEJORADO */}
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-3">
-            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500`}></div>
+            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-accent-3000`}></div>
             <h1 className={`text-3xl lg:text-4xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Dashboard
             </h1>
@@ -185,6 +303,45 @@ export const DashboardEstudiante = () => {
             Bienvenido de nuevo, gestiona tu perfil y encuentra nuevas oportunidades
           </p>
         </div>
+        {/* Anuncios */}
+        {announcements.length > 0 && (
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 rounded-full bg-gradient-to-b from-blue-500 to-indigo-500"></div>
+                <h2 className={`text-lg lg:text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Anuncios
+                </h2>
+              </div>
+              <Megaphone size={20} className={`${isDark ? 'text-slate-400' : 'text-slate-600'}`} />
+            </div>
+
+            <div className="space-y-4">
+              {announcements.map((announcement, idx) => (
+                <div
+                  key={announcement.id}
+                  className={`
+            p-4 rounded-lg border-l-4
+            ${announcement.type === 'info' ? 'border-blue-500' :
+                      announcement.type === 'warning' ? 'border-yellow-500' :
+                        announcement.type === 'success' ? 'border-green-500' : 'border-red-500'}
+            ${isDark ? 'bg-slate-800/50' : 'bg-slate-50'}
+          `}
+                >
+                  <h3 className={`font-bold text-sm mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    {announcement.title}
+                  </h3>
+                  <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                    {announcement.message}
+                  </p>
+                  <p className={`text-xs mt-2 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                    {new Date(announcement.created_at).toLocaleDateString('es-ES')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Stats Grid - MEJORADO */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10">
@@ -205,6 +362,11 @@ export const DashboardEstudiante = () => {
                   <p className={`text-3xl lg:text-4xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {stat.value}
                   </p>
+                  {stat.subtitle && (
+                    <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                      {stat.subtitle}
+                    </p>
+                  )}
                 </div>
                 <div className={`
                   p-4 rounded-2xl
@@ -223,7 +385,7 @@ export const DashboardEstudiante = () => {
             <Card className="p-6 lg:p-8">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className={`w-1.5 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500`}></div>
+                  <div className={`w-1.5 h-8 rounded-full bg-gradient-to-b from-primary-500 to-accent-3000`}></div>
                   <h2 className={`text-xl lg:text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     Acciones Rápidas
                   </h2>
@@ -277,7 +439,7 @@ export const DashboardEstudiante = () => {
                       {action.desc}
                     </p>
 
-                    <div className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+                    <div className="flex items-center gap-2 text-sm font-medium text-primary-600 dark:text-primary-400">
                       <span>Ir ahora</span>
                       <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </div>
@@ -285,92 +447,11 @@ export const DashboardEstudiante = () => {
                 ))}
               </div>
             </Card>
-
-            {/* Progreso del Perfil - MEJORADO */}
-            <Card className="p-6 lg:p-8">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className={`w-1.5 h-8 rounded-full bg-gradient-to-b from-green-500 to-emerald-500`}></div>
-                  <h2 className={`text-xl lg:text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Completa tu Perfil
-                  </h2>
-                </div>
-                <span className={`
-                  px-3 py-1 rounded-full text-sm font-bold
-                  ${isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'}
-                `}>
-                  75%
-                </span>
-              </div>
-
-              <div className="space-y-5">
-                {/* Barra de progreso */}
-                <div>
-                  <div className={`relative w-full h-3 rounded-full overflow-hidden ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`}>
-                    <div
-                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
-                      style={{ width: '75%' }}
-                    >
-                      <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Lista de tareas */}
-                <div className={`space-y-3 p-4 rounded-xl ${isDark ? 'bg-slate-800/50' : 'bg-slate-50'}`}>
-                  {[
-                    { text: 'Información básica', done: true },
-                    { text: 'Habilidades técnicas', done: true },
-                    { text: 'Proyectos (3/5)', done: false, progress: true },
-                    { text: 'Certificaciones', done: false }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-3">
-                      <div className={`
-                        w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0
-                        ${item.done
-                          ? 'bg-gradient-to-br from-green-500 to-emerald-500'
-                          : item.progress
-                            ? 'bg-gradient-to-br from-yellow-500 to-orange-500'
-                            : isDark ? 'bg-slate-700' : 'bg-slate-300'
-                        }
-                      `}>
-                        {item.done && (
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                        {item.progress && (
-                          <Clock size={12} className="text-white" />
-                        )}
-                      </div>
-                      <span className={`text-sm ${item.done
-                        ? isDark ? 'text-slate-300' : 'text-slate-700'
-                        : isDark ? 'text-slate-500' : 'text-slate-500'
-                        }`}>
-                        {item.text}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onClick={() => navigate('/estudiante/perfil')}
-                  className="py-3"
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    Completar Perfil
-                    <ArrowRight size={18} />
-                  </span>
-                </Button>
-              </div>
-            </Card>
           </div>
 
           {/* Sidebar derecha */}
           <div className="space-y-6">
-            {/* Actividad Reciente - MEJORADA */}
+            {/* Actividad Reciente */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -382,114 +463,61 @@ export const DashboardEstudiante = () => {
                 <Bell size={20} className={`${isDark ? 'text-slate-400' : 'text-slate-600'}`} />
               </div>
 
-              <div className="space-y-4">
-                {recentActivity.map((activity, idx) => (
-                  <div
-                    key={idx}
-                    className={`
-                      pb-4 
-                      ${idx !== recentActivity.length - 1 ? 'border-b' : ''} 
-                      ${isDark ? 'border-slate-700' : 'border-slate-200'}
-                    `}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`
-                        w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
-                        ${isDark ? 'bg-slate-700' : 'bg-slate-100'}
-                      `}>
-                        <activity.icon size={16} className={activity.color} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                          {activity.text}
-                        </p>
-                        {activity.company && (
-                          <p className={`text-xs font-semibold mb-1 ${activity.color}`}>
-                            {activity.company}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-1">
-                          <Clock size={12} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
-                          <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-                            {activity.time}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Ofertas Recomendadas - MEJORADA */}
-            <Card className="p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className={`w-1.5 h-6 rounded-full bg-gradient-to-b from-purple-500 to-pink-500`}></div>
-                <h2 className={`text-lg lg:text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  Para Ti
-                </h2>
-              </div>
-
-              <div className="space-y-3">
-                {recommendedOffers.map((offer, idx) => (
-                  <div
-                    key={idx}
-                    className={`
-                      relative p-4 rounded-xl cursor-pointer transition-all duration-300
-                      ${isDark ? 'bg-slate-800 hover:bg-slate-700' : 'bg-white hover:shadow-md border border-slate-200'}
-                      group overflow-hidden
-                    `}
-                    onClick={() => navigate('/estudiante/ofertas')}
-                  >
-                    {/* Gradient background */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${offer.gradient} opacity-5 group-hover:opacity-10 transition-opacity`}></div>
-
-                    <div className="relative">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1 min-w-0">
-                          <p className={`font-bold text-sm mb-1 truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                            {offer.title}
-                          </p>
-                          <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                            {offer.company}
-                          </p>
-                        </div>
-                        <span className={`
-                          ml-2 px-2 py-1 rounded-full text-xs font-bold whitespace-nowrap
-                          ${isDark ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700'}
+              {recentActivity.length > 0 ? (
+                <div className="space-y-4">
+                  {recentActivity.map((activity, idx) => (
+                    <div
+                      key={idx}
+                      className={`
+                        pb-4 
+                        ${idx !== recentActivity.length - 1 ? 'border-b' : ''} 
+                        ${isDark ? 'border-slate-700' : 'border-slate-200'}
+                      `}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`
+                          w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+                          ${isDark ? 'bg-slate-700' : 'bg-slate-100'}
                         `}>
-                          {offer.match}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-                          {offer.type}
-                        </span>
-                        <ArrowRight
-                          size={16}
-                          className={`${isDark ? 'text-slate-600' : 'text-slate-400'} group-hover:translate-x-1 transition-transform`}
-                        />
+                          <activity.icon size={16} className={activity.color} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-medium mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                            {activity.text}
+                          </p>
+                          {activity.company && (
+                            <p className={`text-xs font-semibold mb-1 ${activity.color}`}>
+                              {activity.company}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-1">
+                            <Clock size={12} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
+                            <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                              {activity.time}
+                            </p>
+                          </div>
+
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Bell size={48} className={`mx-auto mb-4 ${isDark ? 'text-slate-600' : 'text-slate-400'}`} />
+                  <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    No hay actividad reciente
+                  </p>
+                </div>
+              )}
 
-              <Button
-                variant="outline"
-                fullWidth
-                className="mt-4"
-                onClick={() => navigate('/estudiante/ofertas')}
-              >
-                <span className="flex items-center justify-center gap-2">
-                  Ver todas las ofertas
-                  <ArrowRight size={16} />
-                </span>
-              </Button>
             </Card>
           </div>
+
         </div>
       </div>
     </div>
   );
 };
+
+export default DashboardEstudiante;

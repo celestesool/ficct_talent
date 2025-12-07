@@ -119,7 +119,7 @@ export const PostulacionesPage = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center h-64">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
               <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Cargando postulaciones...</p>
             </div>
           </div>
@@ -180,11 +180,11 @@ export const PostulacionesPage = () => {
                 <Card key={application.id} hover className="relative">
                   {/* Badge de Estado */}
                   <div className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium
-                    ${statusConfig.color === 'blue' ? 'bg-blue-100 text-blue-800' : ''}
+                    ${statusConfig.color === 'blue' ? 'bg-primary-100 text-primary-800' : ''}
                     ${statusConfig.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' : ''}
                     ${statusConfig.color === 'green' ? 'bg-green-100 text-green-800' : ''}
                     ${statusConfig.color === 'red' ? 'bg-red-100 text-red-800' : ''}
-                    ${statusConfig.color === 'purple' ? 'bg-purple-100 text-purple-800' : ''}
+                    ${statusConfig.color === 'purple' ? 'bg-accent-300 text-accent-700' : ''}
                     ${statusConfig.color === 'indigo' ? 'bg-indigo-100 text-indigo-800' : ''}
                     ${statusConfig.color === 'gray' ? 'bg-gray-100 text-gray-800' : ''}
                   `}>
@@ -195,9 +195,9 @@ export const PostulacionesPage = () => {
                   <div className="flex justify-between items-start mb-4">
                     <div className={`
                       p-3 rounded-lg
-                      ${isDark ? 'bg-blue-900/20' : 'bg-blue-100'}
+                      ${isDark ? 'bg-primary-900/20' : 'bg-primary-100'}
                     `}>
-                      <Building size={24} className="text-blue-600" />
+                      <Building size={24} className="text-primary-600" />
                     </div>
                     <div className="flex gap-2">
                       <button

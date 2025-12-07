@@ -45,7 +45,7 @@ export const HomePage = () => {
   ];
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
+    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' : 'bg-gradient-to-br from-primary-50 via-white to-accent-300'}`}>
       
     {/* Header con navegación */}
     <header className="relative border-b" style={{
@@ -92,21 +92,21 @@ export const HomePage = () => {
 
       {/* Hero Section */}
       <section className="relative py-16 lg:py-24">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-600/10 to-accent-600/10"></div>
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="space-y-6">
               <div>
-                <span className={`inline-block px-4 py-2 rounded-full text-sm font-semibold mb-6 ${isDark ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-600'}`}>
+                <span className={`inline-block px-4 py-2 rounded-full text-sm font-semibold mb-6 ${isDark ? 'bg-primary-500/20 text-primary-300' : 'bg-primary-100 text-primary-600'}`}>
                   Plataforma Oficial FICCT - UAGRM
                 </span>
                 <h1 className={`text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Conectamos{' '}
-                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
                     Talento
                   </span>
                   {' '}con{' '}
-                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-accent-600 to-primary-600 bg-clip-text text-transparent">
                     Oportunidades
                   </span>
                 </h1>
@@ -118,7 +118,7 @@ export const HomePage = () => {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 pt-4">
                 {stats.map((stat, index) => (
                   <div key={index} className={`text-center p-4 rounded-xl ${isDark ? 'bg-slate-800/50' : 'bg-white/50'} backdrop-blur-sm`}>
-                    <div className={`text-2xl lg:text-3xl font-bold mb-1 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent`}>
+                    <div className={`text-2xl lg:text-3xl font-bold mb-1 bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent`}>
                       {stat.number}
                     </div>
                     <div className={`text-xs lg:text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -135,15 +135,15 @@ export const HomePage = () => {
               <Card className={`
                 border-2 transition-all duration-300 hover:shadow-2xl
                 ${isDark
-                  ? 'border-slate-700 hover:border-blue-500 hover:shadow-blue-500/20'
-                  : 'border-slate-200 hover:border-blue-400 hover:shadow-blue-400/20'
+                  ? 'border-slate-700 hover:border-primary-500 hover:shadow-primary-500/20'
+                  : 'border-slate-200 hover:border-primary-400 hover:shadow-primary-400/20'
                 }
               `}>
                 <div className="p-6 lg:p-8">
                   <div className="flex items-center gap-4 mb-6">
                     <div className={`
                       w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0
-                      ${isDark ? 'bg-blue-600' : 'bg-blue-500'}
+                      ${isDark ? 'bg-primary-600' : 'bg-primary-500'}
                       shadow-lg
                     `}>
                       <GraduationCap size={28} className="text-white" />
@@ -163,9 +163,9 @@ export const HomePage = () => {
                       <div key={index} className="flex items-center gap-3">
                         <div className={`
                           w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0
-                          ${isDark ? 'bg-blue-500/20' : 'bg-blue-100'}
+                          ${isDark ? 'bg-primary-500/20' : 'bg-primary-100'}
                         `}>
-                          <Check size={12} className={isDark ? 'text-blue-400' : 'text-blue-600'} />
+                          <Check size={12} className={isDark ? 'text-primary-400' : 'text-primary-600'} />
                         </div>
                         <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                           {feature}
@@ -192,15 +192,15 @@ export const HomePage = () => {
               <Card className={`
                 border-2 transition-all duration-300 hover:shadow-2xl
                 ${isDark
-                  ? 'border-slate-700 hover:border-purple-500 hover:shadow-purple-500/20'
-                  : 'border-slate-200 hover:border-purple-400 hover:shadow-purple-400/20'
+                  ? 'border-slate-700 hover:border-accent-3000 hover:shadow-accent-3000/20'
+                  : 'border-slate-200 hover:border-accent-400 hover:shadow-accent-400/20'
                 }
               `}>
                 <div className="p-6 lg:p-8">
                   <div className="flex items-center gap-4 mb-6">
                     <div className={`
                       w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0
-                      ${isDark ? 'bg-purple-600' : 'bg-purple-500'}
+                      ${isDark ? 'bg-accent-600' : 'bg-accent-3000'}
                       shadow-lg
                     `}>
                       <Building2 size={28} className="text-white" />
@@ -220,9 +220,9 @@ export const HomePage = () => {
                       <div key={index} className="flex items-center gap-3">
                         <div className={`
                           w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0
-                          ${isDark ? 'bg-purple-500/20' : 'bg-purple-100'}
+                          ${isDark ? 'bg-accent-3000/20' : 'bg-accent-300'}
                         `}>
-                          <Check size={12} className={isDark ? 'text-purple-400' : 'text-purple-600'} />
+                          <Check size={12} className={isDark ? 'text-accent-400' : 'text-accent-600'} />
                         </div>
                         <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                           {feature}
@@ -271,9 +271,9 @@ export const HomePage = () => {
                 >
                   <div className={`
                     w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center
-                    ${isDark ? 'bg-blue-500/20' : 'bg-blue-100'}
+                    ${isDark ? 'bg-primary-500/20' : 'bg-primary-100'}
                   `}>
-                    <Icon size={32} className={isDark ? 'text-blue-400' : 'text-blue-600'} />
+                    <Icon size={32} className={isDark ? 'text-primary-400' : 'text-primary-600'} />
                   </div>
                   <h3 className={`text-xl font-semibold mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {feature.title}

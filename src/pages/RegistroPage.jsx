@@ -98,7 +98,7 @@ export const RegistroPage = () => {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-blue-50 to-purple-50'}`}>
+    <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-primary-50 to-accent-300'}`}>
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -115,14 +115,14 @@ export const RegistroPage = () => {
             <div className={`
               w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center
               ${isEstudiante
-                ? (isDark ? 'bg-blue-600' : 'bg-blue-100')
-                : (isDark ? 'bg-purple-600' : 'bg-purple-100')
+                ? (isDark ? 'bg-primary-600' : 'bg-primary-100')
+                : (isDark ? 'bg-accent-600' : 'bg-accent-300')
               }
             `}>
               {isEstudiante ? (
-                <GraduationCap size={32} className={isDark ? 'text-white' : 'text-blue-600'} />
+                <GraduationCap size={32} className={isDark ? 'text-white' : 'text-primary-600'} />
               ) : (
-                <Building2 size={32} className={isDark ? 'text-white' : 'text-purple-600'} />
+                <Building2 size={32} className={isDark ? 'text-white' : 'text-accent-600'} />
               )}
             </div>
             <h2 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -236,10 +236,10 @@ export const RegistroPage = () => {
                     rows="3"
                     disabled={loading}
                     className={`
-                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-primary-500/20
                       ${isDark 
-                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-blue-500' 
-                        : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-blue-500'
+                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-primary-500' 
+                        : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-primary-500'
                       }
                       ${loading ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
@@ -296,10 +296,10 @@ export const RegistroPage = () => {
                     required
                     disabled={loading}
                     className={`
-                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20
+                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-accent-3000/20
                       ${isDark 
-                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500' 
-                        : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-purple-500'
+                        ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-accent-3000' 
+                        : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-accent-3000'
                       }
                       ${loading ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
@@ -375,11 +375,11 @@ export const RegistroPage = () => {
                 />
                 <span className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Acepto los{' '}
-                  <a href="#" className={isEstudiante ? 'text-blue-600 hover:underline' : 'text-purple-600 hover:underline'}>
+                  <a href="#" className={isEstudiante ? 'text-primary-600 hover:underline' : 'text-accent-600 hover:underline'}>
                     términos y condiciones
                   </a>
                   {' '}y la{' '}
-                  <a href="#" className={isEstudiante ? 'text-blue-600 hover:underline' : 'text-purple-600 hover:underline'}>
+                  <a href="#" className={isEstudiante ? 'text-primary-600 hover:underline' : 'text-accent-600 hover:underline'}>
                     política de privacidad
                   </a>
                 </span>
@@ -401,7 +401,7 @@ export const RegistroPage = () => {
               ¿Ya tienes cuenta?{' '}
               <button
                 onClick={() => navigate(`/${userType}/login`)}
-                className={`font-semibold ${isEstudiante ? 'text-blue-600 hover:text-blue-700' : 'text-purple-600 hover:text-purple-700'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`font-semibold ${isEstudiante ? 'text-primary-600 hover:text-primary-700' : 'text-accent-600 hover:text-accent-700'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 disabled={loading}
               >
                 Inicia sesión aquí

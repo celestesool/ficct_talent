@@ -1,6 +1,6 @@
 import {
   AlertCircle,
-  ArrowLeft // ⭐ AÑADIDO: Icono para volver
+  ArrowLeft 
   ,
 
   Briefcase,
@@ -29,18 +29,18 @@ import { Navbar } from '../common/Navbar';
 
 export const OfertasPage = () => {
   const { isDark } = useTheme();
-  const navigate = useNavigate(); // ⭐ ACTUALIZADO: useNavigate hook
+  const navigate = useNavigate(); //  ACTUALIZADO: useNavigate hook
   const [showModal, setShowModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  // ⭐ NUEVO: Función para navegar al dashboard
+  //  NUEVO: Función para navegar al dashboard
   const handleBackToDashboard = () => {
     navigate('/empresa/dashboard');
   };
 
-  // ⭐ NUEVO: Función para ver detalles de oferta
+  //  NUEVO: Función para ver detalles de oferta
   const handleViewOfferDetails = (offerId) => {
     navigate(`/empresa/ofertas/${offerId}`);
   };
@@ -252,7 +252,7 @@ export const OfertasPage = () => {
             >
               <ArrowLeft size={18} />
             </Button>
-            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-blue-500 to-purple-500`}></div>
+            <div className={`w-2 h-8 rounded-full bg-gradient-to-b from-primary-500 to-accent-3000`}></div>
             <div className="flex-1">
               <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Mis Ofertas de Trabajo
@@ -287,13 +287,13 @@ export const OfertasPage = () => {
             <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Activas</div>
           </Card>
           <Card className="p-4 text-center">
-            <div className={`text-2xl font-bold mb-1 text-blue-600`}>
+            <div className={`text-2xl font-bold mb-1 text-primary-600`}>
               {stats.applicants}
             </div>
             <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Postulantes</div>
           </Card>
           <Card className="p-4 text-center">
-            <div className={`text-2xl font-bold mb-1 text-purple-600`}>
+            <div className={`text-2xl font-bold mb-1 text-accent-600`}>
               {stats.matches}
             </div>
             <div className={isDark ? 'text-slate-400' : 'text-slate-600'}>Matches</div>
@@ -313,8 +313,8 @@ export const OfertasPage = () => {
                 className={`
                   w-full pl-10 pr-4 py-3 rounded-xl border-2 transition-all duration-200
                   ${isDark
-                    ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500'
-                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-blue-500'
+                    ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:border-primary-500'
+                    : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-primary-500'
                   }
                 `}
               />
@@ -325,7 +325,7 @@ export const OfertasPage = () => {
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className={`
-                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                  px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20
                   ${isDark
                     ? 'bg-slate-800 border-slate-600 text-white'
                     : 'bg-white border-slate-200 text-slate-900'
@@ -385,9 +385,9 @@ export const OfertasPage = () => {
                     <div className="flex items-start gap-4">
                       <div className={`
                         p-3 rounded-lg
-                        ${isDark ? 'bg-purple-900/20' : 'bg-purple-100'}
+                        ${isDark ? 'bg-accent-700/20' : 'bg-accent-300'}
                       `}>
-                        <Briefcase size={24} className="text-purple-600" />
+                        <Briefcase size={24} className="text-accent-600" />
                       </div>
                       <div className="flex-1">
                         <h3 className={`text-xl font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -570,7 +570,7 @@ export const OfertasPage = () => {
                     value={newOffer.type}
                     onChange={(e) => setNewOffer({ ...newOffer, type: e.target.value })}
                     className={`
-                      w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                      w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20
                       ${isDark
                         ? 'bg-slate-800 border-slate-600 text-white'
                         : 'bg-white border-slate-300 text-slate-900'
@@ -616,7 +616,7 @@ export const OfertasPage = () => {
                     rows="4"
                     required
                     className={`
-                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                      w-full px-4 py-3 rounded-lg transition-colors border-2 focus:outline-none focus:ring-2 focus:ring-primary-500/20
                       ${isDark
                         ? 'bg-slate-800 border-slate-600 text-slate-100 placeholder-slate-400'
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'

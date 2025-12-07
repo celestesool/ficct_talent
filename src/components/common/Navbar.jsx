@@ -77,7 +77,8 @@ export const Navbar = () => {
   // DETECTAR TIPO DE USUARIO POR LA RUTA ACTUAL
   const currentPath = location.pathname;
   const isEstudiante = currentPath.includes('/estudiante');
-  const userType = isEstudiante ? 'estudiante' : 'empresa';
+  const isAdmin = currentPath.includes('/admin');
+  const userType = isAdmin ? 'admin' : isEstudiante ? 'estudiante' : 'empresa';
 
   // Rutas para Estudiante - Agrupadas por categoría (igual que tenías)
   const estudianteRoutes = [
@@ -105,18 +106,25 @@ export const Navbar = () => {
     }
   ];
 
-  // Rutas para Empresa (igual que tenías)
+  // Rutas para Empresa
   const empresaRoutes = [
     { path: '/empresa/dashboard', label: 'Dashboard', icon: Home },
     { path: '/empresa/ofertas', label: 'Ofertas', icon: Briefcase },
     { path: '/empresa/candidatos', label: 'Candidatos', icon: Users },
   ];
 
+  // Rutas para Admin
+  const adminRoutes = [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: Home },
+    { path: '/admin/moderation', label: 'Moderación', icon: Users },
+    { path: '/admin/announcements', label: 'Anuncios', icon: Briefcase },
+  ];
+
   const getEstudianteRoutes = () => {
     return estudianteRoutes.flatMap(group => group.routes || []);
   };
 
-  const routes = isEstudiante ? getEstudianteRoutes() : empresaRoutes;
+  const routes = isAdmin ? adminRoutes : isEstudiante ? getEstudianteRoutes() : empresaRoutes;
 
   // REEMPLAZO: Detectar ruta activa con useLocation
   const isActiveRoute = (path) => {
@@ -165,7 +173,7 @@ export const Navbar = () => {
                   className={`
                     flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium
                     ${isActiveRoute('/estudiante/dashboard')
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
+                      ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
                       : isDark
                         ? 'text-slate-300 hover:bg-slate-800 hover:text-white hover:shadow-lg'
                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-lg'
@@ -209,7 +217,7 @@ export const Navbar = () => {
                               className={`
                                 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
                                 ${isActiveRoute(route.path)
-                                  ? 'bg-blue-500/20 text-blue-600 border border-blue-500/30'
+                                  ? 'bg-primary-500/20 text-primary-600 border border-primary-500/30'
                                   : isDark
                                     ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
                                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -327,9 +335,9 @@ export const Navbar = () => {
                 </div>
               </div>
             ) : (
-              // Navegación simple para empresa 
+              // Navegación simple para empresa y admin
               <div className="flex items-center gap-2">
-                {empresaRoutes.map((route) => {
+                {routes.map((route) => {
                   const Icon = route.icon;
                   return (
                     <button
@@ -338,7 +346,9 @@ export const Navbar = () => {
                       className={`
                         flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium
                         ${isActiveRoute(route.path)
-                          ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
+                          ? isAdmin 
+                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
+                            : 'bg-accent-600 text-white shadow-lg shadow-accent-3000/25'
                           : isDark
                             ? 'text-slate-300 hover:bg-slate-800 hover:text-white hover:shadow-lg'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-lg'
@@ -373,8 +383,8 @@ export const Navbar = () => {
                   <div className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
                     ${isEstudiante
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-purple-500 text-white'
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-accent-3000 text-white'
                     }
                   `}>
                     {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
@@ -459,7 +469,7 @@ export const Navbar = () => {
                       className={`
                         w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
                         ${isActiveRoute('/estudiante/dashboard')
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-primary-600 text-white'
                           : isDark
                             ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -558,7 +568,7 @@ export const Navbar = () => {
                               className={`
                                 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
                                 ${isActiveRoute(route.path)
-                                  ? 'bg-blue-500/20 text-blue-600 border border-blue-500/30'
+                                  ? 'bg-primary-500/20 text-primary-600 border border-primary-500/30'
                                   : isDark
                                     ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
                                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -584,7 +594,7 @@ export const Navbar = () => {
                         className={`
                           w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
                           ${isActiveRoute(route.path)
-                            ? 'bg-purple-600 text-white'
+                            ? 'bg-accent-600 text-white'
                             : isDark
                               ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
                               : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
