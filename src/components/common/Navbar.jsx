@@ -1,7 +1,9 @@
 import {
   Award,
+  BarChart3,
   Bell,
   BookOpen,
+  Brain,
   Briefcase,
   ChevronDown,
   Code,
@@ -12,11 +14,13 @@ import {
   Menu,
   User,
   Users,
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { NotificationDropdown } from './NotificationDropdown';
 import { ThemeToggle } from './ThemeToggle';
 
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -101,6 +105,7 @@ export const Navbar = () => {
       category: 'Académico',
       routes: [
         { path: '/estudiante/academico', label: 'Académico', icon: GraduationCap },
+        { path: '/estudiante/tests', label: 'Tests de Práctica', icon: Brain },
         { path: '/estudiante/cv-generator', label: 'Generar CV', icon: FileText },
       ]
     }
@@ -111,6 +116,7 @@ export const Navbar = () => {
     { path: '/empresa/dashboard', label: 'Dashboard', icon: Home },
     { path: '/empresa/ofertas', label: 'Ofertas', icon: Briefcase },
     { path: '/empresa/candidatos', label: 'Candidatos', icon: Users },
+    { path: '/empresa/recomendaciones', label: 'IA Recomendaciones', icon: Sparkles },
   ];
 
   // Rutas para Admin
@@ -118,6 +124,7 @@ export const Navbar = () => {
     { path: '/admin/dashboard', label: 'Dashboard', icon: Home },
     { path: '/admin/moderation', label: 'Moderación', icon: Users },
     { path: '/admin/announcements', label: 'Anuncios', icon: Briefcase },
+    { path: '/admin/reportes', label: 'Reportes', icon: BarChart3 },
   ];
 
   const getEstudianteRoutes = () => {
@@ -161,7 +168,9 @@ export const Navbar = () => {
               src="/images/logo.png"
               alt="FICCT TALENT"
               className="w-18 h-16 object-contain cursor-pointer transition-transform hover:scale-105"
-              onClick={() => handleNavigation(isEstudiante ? '/estudiante/dashboard' : '/empresa/dashboard')}
+              onClick={() => handleNavigation(
+                isAdmin ? '/admin/dashboard' : isEstudiante ? '/estudiante/dashboard' : '/empresa/dashboard'
+              )}
             />
           </div>
 
@@ -346,7 +355,7 @@ export const Navbar = () => {
                       className={`
                         flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium
                         ${isActiveRoute(route.path)
-                          ? isAdmin 
+                          ? isAdmin
                             ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
                             : 'bg-accent-600 text-white shadow-lg shadow-accent-3000/25'
                           : isDark
@@ -365,6 +374,9 @@ export const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Notificaciones - Para estudiantes y empresas */}
+            {(isEstudiante || !isAdmin) && <NotificationDropdown />}
+
             <ThemeToggle />
 
             {/* Perfil de usuario con dropdown */}
@@ -382,9 +394,11 @@ export const Navbar = () => {
                 >
                   <div className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                    ${isEstudiante
-                      ? 'bg-primary-500 text-white'
-                      : 'bg-accent-3000 text-white'
+                    ${isAdmin
+                      ? 'bg-green-600 text-white'
+                      : isEstudiante
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-accent-3000 text-white'
                     }
                   `}>
                     {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
@@ -410,7 +424,7 @@ export const Navbar = () => {
                           {user?.name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Usuario'}
                         </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                          {isEstudiante ? 'Estudiante' : 'Empresa'}
+                          {isAdmin ? 'Administrador' : isEstudiante ? 'Estudiante' : 'Empresa'}
                         </p>
                       </div>
                       <button
@@ -584,8 +598,8 @@ export const Navbar = () => {
                     ))}
                   </>
                 ) : (
-                  // Menú mobile simple para empresa
-                  empresaRoutes.map((route) => {
+                  // Menú mobile para empresa y admin
+                  routes.map((route) => {
                     const Icon = route.icon;
                     return (
                       <button
@@ -594,7 +608,9 @@ export const Navbar = () => {
                         className={`
                           w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium
                           ${isActiveRoute(route.path)
-                            ? 'bg-accent-600 text-white'
+                            ? isAdmin
+                              ? 'bg-primary-600 text-white'
+                              : 'bg-accent-600 text-white'
                             : isDark
                               ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
                               : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'

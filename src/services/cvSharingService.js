@@ -1,16 +1,6 @@
 // src/services/cvSharingService.js
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabaseClient';
 import { generatePDFBlob } from '../utils/pdfExporter';
-
-// Usa variables de entorno (Vite)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Faltan VITE_SUPABASE_URL o VITE_SUPABASE_ANON_KEY en .env');
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const cvSharingService = {
   /**

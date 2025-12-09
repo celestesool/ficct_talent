@@ -10,7 +10,7 @@
 
 export const API_CONFIG = {
   BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
-  TIMEOUT: 30000, // 30 segundos
+  TIMEOUT: 60000, // 60 segundos (aumentado para generación de IA)
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000, // 1 segundo
 };
@@ -23,22 +23,22 @@ export const ENDPOINTS = {
   // Auth
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
-  
+
   // Companies
   COMPANIES: '/companies',
   COMPANY_PROFILE: (id) => `/companies/${id}/profile`,
   COMPANY_VIEWS: (id) => `/companies/${id}/views/count`,
   TRACK_VIEW: (id) => `/companies/${id}/track-view`,
-  
+
   // Jobs
   JOBS: '/jobs',
   JOB_BY_ID: (id) => `/jobs/${id}`,
   JOB_APPLICATIONS: (id) => `/jobs/${id}/applications`,
-  
+
   // Students
   STUDENTS: '/students',
   STUDENT_CV: (id) => `/students/${id}/cv-data`,
-  
+
   // Applications
   APPLICATIONS: '/applications',
 };

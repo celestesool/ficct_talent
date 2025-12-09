@@ -1,5 +1,5 @@
 // Página simple para mostrar notificaciones (CU13)
-import { Bell, BellOff, CheckCheck, Eye } from 'lucide-react';
+import { Bell, BellOff, CheckCheck, Eye, FileText, CheckCircle, Clock, AlertCircle, Send } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
@@ -18,8 +18,14 @@ export const NotificationsPage = () => {
     const loadNotifications = async () => {
         try {
             setLoading(true);
-            const data = await notificationService.getNotifications();
-            setNotifications(data || []);
+            // Usar el método especial para empresas que genera desde aplicaciones reales
+            const data = await notificationService.getCompanyNotifications();
+            // Aplicar estado de lectura local
+            const withReadState = data.map(n => ({
+                ...n,
+                read: notificationService.isRead(n.id)
+            }));
+            setNotifications(withReadState);
         } catch (error) {
             console.error('Error loading notifications:', error);
             setNotifications([]);
@@ -51,15 +57,18 @@ export const NotificationsPage = () => {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     const getIcon = (type) => {
+        const iconClass = isDark ? 'text-slate-300' : 'text-slate-600';
         switch (type) {
             case 'new_application':
-                return '📋';
+                return <Send size={24} className="text-primary-500" />;
             case 'application_status':
-                return '✅';
+                return <CheckCircle size={24} className="text-green-500" />;
             case 'job_expiring':
-                return '⏰';
+                return <Clock size={24} className="text-yellow-500" />;
+            case 'alert':
+                return <AlertCircle size={24} className="text-red-500" />;
             default:
-                return '🔔';
+                return <Bell size={24} className={iconClass} />;
         }
     };
 
@@ -95,7 +104,7 @@ export const NotificationsPage = () => {
                             className={`relative ${!notification.read ? (isDark ? 'bg-primary-900/10 border-primary-500/30' : 'bg-primary-50 border-primary-200') : ''}`}
                         >
                             <div className="flex items-start gap-4">
-                                <div className={`text-4xl ${!notification.read ? 'animate-pulse' : 'opacity-60'}`}>
+                                <div className={`p-2 rounded-lg ${isDark ? 'bg-slate-700' : 'bg-slate-100'} ${!notification.read ? '' : 'opacity-60'}`}>
                                     {getIcon(notification.type)}
                                 </div>
                                 <div className="flex-1">
