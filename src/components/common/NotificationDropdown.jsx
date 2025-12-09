@@ -4,76 +4,60 @@ import {
     CheckCheck,
     Clock,
     MessageSquare,
+    Send,
     Trash2,
     X
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { notificationService } from '../../services/notificationService';
 
 export const NotificationDropdown = () => {
     const { isDark } = useTheme();
     const navigate = useNavigate();
+    const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(false);
     const dropdownRef = useRef(null);
 
-    // Mock data - Esto será reemplazado por datos reales del backend
+    // Detectar tipo de usuario
+    const isEmpresa = location.pathname.includes('/empresa');
+
+    // Cargar notificaciones reales
     useEffect(() => {
-        const mockNotifications = [
-            {
-                id: 1,
-                type: 'job_match',
-                title: 'Nueva oferta que coincide con tu perfil',
-                message: 'Desarrollador Full Stack en TechCorp Bolivia',
-                timestamp: new Date(Date.now() - 5 * 60000), // 5 minutos atrás
-                read: false,
-                actionUrl: '/estudiante/ofertas',
-                icon: 'briefcase'
-            },
-            {
-                id: 2,
-                type: 'application_update',
-                title: 'Actualización de postulación',
-                message: 'Tu postulación a "Frontend Developer" fue vista por la empresa',
-                timestamp: new Date(Date.now() - 2 * 3600000), // 2 horas atrás
-                read: false,
-                actionUrl: '/estudiante/postulaciones',
-                icon: 'clock'
-            },
-            {
-                id: 3,
-                type: 'message',
-                title: 'Nuevo mensaje',
-                message: 'Innovatech S.R.L. te ha enviado un mensaje',
-                timestamp: new Date(Date.now() - 24 * 3600000), // 1 día atrás
-                read: true,
-                actionUrl: '/estudiante/mensajes',
-                icon: 'message'
-            },
-            {
-                id: 4,
-                type: 'recommendation',
-                title: 'Recomendación de empleo',
-                message: '3 nuevas ofertas basadas en tus habilidades de React y Node.js',
-                timestamp: new Date(Date.now() - 2 * 24 * 3600000), // 2 días atrás
-                read: true,
-                actionUrl: '/estudiante/ofertas',
-                icon: 'briefcase'
-            },
-            {
-                id: 5,
-                type: 'profile_view',
-                title: 'Perfil visto',
-                message: '2 empresas vieron tu perfil esta semana',
-                timestamp: new Date(Date.now() - 3 * 24 * 3600000), // 3 días atrás
-                read: true,
-                actionUrl: '/estudiante/perfil',
-                icon: 'clock'
-            }
-        ];
-        setNotifications(mockNotifications);
+        loadNotifications();
     }, []);
+
+    const loadNotifications = async () => {
+        try {
+            setLoading(true);
+            let data;
+
+            if (isEmpresa) {
+                // Para empresas: generar desde aplicaciones
+                data = await notificationService.getCompanyNotifications();
+            } else {
+                // Para estudiantes: usar el servicio normal
+                data = await notificationService.getNotifications();
+            }
+
+            // Aplicar estado de lectura local
+            const withReadState = (data || []).map(n => ({
+                ...n,
+                read: notificationService.isRead(n.id),
+                timestamp: n.created_at ? new Date(n.created_at) : new Date()
+            }));
+
+            setNotifications(withReadState);
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+            setNotifications([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Cerrar dropdown al hacer click fuera
     useEffect(() => {
@@ -94,19 +78,30 @@ export const NotificationDropdown = () => {
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
-    const getIcon = (iconType) => {
+    const getIcon = (type) => {
         const iconProps = { size: 18 };
-        switch (iconType) {
-            case 'briefcase': return <Briefcase {...iconProps} />;
-            case 'message': return <MessageSquare {...iconProps} />;
-            case 'clock': return <Clock {...iconProps} />;
-            default: return <Bell {...iconProps} />;
+        switch (type) {
+            case 'new_application':
+            case 'job_match':
+                return <Send {...iconProps} />;
+            case 'application_update':
+            case 'application_status':
+                return <Clock {...iconProps} />;
+            case 'message':
+                return <MessageSquare {...iconProps} />;
+            case 'briefcase':
+            case 'recommendation':
+                return <Briefcase {...iconProps} />;
+            default:
+                return <Bell {...iconProps} />;
         }
     };
 
     const getTimeAgo = (timestamp) => {
+        if (!timestamp) return '';
         const now = new Date();
-        const diff = now - timestamp;
+        const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+        const diff = now - date;
         const minutes = Math.floor(diff / 60000);
         const hours = Math.floor(diff / 3600000);
         const days = Math.floor(diff / 86400000);
@@ -115,24 +110,30 @@ export const NotificationDropdown = () => {
         if (minutes < 60) return `Hace ${minutes} min`;
         if (hours < 24) return `Hace ${hours}h`;
         if (days === 1) return 'Ayer';
-        return `Hace ${days} días`;
+        return `Hace ${days} dias`;
     };
 
-    const handleNotificationClick = (notification) => {
-        // Marcar como leída
+    const handleNotificationClick = async (notification) => {
+        // Marcar como leida
+        await notificationService.markAsRead(notification.id);
         setNotifications(prev =>
             prev.map(n => n.id === notification.id ? { ...n, read: true } : n)
         );
 
-        // Navegar a la URL de acción
+        // Navegar segun tipo de usuario
         if (notification.actionUrl) {
             navigate(notification.actionUrl);
+        } else if (isEmpresa) {
+            navigate('/empresa/candidatos');
+        } else {
+            navigate('/estudiante/postulaciones');
         }
 
         setIsOpen(false);
     };
 
-    const markAllAsRead = () => {
+    const markAllAsRead = async () => {
+        await notificationService.markAllAsRead();
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     };
 
@@ -145,9 +146,13 @@ export const NotificationDropdown = () => {
         setNotifications([]);
     };
 
+    const getNotificationsUrl = () => {
+        return isEmpresa ? '/empresa/notificaciones' : '/estudiante/notificaciones';
+    };
+
     return (
         <div className="relative" ref={dropdownRef}>
-            {/* Botón de notificaciones */}
+            {/* Boton de notificaciones */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`
@@ -162,7 +167,7 @@ export const NotificationDropdown = () => {
 
                 {/* Badge de contador */}
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
@@ -204,7 +209,7 @@ export const NotificationDropdown = () => {
                                             : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
                                         }
                   `}
-                                    title="Marcar todas como leídas"
+                                    title="Marcar todas como leidas"
                                 >
                                     <CheckCheck size={16} />
                                 </button>
@@ -227,7 +232,14 @@ export const NotificationDropdown = () => {
 
                     {/* Lista de notificaciones */}
                     <div className="max-h-[450px] overflow-y-auto">
-                        {notifications.length === 0 ? (
+                        {loading ? (
+                            <div className="text-center py-12">
+                                <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                                <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                                    Cargando...
+                                </p>
+                            </div>
+                        ) : notifications.length === 0 ? (
                             <div className="text-center py-12">
                                 <div className={`
                   w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center
@@ -242,11 +254,11 @@ export const NotificationDropdown = () => {
                         ) : (
                             <div className="divide-y divide-slate-200 dark:divide-slate-700">
                                 {notifications.map((notification) => (
-                                    <button
+                                    <div
                                         key={notification.id}
                                         onClick={() => handleNotificationClick(notification)}
                                         className={`
-                      w-full px-4 py-3 text-left transition-all duration-200 relative group
+                      w-full px-4 py-3 text-left transition-all duration-200 relative group cursor-pointer
                       ${!notification.read
                                                 ? isDark
                                                     ? 'bg-primary-900/20 hover:bg-primary-900/30'
@@ -268,7 +280,7 @@ export const NotificationDropdown = () => {
                                                         : 'bg-slate-200 text-slate-600'
                                                 }
                       `}>
-                                                {getIcon(notification.icon)}
+                                                {getIcon(notification.type || notification.icon)}
                                             </div>
 
                                             {/* Contenido */}
@@ -281,7 +293,7 @@ export const NotificationDropdown = () => {
                                                         {notification.title}
                                                     </h4>
 
-                                                    {/* Indicador de no leída */}
+                                                    {/* Indicador de no leida */}
                                                     {!notification.read && (
                                                         <span className="flex-shrink-0 w-2 h-2 rounded-full bg-primary-500 mt-1.5"></span>
                                                     )}
@@ -299,53 +311,53 @@ export const NotificationDropdown = () => {
                             text-xs
                             ${isDark ? 'text-slate-500' : 'text-slate-500'}
                           `}>
-                                                        {getTimeAgo(notification.timestamp)}
+                                                        {getTimeAgo(notification.timestamp || notification.created_at)}
                                                     </span>
 
-                                                    {/* Botón eliminar */}
-                                                    <button
+                                                    {/* Boton eliminar - Cambiado de button a span */}
+                                                    <span
                                                         onClick={(e) => deleteNotification(notification.id, e)}
                                                         className={`
-                              opacity-0 group-hover:opacity-100 p-1.5 rounded transition-all
+                              opacity-0 group-hover:opacity-100 p-1.5 rounded transition-all cursor-pointer
                               ${isDark
                                                                 ? 'hover:bg-red-900/30 text-red-400'
                                                                 : 'hover:bg-red-50 text-red-600'
                                                             }
                             `}
-                                                        title="Eliminar notificación"
+                                                        title="Eliminar notificacion"
                                                     >
                                                         <Trash2 size={14} />
-                                                    </button>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
-                                    </button>
+                                    </div>
                                 ))}
                             </div>
                         )}
                     </div>
 
-                    {/* Footer */}
-                    {notifications.length > 0 && (
-                        <div className={`
+                    {/* Footer - Siempre visible */}
+                    <div className={`
               px-4 py-3 border-t space-y-2
               ${isDark ? 'border-slate-700' : 'border-slate-200'}
             `}>
-                            <button
-                                onClick={() => {
-                                    navigate('/estudiante/notificaciones');
-                                    setIsOpen(false);
-                                }}
-                                className={`
+                        <button
+                            onClick={() => {
+                                navigate(getNotificationsUrl());
+                                setIsOpen(false);
+                            }}
+                            className={`
                   w-full py-2 rounded-lg text-sm font-medium transition-colors
                   ${isDark
-                                        ? 'text-primary-400 hover:bg-primary-900/20'
-                                        : 'text-primary-600 hover:bg-primary-50'
-                                    }
+                                    ? 'text-primary-400 hover:bg-primary-900/20'
+                                    : 'text-primary-600 hover:bg-primary-50'
+                                }
                 `}
-                            >
-                                Ver todas las notificaciones
-                            </button>
+                        >
+                            Ver todas las notificaciones
+                        </button>
+                        {notifications.length > 0 && (
                             <button
                                 onClick={clearAll}
                                 className={`
@@ -358,8 +370,8 @@ export const NotificationDropdown = () => {
                             >
                                 Limpiar todas
                             </button>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             )}
         </div>

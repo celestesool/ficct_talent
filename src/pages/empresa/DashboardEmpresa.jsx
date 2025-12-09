@@ -6,7 +6,10 @@ import {
   FileText,
   Plus,
   TrendingUp,
-  Users
+  Users,
+  Clock,
+  Send,
+  UserPlus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
@@ -17,6 +20,7 @@ import { adminService } from '../../api/services/adminService';
 import { Megaphone } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { companyJobService } from '../../api/services/companyService';
+import { recommendationService } from '../../services/recommendationService';
 
 export const DashboardEmpresa = () => {
   const { isDark } = useTheme();
@@ -27,6 +31,7 @@ export const DashboardEmpresa = () => {
   const [profileViews, setProfileViews] = useState(0);
   const [loading, setLoading] = useState(true);
   const [announcements, setAnnouncements] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
 
   // =====================================================
   // LOAD DASHBOARD DATA FROM BACKEND (WITH AUTOMAPPING)
@@ -74,29 +79,64 @@ export const DashboardEmpresa = () => {
       setOffers(mappedJobs);
 
       // ===========================
-      // 2) LOAD APPLICANTS FROM JOBS
+      // 2) LOAD APPLICANTS FROM JOBS WITH REAL ML MATCH
       // ===========================
 
       const applicantList = [];
+      const activityList = [];
 
       for (const job of jobList) {
-        // Las aplicaciones ya vienen en job.applications
         if (job.applications && Array.isArray(job.applications)) {
-          job.applications.forEach(app => {
+          for (const app of job.applications) {
             if (app.student) {
               const s = app.student;
+
+              // Calcular match real con ML
+              let matchScore = 0;
+              try {
+                const matchResult = await recommendationService.getDetailedMatchScore(s.id, job.id);
+                if (matchResult && matchResult.matchScore !== undefined) {
+                  matchScore = matchResult.matchScore;
+                }
+              } catch (err) {
+                console.warn(`Could not calculate match for student ${s.id}`);
+              }
+
               applicantList.push({
                 id: app.id,
+                studentId: s.id,
                 name: `${s.first_name || ''} ${s.last_name || ''}`.trim(),
-                skills: [], // TODO: obtener skills reales del estudiante
-                match: 80, // placeholder
+                skills: [],
+                match: matchScore, // ML REAL
                 appliedFor: job.title,
                 email: s.email || s.user?.email || '',
               });
+
+              // Agregar a actividad reciente
+              activityList.push({
+                id: app.id,
+                type: 'application',
+                title: `${s.first_name || 'Candidato'} aplicó a ${job.title}`,
+                date: app.applied_at || app.created_at,
+                icon: 'send'
+              });
             }
-          });
+          }
         }
+
+        // Agregar creación de ofertas a actividad
+        activityList.push({
+          id: `job-${job.id}`,
+          type: 'job',
+          title: `Oferta "${job.title}" publicada`,
+          date: job.created_at,
+          icon: 'plus'
+        });
       }
+
+      // Ordenar actividad por fecha descendente
+      activityList.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setRecentActivity(activityList.slice(0, 5));
 
       setCandidates(applicantList);
 
@@ -349,19 +389,60 @@ export const DashboardEmpresa = () => {
               </div>
             </Card>
 
-            {/* Graph placeholder */}
+            {/* Actividad Reciente */}
             <Card className="mt-6">
               <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Actividad del Mes
+                Actividad Reciente
               </h2>
-              <div className={`h-48 rounded-lg flex items-center justify-center ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
-                <div className="text-center">
-                  <TrendingUp size={48} className={isDark ? 'text-slate-500 mb-2' : 'text-slate-400 mb-2'} />
-                  <p className={`${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    Gráfico de actividad (próximamente)
-                  </p>
+
+              {recentActivity.length === 0 ? (
+                <div className={`h-32 rounded-lg flex items-center justify-center ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`}>
+                  <div className="text-center">
+                    <Clock size={32} className={isDark ? 'text-slate-500 mb-2 mx-auto' : 'text-slate-400 mb-2 mx-auto'} />
+                    <p className={`${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                      No hay actividad reciente
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentActivity.map((activity) => (
+                    <div
+                      key={activity.id}
+                      className={`p-3 rounded-lg border-l-4 ${activity.type === 'application'
+                        ? 'border-primary-500'
+                        : 'border-green-500'
+                        } ${isDark ? 'bg-slate-700' : 'bg-slate-50'}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-full ${activity.type === 'application'
+                          ? 'bg-primary-100 dark:bg-primary-900/30'
+                          : 'bg-green-100 dark:bg-green-900/30'
+                          }`}>
+                          {activity.type === 'application' ? (
+                            <Send size={14} className="text-primary-600" />
+                          ) : (
+                            <Plus size={14} className="text-green-600" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            {activity.title}
+                          </p>
+                          <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                            {activity.date ? new Date(activity.date).toLocaleDateString('es-ES', {
+                              day: 'numeric',
+                              month: 'short',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            }) : 'Fecha no disponible'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
 
@@ -373,26 +454,38 @@ export const DashboardEmpresa = () => {
               </h2>
 
               <div className="space-y-4">
-                {topCandidates.map((candidate, idx) => (
-                  <div
-                    key={idx}
-                    className={`p-3 rounded-lg cursor-pointer ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-accent-300 hover:bg-accent-300'
-                      }`}
-                    onClick={() => handleViewCandidateDetails(candidate.id)}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <p className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        {candidate.name}
-                      </p>
-                      <span className="text-sm font-bold text-accent-600">
-                        {candidate.match}%
-                      </span>
-                    </div>
-                    <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                      {candidate.skills.join(', ')}
-                    </p>
+                {topCandidates.length === 0 ? (
+                  <div className={`text-center py-6 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    <UserPlus size={32} className="mx-auto mb-2 opacity-50" />
+                    <p>No hay candidatos aún</p>
                   </div>
-                ))}
+                ) : (
+                  topCandidates.map((candidate, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-3 rounded-lg cursor-pointer transition-all ${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-50 hover:bg-slate-100'
+                        }`}
+                      onClick={() => handleViewCandidateDetails(candidate.studentId || candidate.id)}
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <p className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                          {candidate.name || 'Candidato'}
+                        </p>
+                        <span className={`text-sm font-bold px-2 py-0.5 rounded ${candidate.match >= 70
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : candidate.match >= 40
+                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                              : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                          }`}>
+                          {candidate.match}%
+                        </span>
+                      </div>
+                      <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                        {candidate.appliedFor || 'Sin puesto especificado'}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
 
               <Button variant="outline" fullWidth className="mt-4" onClick={handleViewAllCandidates}>

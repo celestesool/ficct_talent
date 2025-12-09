@@ -13,7 +13,8 @@ import {
   Menu,
   User,
   Users,
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -75,6 +76,7 @@ export const Navbar = () => {
     { path: '/empresa/dashboard', label: 'Dashboard', icon: Home },
     { path: '/empresa/ofertas', label: 'Ofertas', icon: Briefcase },
     { path: '/empresa/candidatos', label: 'Candidatos', icon: Users },
+    { path: '/empresa/recomendaciones', label: 'IA Recomendaciones', icon: Sparkles },
   ];
 
   // Rutas para Admin
@@ -222,8 +224,8 @@ export const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Notificaciones - Solo para estudiantes */}
-            {isEstudiante && <NotificationDropdown />}
+            {/* Notificaciones - Para estudiantes y empresas */}
+            {(isEstudiante || !isAdmin) && <NotificationDropdown />}
 
             <ThemeToggle />
 

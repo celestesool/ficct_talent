@@ -91,6 +91,7 @@ function App() {
                 <Route path="candidatos/:studentId" element={<StudentProfilePage />} />
                 <Route path="notificaciones" element={<NotificationsPage />} />
                 <Route path="recomendaciones" element={<RecommendationsPage />} />
+                <Route path="recomendaciones/:jobId" element={<RecommendationsPage />} />
               </Route>
 
               {/* Rutas de Administrador */}

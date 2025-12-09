@@ -1,33 +1,59 @@
 // Página simple para mostrar candidatos recomendados por IA (CU18)
-import { Sparkles, Mail, Eye, Star, TrendingUp, AlertCircle, Loader } from 'lucide-react';
+import { Sparkles, Mail, Eye, Star, TrendingUp, AlertCircle, Loader, Briefcase, ArrowLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { useTheme } from '../../contexts/ThemeContext';
 import { recommendationService } from '../../services/recommendationService';
+import api from '../../services/api';
 
 export const RecommendationsPage = () => {
     const { isDark } = useTheme();
     const { jobId } = useParams();
+    const navigate = useNavigate();
     const [candidates, setCandidates] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [jobs, setJobs] = useState([]);
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [loadingJobs, setLoadingJobs] = useState(true);
     const [error, setError] = useState(null);
 
+    // Cargar ofertas de la empresa
+    useEffect(() => {
+        loadJobs();
+    }, []);
+
+    // Cargar recomendaciones cuando hay jobId
     useEffect(() => {
         if (jobId) {
-            loadRecommendations();
+            loadRecommendations(jobId);
         }
     }, [jobId]);
 
-    const loadRecommendations = async () => {
+    const loadJobs = async () => {
+        try {
+            setLoadingJobs(true);
+            const response = await api.get('/jobs');
+            setJobs(response.data || []);
+        } catch (err) {
+            console.error('Error loading jobs:', err);
+        } finally {
+            setLoadingJobs(false);
+        }
+    };
+
+    const loadRecommendations = async (id) => {
         try {
             setLoading(true);
             setError(null);
-            const candidates = await recommendationService.getRecommendedCandidatesForJob(jobId, 10);
-            
+            const candidates = await recommendationService.getRecommendedCandidatesForJob(id, 10);
+
             if (Array.isArray(candidates)) {
                 setCandidates(candidates);
+                // Encontrar el job seleccionado
+                const job = jobs.find(j => j.id === id);
+                setSelectedJob(job);
             } else {
                 setError('No se pudieron cargar las recomendaciones');
             }
@@ -39,10 +65,15 @@ export const RecommendationsPage = () => {
         }
     };
 
+    const handleSelectJob = (job) => {
+        navigate(`/empresa/recomendaciones/${job.id}`);
+    };
+
     const getMatchColor = (percentage) => {
         if (percentage >= 90) return 'text-green-600 bg-green-100';
-        if (percentage >= 80) return 'text-primary-600 bg-primary-100';
-        return 'text-yellow-600 bg-yellow-100';
+        if (percentage >= 60) return 'text-primary-600 bg-primary-100';
+        if (percentage >= 30) return 'text-yellow-600 bg-yellow-100';
+        return 'text-red-600 bg-red-100';
     };
 
     return (
@@ -51,23 +82,89 @@ export const RecommendationsPage = () => {
                 {/* Header */}
                 <div className="mb-8">
                     <div className="flex items-center gap-3 mb-2">
+                        {/* Botón Volver */}
+                        {jobId && (
+                            <Button
+                                variant="outline"
+                                onClick={() => navigate('/empresa/recomendaciones')}
+                                className="mr-2"
+                            >
+                                <ArrowLeft size={18} />
+                            </Button>
+                        )}
                         <Sparkles className="text-primary-500" size={32} />
                         <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                             Candidatos Recomendados por IA
                         </h1>
                     </div>
                     <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                        Nuestra IA ha encontrado {candidates.length} candidatos ideales para tu vacante
+                        {jobId
+                            ? `Nuestra IA ha encontrado ${candidates.length} candidatos ideales para tu vacante`
+                            : 'Selecciona una vacante para ver candidatos recomendados'
+                        }
                     </p>
                 </div>
 
-                {/* Loading State */}
-                {loading && (
+                {/* Job Selector - Solo cuando no hay jobId */}
+                {!jobId && !loadingJobs && (
+                    <div className="mb-8">
+                        <Card className="p-6">
+                            <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                <Briefcase className="inline mr-2" size={20} />
+                                Selecciona una vacante
+                            </h3>
+                            {jobs.length > 0 ? (
+                                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                                    {jobs.map(job => (
+                                        <button
+                                            key={job.id}
+                                            onClick={() => handleSelectJob(job)}
+                                            className={`p-4 rounded-lg text-left transition-all hover:shadow-lg border ${isDark
+                                                ? 'bg-slate-700 border-slate-600 hover:bg-slate-600 text-white'
+                                                : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-900'
+                                                }`}
+                                        >
+                                            <h4 className="font-semibold mb-1">{job.title}</h4>
+                                            <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                                                {job.requirements?.split(',').slice(0, 3).join(', ') || 'Sin requisitos'}
+                                            </p>
+                                            <span className={`inline-block mt-2 px-2 py-1 rounded text-xs ${job.is_active
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-gray-100 text-gray-700'
+                                                }`}>
+                                                {job.is_active ? 'Activa' : 'Cerrada'}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                                    No tienes vacantes publicadas. Crea una para ver recomendaciones.
+                                </p>
+                            )}
+                        </Card>
+                    </div>
+                )}
+
+                {/* Loading Jobs */}
+                {!jobId && loadingJobs && (
+                    <Card>
+                        <div className="text-center py-12">
+                            <Loader size={48} className={`mx-auto mb-4 animate-spin ${isDark ? 'text-primary-400' : 'text-primary-500'}`} />
+                            <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                                Cargando tus vacantes...
+                            </p>
+                        </div>
+                    </Card>
+                )}
+
+                {/* Loading Recommendations */}
+                {jobId && loading && (
                     <Card>
                         <div className="text-center py-12">
                             <Loader size={64} className={`mx-auto mb-4 animate-spin ${isDark ? 'text-primary-400' : 'text-primary-500'}`} />
                             <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                                Analizando candidatos...
+                                Analizando candidatos con Machine Learning...
                             </p>
                         </div>
                     </Card>
@@ -87,16 +184,17 @@ export const RecommendationsPage = () => {
                 )}
 
                 {/* Info Card */}
-                {!loading && !error && (
+                {jobId && !loading && !error && (
                     <Card className="mb-6 bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 border-primary-200 dark:border-primary-700">
                         <div className="flex items-start gap-3">
                             <TrendingUp className="text-primary-600 mt-1" size={24} />
                             <div>
                                 <h3 className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                    ¿Cómo funciona?
+                                    ¿Cómo funciona el algoritmo?
                                 </h3>
                                 <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                                    Analizamos habilidades para encontrar los mejores matches para tu vacante.
+                                    Usamos <strong>Machine Learning</strong> (Content-Based Filtering + Distancia de Levenshtein)
+                                    para comparar las habilidades de cada candidato con los requisitos de tu vacante.
                                 </p>
                             </div>
                         </div>
@@ -104,7 +202,7 @@ export const RecommendationsPage = () => {
                 )}
 
                 {/* Lista de Candidatos Recomendados */}
-                {!loading && !error && (
+                {jobId && !loading && !error && (
                     <div className="grid gap-6">
                         {candidates.map((candidate, index) => (
                             <Card key={candidate.studentId} hover className="relative overflow-hidden">
@@ -200,15 +298,15 @@ export const RecommendationsPage = () => {
                     </div>
                 )}
 
-                {!loading && !error && candidates.length === 0 && (
+                {jobId && !loading && !error && candidates.length === 0 && (
                     <Card>
                         <div className="text-center py-12">
                             <Sparkles size={64} className={`mx-auto mb-4 ${isDark ? 'text-slate-600' : 'text-slate-400'}`} />
                             <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                No hay recomendaciones disponibles
+                                No se encontraron candidatos
                             </h3>
                             <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                                Selecciona una vacante para ver candidatos recomendados
+                                No hay estudiantes con skills que coincidan con los requisitos de esta vacante.
                             </p>
                         </div>
                     </Card>

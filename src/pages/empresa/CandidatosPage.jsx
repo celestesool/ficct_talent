@@ -23,6 +23,7 @@ import { Card } from "../../components/common/Card";
 import { Navbar } from "../../components/common/Navbar";
 import { useTheme } from "../../contexts/ThemeContext";
 import { companyJobService } from "../../api/services/companyService";
+import { recommendationService } from "../../services/recommendationService";
 
 export const CandidatosPage = () => {
   const { isDark } = useTheme();
@@ -48,7 +49,7 @@ export const CandidatosPage = () => {
 
       // Obtener todos los jobs de la empresa
       const jobsResult = await companyJobService.getCompanyJobs(companyId);
-      
+
       if (!jobsResult.success || !jobsResult.data) {
         setCandidates([]);
         return;
@@ -56,7 +57,7 @@ export const CandidatosPage = () => {
 
       // Extraer todos los candidatos de todas las ofertas
       const allCandidates = [];
-      
+
       jobsResult.data.forEach(job => {
         if (job.applications && Array.isArray(job.applications)) {
           job.applications.forEach(app => {
@@ -72,27 +73,87 @@ export const CandidatosPage = () => {
       });
 
       if (allCandidates.length > 0) {
-        const mapped = allCandidates.map((c) => ({
-          id: c.application.id,
-          studentId: c.student.id,
-          name: `${c.student.first_name || ''} ${c.student.last_name || ''}`.trim() || 'Nombre no disponible',
-          email: c.student.email || c.student.user?.email || 'Email no disponible',
-          phone: c.student.phone_number || 'No especificado',
-          birthDate: c.student.birth_date || 'No especificado',
-          appliedFor: c.job.title,
-          appliedDate: c.application.applied_at ? new Date(c.application.applied_at).toLocaleDateString() : 'N/A',
-          gpa: 85, // TODO: obtener de academic_info
-          institution: 'Universidad Mayor de San Simón', // TODO: obtener de academic_info
-          certifications: 0, // TODO: contar certificaciones reales
-          projects: 0, // TODO: contar proyectos reales
-          skills: [], // TODO: obtener skills reales del estudiante
-          match: 80, // TODO: calcular match real
-          status: c.application.status || 'aplicado',
-          location: 'Santa Cruz', // TODO: obtener ubicación real
-          raw: c,
-        }));
+        // Mapear candidatos con datos reales
+        const mappedCandidates = await Promise.all(
+          allCandidates.map(async (c) => {
+            const studentId = c.student.id;
+            const jobId = c.job.id;
 
-        setCandidates(mapped);
+            // Calcular match score real usando el servicio de recomendaciones
+            let matchScore = 0;
+            let projectsCount = 0;
+            let certificationsCount = 0;
+            let skillsList = [];
+
+            try {
+              // Obtener match score
+              const matchResult = await recommendationService.getDetailedMatchScore(studentId, jobId);
+              if (matchResult && matchResult.matchScore !== undefined) {
+                matchScore = matchResult.matchScore;
+              }
+            } catch (err) {
+              console.warn(`Could not calculate match for student ${studentId}:`, err);
+            }
+
+            try {
+              // Obtener proyectos del estudiante
+              const projectsResponse = await fetch(`http://localhost:3000/projects/student/${studentId}`);
+              if (projectsResponse.ok) {
+                const projects = await projectsResponse.json();
+                projectsCount = Array.isArray(projects) ? projects.length : 0;
+              }
+            } catch (err) {
+              console.warn(`Could not load projects for student ${studentId}`);
+            }
+
+            try {
+              // Obtener certificaciones del estudiante
+              const certsResponse = await fetch(`http://localhost:3000/certifications/student/${studentId}`);
+              if (certsResponse.ok) {
+                const certs = await certsResponse.json();
+                certificationsCount = Array.isArray(certs) ? certs.length : 0;
+              }
+            } catch (err) {
+              console.warn(`Could not load certifications for student ${studentId}`);
+            }
+
+            try {
+              // Obtener skills del estudiante
+              const skillsResponse = await fetch(`http://localhost:3000/skills/student/${studentId}`);
+              if (skillsResponse.ok) {
+                const skills = await skillsResponse.json();
+                if (Array.isArray(skills)) {
+                  skillsList = skills.map(s => s.skill?.name || s.name || 'Skill').slice(0, 5);
+                }
+              }
+            } catch (err) {
+              console.warn(`Could not load skills for student ${studentId}`);
+            }
+
+            return {
+              id: c.application.id,
+              studentId: studentId,
+              jobId: jobId,
+              name: `${c.student.first_name || ''} ${c.student.last_name || ''}`.trim() || 'Nombre no disponible',
+              email: c.student.email || c.student.user?.email || 'Email no disponible',
+              phone: c.student.phone_number || 'No especificado',
+              birthDate: c.student.birth_date || 'No especificado',
+              appliedFor: c.job.title,
+              appliedDate: c.application.applied_at ? new Date(c.application.applied_at).toLocaleDateString() : 'N/A',
+              gpa: 85, // TODO: obtener de academic_info
+              institution: 'Universidad Mayor de San Simón', // TODO: obtener de academic_info
+              certifications: certificationsCount, // ✅ DATOS REALES
+              projects: projectsCount, // ✅ DATOS REALES
+              skills: skillsList, // ✅ DATOS REALES
+              match: matchScore, // ✅ ML REAL
+              status: c.application.status || 'aplicado',
+              location: 'Santa Cruz', // TODO: obtener ubicación real
+              raw: c,
+            };
+          })
+        );
+
+        setCandidates(mappedCandidates);
       } else {
         setCandidates([]);
       }
