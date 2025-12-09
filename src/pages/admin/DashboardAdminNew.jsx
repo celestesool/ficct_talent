@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Users, 
-  Briefcase, 
-  FileText, 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckCircle, 
-  Building, 
-  Clock,
-  Activity,
-  BarChart3
+import {
+    Users,
+    Briefcase,
+    FileText,
+    TrendingUp,
+    AlertTriangle,
+    CheckCircle,
+    Building,
+    Clock,
+    Activity,
+    BarChart3
 } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../services/api';
+import { dashboardCache } from '../../utils/cacheManager';
 
 export const DashboardAdmin = () => {
     const { isDark } = useTheme();
@@ -39,51 +40,49 @@ export const DashboardAdmin = () => {
                 setLoading(true);
                 setError(null);
 
-                // Fetch real data from backend
-                const response = await api.get('/admin/dashboard-stats');
-                
+                const startTime = performance.now();
+
+                // ✅ OPTIMIZACIÓN: Usar caché para datos del admin
+                const response = await dashboardCache.get(
+                    'admin_dashboard_stats',
+                    () => api.get('/admin/dashboard-stats'),
+                    5 * 60 * 1000 // 5 minutos (datos de admin cambian frecuentemente)
+                );
+
                 if (response.data) {
                     setStats(response.data);
-                    
-                    // Build recent activity from real data
-                    const activities = [];
-                    
-                    if (response.data.recentRegistrations) {
-                        response.data.recentRegistrations.forEach(reg => {
-                            activities.push({
-                                type: reg.userType === 'student' ? 'student' : 'company',
-                                message: `Nuevo ${reg.userType === 'student' ? 'estudiante' : 'empresa'} registrado: ${reg.name}`,
-                                time: formatTimeAgo(reg.createdAt),
-                                icon: reg.userType === 'student' ? Users : Building
-                            });
+
+                    // Usar recentActivity directamente del backend
+                    if (response.data.recentActivity && Array.isArray(response.data.recentActivity)) {
+                        const activities = response.data.recentActivity.map(activity => {
+                            // Mapear iconos basados en el tipo
+                            let icon = Activity;
+                            let activityType = 'default';
+
+                            if (activity.type === 'user_registered') {
+                                icon = Users;
+                                activityType = 'student';
+                            } else if (activity.type === 'job_posted') {
+                                icon = Briefcase;
+                                activityType = 'job';
+                            } else if (activity.type === 'application') {
+                                icon = FileText;
+                                activityType = 'application';
+                            }
+
+                            return {
+                                type: activityType,
+                                message: activity.message,
+                                time: formatTimeAgo(activity.time),
+                                icon: icon
+                            };
                         });
+
+                        setRecentActivity(activities);
                     }
-                    
-                    if (response.data.recentJobs) {
-                        response.data.recentJobs.forEach(job => {
-                            activities.push({
-                                type: 'job',
-                                message: `Nueva oferta publicada: ${job.title}`,
-                                time: formatTimeAgo(job.createdAt),
-                                icon: Briefcase
-                            });
-                        });
-                    }
-                    
-                    if (response.data.recentApplications) {
-                        response.data.recentApplications.forEach(app => {
-                            activities.push({
-                                type: 'application',
-                                message: `Nueva postulación a ${app.jobTitle}`,
-                                time: formatTimeAgo(app.appliedAt),
-                                icon: FileText
-                            });
-                        });
-                    }
-                    
-                    // Sort by most recent
-                    activities.sort((a, b) => b.time.localeCompare(a.time));
-                    setRecentActivity(activities.slice(0, 10));
+
+                    const endTime = performance.now();
+                    console.log(`Admin dashboard loaded in ${(endTime - startTime).toFixed(2)}ms`);
                 }
             } catch (err) {
                 console.error('Error loading admin dashboard:', err);
@@ -94,6 +93,11 @@ export const DashboardAdmin = () => {
         };
 
         fetchDashboardData();
+
+        // Limpiar caché al desmontar
+        return () => {
+            dashboardCache.clear('admin_dashboard_stats');
+        };
     }, []);
 
     const formatTimeAgo = (dateString) => {
@@ -101,7 +105,7 @@ export const DashboardAdmin = () => {
         const date = new Date(dateString);
         const now = new Date();
         const diffInSeconds = Math.floor((now - date) / 1000);
-        
+
         if (diffInSeconds < 60) return 'Hace un momento';
         if (diffInSeconds < 3600) return `Hace ${Math.floor(diffInSeconds / 60)} minutos`;
         if (diffInSeconds < 86400) return `Hace ${Math.floor(diffInSeconds / 3600)} horas`;
@@ -196,14 +200,29 @@ export const DashboardAdmin = () => {
     return (
         <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
             <div className="container mx-auto px-4 py-8">
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        Panel de Administración
-                    </h1>
-                    <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                        Vista general del sistema FICCT Talent
-                    </p>
+                {/* Header con gradiente */}
+                <div className={`mb-8 p-6 rounded-2xl ${isDark ? 'bg-gradient-to-r from-slate-800 to-slate-700' : 'bg-gradient-to-r from-primary-500 to-primary-600'}`}>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h1 className="text-3xl font-bold mb-2 text-white">
+                                Panel de Administracion
+                            </h1>
+                            <p className="text-white/80">
+                                Vista general del sistema FICCT Talent
+                            </p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-white/60 text-sm">Ultima actualizacion</p>
+                            <p className="text-white font-medium">
+                                {new Date().toLocaleDateString('es-ES', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Stats Grid */}
@@ -273,21 +292,20 @@ export const DashboardAdmin = () => {
                                 recentActivity.map((activity, index) => {
                                     const Icon = activity.icon;
                                     return (
-                                        <div 
-                                            key={index} 
+                                        <div
+                                            key={index}
                                             className={`flex items-start gap-3 p-3 rounded-lg border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}
                                         >
-                                            <div className={`p-2 rounded-lg ${
-                                                activity.type === 'student' ? 'bg-blue-100 dark:bg-blue-900/20' :
+                                            <div className={`p-2 rounded-lg ${activity.type === 'student' ? 'bg-blue-100 dark:bg-blue-900/20' :
                                                 activity.type === 'company' ? 'bg-purple-100 dark:bg-purple-900/20' :
-                                                activity.type === 'job' ? 'bg-green-100 dark:bg-green-900/20' :
-                                                'bg-orange-100 dark:bg-orange-900/20'
-                                            }`}>
+                                                    activity.type === 'job' ? 'bg-green-100 dark:bg-green-900/20' :
+                                                        'bg-orange-100 dark:bg-orange-900/20'
+                                                }`}>
                                                 <Icon className={
                                                     activity.type === 'student' ? 'text-blue-600 dark:text-blue-400' :
-                                                    activity.type === 'company' ? 'text-purple-600 dark:text-purple-400' :
-                                                    activity.type === 'job' ? 'text-green-600 dark:text-green-400' :
-                                                    'text-orange-600 dark:text-orange-400'
+                                                        activity.type === 'company' ? 'text-purple-600 dark:text-purple-400' :
+                                                            activity.type === 'job' ? 'text-green-600 dark:text-green-400' :
+                                                                'text-orange-600 dark:text-orange-400'
                                                 } size={20} />
                                             </div>
                                             <div className="flex-1">
@@ -317,35 +335,84 @@ export const DashboardAdmin = () => {
                         <div className="flex items-center gap-2 mb-6">
                             <BarChart3 className="text-primary-500" size={24} />
                             <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                Acciones Rápidas
+                                Acciones Rapidas
                             </h2>
                         </div>
                         <div className="space-y-3">
-                            <Button
-                                fullWidth
-                                variant="outline"
+                            <button
                                 onClick={() => navigate('/admin/moderation')}
-                                className="justify-start"
+                                className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
+                                        ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                                        : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
+                                    }`}
                             >
-                                <Users size={20} className="mr-2" />
-                                Gestionar Usuarios
-                            </Button>
-                            <Button
-                                fullWidth
-                                variant="outline"
+                                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                                    <Users size={20} className="text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div>
+                                    <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                        Gestionar Usuarios
+                                    </p>
+                                    <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                        Moderar y administrar cuentas
+                                    </p>
+                                </div>
+                            </button>
+
+                            <button
                                 onClick={() => navigate('/admin/announcements')}
-                                className="justify-start"
+                                className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
+                                        ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                                        : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
+                                    }`}
                             >
-                                <TrendingUp size={20} className="mr-2" />
-                                Gestionar Anuncios
-                            </Button>
+                                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                                    <TrendingUp size={20} className="text-purple-600 dark:text-purple-400" />
+                                </div>
+                                <div>
+                                    <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                        Gestionar Anuncios
+                                    </p>
+                                    <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                        Crear y editar comunicados
+                                    </p>
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/admin/reports')}
+                                className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
+                                        ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                                        : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
+                                    }`}
+                            >
+                                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                                    <BarChart3 size={20} className="text-green-600 dark:text-green-400" />
+                                </div>
+                                <div>
+                                    <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                        Ver Reportes
+                                    </p>
+                                    <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                        Estadisticas y metricas del sistema
+                                    </p>
+                                </div>
+                            </button>
+
                             {stats.reportedUsers > 0 && (
-                                <div className={`p-3 rounded-lg border-2 border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20`}>
-                                    <div className="flex items-center gap-2">
-                                        <AlertTriangle className="text-red-600 dark:text-red-400" size={20} />
-                                        <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                            {stats.reportedUsers} reporte(s) pendiente(s)
-                                        </span>
+                                <div className={`p-4 rounded-xl border-2 border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20`}>
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                                            <AlertTriangle className="text-red-600 dark:text-red-400" size={20} />
+                                        </div>
+                                        <div>
+                                            <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                {stats.reportedUsers} reporte(s) pendiente(s)
+                                            </p>
+                                            <p className={`text-xs ${isDark ? 'text-red-300' : 'text-red-600'}`}>
+                                                Requiere atencion inmediata
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             )}

@@ -21,6 +21,7 @@ import { Megaphone } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { companyJobService } from '../../api/services/companyService';
 import { recommendationService } from '../../services/recommendationService';
+import { dashboardCache } from '../../utils/cacheManager';
 
 export const DashboardEmpresa = () => {
   const { isDark } = useTheme();
@@ -34,10 +35,15 @@ export const DashboardEmpresa = () => {
   const [recentActivity, setRecentActivity] = useState([]);
 
   // =====================================================
-  // LOAD DASHBOARD DATA FROM BACKEND (WITH AUTOMAPPING)
+  // LOAD DASHBOARD DATA - OPTIMIZED WITH PARALLEL LOADING
   // =====================================================
   useEffect(() => {
     loadDashboardData();
+    
+    // Limpiar caché al desmontar
+    return () => {
+      dashboardCache.clearAll();
+    };
   }, []);
 
   async function loadDashboardData() {
@@ -51,11 +57,34 @@ export const DashboardEmpresa = () => {
         return;
       }
 
-      // 1) Load this company's jobs
-      const jobsResult = await companyJobService.getCompanyJobs(companyId);
+      // ✅ OPTIMIZACIÓN 1: Cargar en paralelo (no secuencial)
+      const startTime = performance.now();
+      
+      const [jobsResult, viewsResult, announcementsResult] = await Promise.all([
+        dashboardCache.get(
+          `jobs_${companyId}`,
+          () => companyJobService.getCompanyJobs(companyId),
+          10 * 60 * 1000 // 10 minutos
+        ),
+        dashboardCache.get(
+          `views_${companyId}`,
+          () => companyJobService.getViewsCount(companyId),
+          10 * 60 * 1000
+        ),
+        dashboardCache.get(
+          'announcements',
+          () => adminService.getAnnouncements(),
+          30 * 60 * 1000 // 30 minutos
+        )
+      ]);
+
+      const endTime = performance.now();
+      console.log(`⚡ Dashboard data loaded in ${(endTime - startTime).toFixed(2)}ms`);
 
       // Ensure jobs is always an array
-      const jobList = jobsResult.success && Array.isArray(jobsResult.data) ? jobsResult.data : [];
+      const jobList = jobsResult.success && Array.isArray(jobsResult.data) 
+        ? jobsResult.data 
+        : [];
 
       // ===========================
       //  AUTOMAP JOB DATA
@@ -79,40 +108,60 @@ export const DashboardEmpresa = () => {
       setOffers(mappedJobs);
 
       // ===========================
-      // 2) LOAD APPLICANTS FROM JOBS WITH REAL ML MATCH
+      // 2) LOAD APPLICANTS - OPTIMIZED (Sin loop de requests)
       // ===========================
-
       const applicantList = [];
       const activityList = [];
 
-      for (const job of jobList) {
+      // ✅ OPTIMIZACIÓN 2: Recolectar todos los match scores en paralelo
+      const matchPromises = [];
+      const matchMap = new Map();
+
+      jobList.forEach(job => {
         if (job.applications && Array.isArray(job.applications)) {
-          for (const app of job.applications) {
+          job.applications.forEach(app => {
+            if (app.student) {
+              const cacheKey = `match_${app.student.id}_${job.id}`;
+              matchPromises.push(
+                dashboardCache.get(
+                  cacheKey,
+                  () => recommendationService.getDetailedMatchScore(app.student.id, job.id),
+                  15 * 60 * 1000 // 15 minutos
+                ).then(result => {
+                  matchMap.set(cacheKey, result?.matchScore || 0);
+                }).catch(() => {
+                  matchMap.set(cacheKey, 0);
+                })
+              );
+            }
+          });
+        }
+      });
+
+      // Esperar a que todos los matches se carguen en paralelo
+      if (matchPromises.length > 0) {
+        await Promise.all(matchPromises);
+      }
+
+      // Ahora construir candidatos con match scores ya cacheados
+      jobList.forEach(job => {
+        if (job.applications && Array.isArray(job.applications)) {
+          job.applications.forEach(app => {
             if (app.student) {
               const s = app.student;
-
-              // Calcular match real con ML
-              let matchScore = 0;
-              try {
-                const matchResult = await recommendationService.getDetailedMatchScore(s.id, job.id);
-                if (matchResult && matchResult.matchScore !== undefined) {
-                  matchScore = matchResult.matchScore;
-                }
-              } catch (err) {
-                console.warn(`Could not calculate match for student ${s.id}`);
-              }
+              const cacheKey = `match_${s.id}_${job.id}`;
+              const matchScore = matchMap.get(cacheKey) || 0;
 
               applicantList.push({
                 id: app.id,
                 studentId: s.id,
                 name: `${s.first_name || ''} ${s.last_name || ''}`.trim(),
                 skills: [],
-                match: matchScore, // ML REAL
+                match: matchScore,
                 appliedFor: job.title,
                 email: s.email || s.user?.email || '',
               });
 
-              // Agregar a actividad reciente
               activityList.push({
                 id: app.id,
                 type: 'application',
@@ -121,10 +170,9 @@ export const DashboardEmpresa = () => {
                 icon: 'send'
               });
             }
-          }
+          });
         }
 
-        // Agregar creación de ofertas a actividad
         activityList.push({
           id: `job-${job.id}`,
           type: 'job',
@@ -132,7 +180,7 @@ export const DashboardEmpresa = () => {
           date: job.created_at,
           icon: 'plus'
         });
-      }
+      });
 
       // Ordenar actividad por fecha descendente
       activityList.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -140,21 +188,12 @@ export const DashboardEmpresa = () => {
 
       setCandidates(applicantList);
 
-      // 3) CARGAR VISTAS DE PERFIL
-      try {
-        const viewsResult = await companyJobService.getViewsCount(companyId);
-        setProfileViews(viewsResult || 0);
-        try {
-          const response = await adminService.getAnnouncements();
-          // Filtrar solo anuncios para empresas o todos
-          const filtered = response.filter(a => a.target === 'companies' || a.target === 'all');
-          setAnnouncements(filtered.slice(0, 3)); // Mostrar máximo 3
-        } catch (announcementError) {
-          console.error("Error loading announcements:", announcementError);
-        }
-      } catch (viewError) {
-        console.error("Error loading profile views:", viewError);
-        setProfileViews(0);
+      // 3) SET VIEWS AND ANNOUNCEMENTS
+      setProfileViews(viewsResult || 0);
+      
+      if (announcementsResult) {
+        const filtered = announcementsResult.filter(a => a.target === 'companies' || a.target === 'all');
+        setAnnouncements(filtered.slice(0, 3));
       }
 
     } catch (error) {
