@@ -2,6 +2,7 @@ import {
   ArrowRight,
   Award,
   Bell,
+  Brain,
   Briefcase,
   Clock,
   Code,
@@ -260,6 +261,17 @@ export const DashboardEstudiante = () => {
       bgLight: 'bg-indigo-50',
       bgDark: 'bg-indigo-500/10',
       hoverBorder: 'hover:border-indigo-400 dark:hover:border-indigo-500',
+      badge: 'IA'
+    },
+    {
+      title: 'Tests de Práctica',
+      desc: 'Practica con tests generados por IA',
+      icon: Brain,
+      path: '/estudiante/tests',
+      gradient: 'from-purple-500 to-purple-600',
+      bgLight: 'bg-purple-50',
+      bgDark: 'bg-purple-500/10',
+      hoverBorder: 'hover:border-purple-400 dark:hover:border-purple-500',
       badge: 'IA'
     },
     {

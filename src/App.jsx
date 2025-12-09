@@ -21,6 +21,10 @@ import { ProyectosPage } from './pages/estudiante/ProyectosPage';
 import { CVEditor } from './pages/estudiante/CVEditor';
 import { PostulacionesPage } from './pages/estudiante/PostulacionesPage';
 import { CompanyProfilePage } from './pages/estudiante/CompanyProfilePage';
+import NotificationsPageEstudiante from './pages/estudiante/NotificationsPage';
+import TestsPage from './pages/estudiante/TestsPage';
+import TestExecutionPage from './pages/estudiante/TestExecutionPage';
+import TestResultsPage from './pages/estudiante/TestResultsPage';
 
 // Páginas de Empresa
 import { CandidatosPage } from './pages/empresa/CandidatosPage';
@@ -34,6 +38,7 @@ import { RecommendationsPage } from './pages/empresa/RecommendationsPage';
 import { DashboardAdmin } from './pages/admin/DashboardAdminNew';
 import { ModerationPage } from './pages/admin/ModerationPage';
 import { AnnouncementsPage } from './pages/admin/AnnouncementsPage';
+import ReportsPage from './pages/admin/ReportsPage';
 
 // Layouts
 import { CompanyLayout } from './components/layout/CompanyLayout';
@@ -69,6 +74,10 @@ function App() {
                 <Route path="postulaciones" element={<PostulacionesPage />} />
                 <Route path="cv-generator" element={<CVEditor />} />
                 <Route path="empresas/:companyId" element={<CompanyProfilePage />} />
+                <Route path="notificaciones" element={<NotificationsPageEstudiante />} />
+                <Route path="tests" element={<TestsPage />} />
+                <Route path="tests/:applicationId/start" element={<TestExecutionPage />} />
+                <Route path="tests/:testId/results" element={<TestResultsPage />} />
               </Route>
 
               {/* Rutas de Empresa */}
@@ -90,6 +99,7 @@ function App() {
                 <Route path="dashboard" element={<DashboardAdmin />} />
                 <Route path="moderation" element={<ModerationPage />} />
                 <Route path="announcements" element={<AnnouncementsPage />} />
+                <Route path="reportes" element={<ReportsPage />} />
               </Route>
 
               {/* Ruta por defecto */}

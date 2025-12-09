@@ -12,12 +12,13 @@ import {
   TrendingUp,
   XCircle
 } from 'lucide-react';
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { applicationService } from '../../api/services/applicationService';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
-import { ApplicationDetailsModal } from '../../components/estudiante/ApplicationDetailsModal'; // Nuevo import
+import { ApplicationDetailsModal } from '../../components/estudiante/ApplicationDetailsModal';
 import { AptitudeTestModal } from '../../components/estudiante/AptitudeTest/AptitudeTestModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -26,13 +27,19 @@ export const PostulacionesPage = () => {
   const { isDark } = useTheme();
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAptitudeTestModal, setShowAptitudeTestModal] = useState(false);
   const [selectedJobForTest, setSelectedJobForTest] = useState(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false); // Estado para el nuevo modal
-  const [selectedApplicationId, setSelectedApplicationId] = useState(null); // Solo el ID
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+
   const studentId = user?.id;
+
+  // ------------------------------------------
+  // Cargar postulaciones
+  // ------------------------------------------
 
   useEffect(() => {
     if (isAuthenticated && studentId) {
@@ -45,7 +52,6 @@ export const PostulacionesPage = () => {
 
     setLoading(true);
     const result = await applicationService.getStudentApplications(studentId);
-
     if (result.success) {
       setApplications(result.data);
     } else {
@@ -54,40 +60,59 @@ export const PostulacionesPage = () => {
     setLoading(false);
   };
 
+  // ------------------------------------------
+  // Abrir detalles
+  // ------------------------------------------
+
   const handleViewDetails = (applicationId) => {
     setSelectedApplicationId(applicationId);
     setShowDetailsModal(true);
   };
 
+  // ------------------------------------------
+  // NUEVO: Abrir test (REEMPLAZADO)
+  // ------------------------------------------
+
   const handleOpenAptitudeTest = (application) => {
-    setSelectedJobForTest({
-      jobId: application.job.id,
-      jobTitle: application.job.title,
-      companyName: application.job.company.name,
-      applicationId: application.id
-    });
-    setShowAptitudeTestModal(true);
+    navigate(`/estudiante/tests/${application.id}/start`);
   };
+
+  // ------------------------------------------
+  // Cancelar postulación
+  // ------------------------------------------
 
   const handleWithdrawApplication = async (applicationId) => {
-    if (window.confirm('¿Estás seguro de que quieres cancelar esta postulación?')) {
-      const result = await applicationService.withdrawApplication(applicationId, studentId);
+    if (!window.confirm('¿Estás seguro de que quieres cancelar esta postulación?')) return;
 
-      if (result.success) {
-        setApplications(applications.map(app =>
+    const result = await applicationService.withdrawApplication(
+      applicationId,
+      studentId
+    );
+
+    if (result.success) {
+      setApplications(
+        applications.map(app =>
           app.id === applicationId
-            ? { ...app, status: 'withdrawn', decided_at: new Date().toISOString() }
+            ? {
+              ...app,
+              status: 'withdrawn',
+              decided_at: new Date().toISOString()
+            }
             : app
-        ));
-        // Cerrar modal si está abierto
-        if (showDetailsModal && selectedApplicationId === applicationId) {
-          setShowDetailsModal(false);
-        }
-      } else {
-        alert(result.error);
+        )
+      );
+
+      if (showDetailsModal && selectedApplicationId === applicationId) {
+        setShowDetailsModal(false);
       }
+    } else {
+      console.error("Error al cancelar postulación:", result.error);
     }
   };
+
+  // ------------------------------------------
+  // Config de estados
+  // ------------------------------------------
 
   const getStatusConfig = (status) => {
     const configs = {
@@ -113,6 +138,10 @@ export const PostulacionesPage = () => {
     });
   };
 
+  // ------------------------------------------
+  // Loading
+  // ------------------------------------------
+
   if (loading) {
     return (
       <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
@@ -128,10 +157,15 @@ export const PostulacionesPage = () => {
     );
   }
 
+  // ------------------------------------------
+  // Render principal
+  // ------------------------------------------
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
+
+        {/* HEADER */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
             <div>
@@ -142,6 +176,7 @@ export const PostulacionesPage = () => {
                 Seguimiento de todas tus aplicaciones a vacantes
               </p>
             </div>
+
             <Button variant="primary" onClick={() => navigate('/jobs')}>
               <div className="flex items-center gap-2">
                 <Eye size={18} />
@@ -151,7 +186,7 @@ export const PostulacionesPage = () => {
           </div>
         </div>
 
-        {/* Grid de Postulaciones */}
+        {/* SIN POSTULACIONES */}
         {applications.length === 0 ? (
           <Card>
             <div className="text-center py-12">
@@ -159,7 +194,7 @@ export const PostulacionesPage = () => {
               <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 No tienes postulaciones aún
               </h3>
-              <p className={`mb-6 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              <p className={`${isDark ? 'text-slate-400' : 'text-slate-600'} mb-6`}>
                 Comienza aplicando a vacantes que se ajusten a tu perfil
               </p>
               <Button variant="primary" onClick={() => navigate('/jobs')}>
@@ -178,43 +213,47 @@ export const PostulacionesPage = () => {
 
               return (
                 <Card key={application.id} hover className="relative">
-                  {/* Badge de Estado */}
-                  <div className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium
-                    ${statusConfig.color === 'blue' ? 'bg-primary-100 text-primary-800' : ''}
-                    ${statusConfig.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' : ''}
-                    ${statusConfig.color === 'green' ? 'bg-green-100 text-green-800' : ''}
-                    ${statusConfig.color === 'red' ? 'bg-red-100 text-red-800' : ''}
-                    ${statusConfig.color === 'purple' ? 'bg-accent-300 text-accent-700' : ''}
-                    ${statusConfig.color === 'indigo' ? 'bg-indigo-100 text-indigo-800' : ''}
-                    ${statusConfig.color === 'gray' ? 'bg-gray-100 text-gray-800' : ''}
-                  `}>
+
+                  {/* BADGE DE ESTADO */}
+                  <div
+                    className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium
+                      ${statusConfig.color === 'blue' ? 'bg-primary-100 text-primary-800' : ''}
+                      ${statusConfig.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' : ''}
+                      ${statusConfig.color === 'green' ? 'bg-green-100 text-green-800' : ''}
+                      ${statusConfig.color === 'red' ? 'bg-red-100 text-red-800' : ''}
+                      ${statusConfig.color === 'purple' ? 'bg-accent-300 text-accent-700' : ''}
+                      ${statusConfig.color === 'indigo' ? 'bg-indigo-100 text-indigo-800' : ''}
+                      ${statusConfig.color === 'gray' ? 'bg-gray-100 text-gray-800' : ''}`}
+                  >
                     <StatusIcon size={16} />
                     {statusConfig.label}
                   </div>
 
                   <div className="flex justify-between items-start mb-4">
-                    <div className={`
-                      p-3 rounded-lg
-                      ${isDark ? 'bg-primary-900/20' : 'bg-primary-100'}
-                    `}>
+                    <div
+                      className={`p-3 rounded-lg ${isDark ? 'bg-primary-900/20' : 'bg-primary-100'}`}
+                    >
                       <Building size={24} className="text-primary-600" />
                     </div>
+
                     <div className="flex gap-2">
+
                       <button
                         onClick={() => handleOpenAptitudeTest(application)}
                         className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
                           }`}
-                        title="Realizar prueba de aptitud"
                       >
                         <Brain size={16} className={isDark ? 'text-green-400' : 'text-green-600'} />
                       </button>
+
                       <button
-                        onClick={() => handleViewDetails(application.id)} // Ahora pasa solo el ID
+                        onClick={() => handleViewDetails(application.id)}
                         className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
                           }`}
                       >
                         <Eye size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
                       </button>
+
                       {!['accepted', 'rejected', 'withdrawn'].includes(application.status) && (
                         <button
                           onClick={() => handleWithdrawApplication(application.id)}
@@ -227,6 +266,7 @@ export const PostulacionesPage = () => {
                     </div>
                   </div>
 
+                  {/* CONTENIDO DE LA POSTULACIÓN */}
                   <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {application.job.title}
                   </h3>
@@ -249,6 +289,7 @@ export const PostulacionesPage = () => {
                         {application.job.location}
                       </span>
                     </div>
+
                     <div className="flex items-center gap-2 text-sm">
                       <DollarSign size={16} className={isDark ? 'text-slate-500' : 'text-slate-400'} />
                       <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
@@ -266,13 +307,20 @@ export const PostulacionesPage = () => {
                         </div>
                       </div>
                       <div>
-                        <span className={isDark ? 'text-slate-500' : 'text-slate-600'}>Última actualización:</span>
+                        <span className={isDark ? 'text-slate-500' : 'text-slate-600'}>
+                          Última actualización:
+                        </span>
                         <div className={isDark ? 'text-slate-300' : 'text-slate-900'}>
-                          {formatDate(application.reviewed_at || application.interview_at || application.applied_at)}
+                          {formatDate(
+                            application.reviewed_at ||
+                            application.interview_at ||
+                            application.applied_at
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
+
                 </Card>
               );
             })}
@@ -280,7 +328,7 @@ export const PostulacionesPage = () => {
         )}
       </div>
 
-      {/* Nuevo Modal de Detalles */}
+      {/* MODAL DETALLES */}
       {showDetailsModal && selectedApplicationId && (
         <ApplicationDetailsModal
           applicationId={selectedApplicationId}
@@ -288,10 +336,11 @@ export const PostulacionesPage = () => {
             setShowDetailsModal(false);
             setSelectedApplicationId(null);
           }}
-          onWithdraw={handleWithdrawApplication} // Pasar la función para cancelar desde el modal
+          onWithdraw={handleWithdrawApplication}
         />
       )}
 
+      {/* MODAL TEST (si se usa en el futuro) */}
       {showAptitudeTestModal && selectedJobForTest && (
         <AptitudeTestModal
           jobData={selectedJobForTest}

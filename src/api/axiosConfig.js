@@ -4,6 +4,7 @@ import { API_BASE } from './api';
 
 const api = axios.create({
     baseURL: API_BASE,
+    timeout: 120000, // Aumentado a 120 segundos para queries complejas
     headers: {
         'Content-Type': 'application/json',
     },

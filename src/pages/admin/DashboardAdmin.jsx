@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Users, Briefcase, FileText, TrendingUp, AlertTriangle, CheckCircle, Building } from 'lucide-react';
+import { Users, Briefcase, FileText, TrendingUp, AlertTriangle, CheckCircle, Building, Activity, Zap, ChevronRight, Download } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { useTheme } from '../../contexts/ThemeContext';
 import { adminService } from '../../api/services/adminService';
+import { statsService } from '../../api/services/statsService';
 
 export const DashboardAdmin = () => {
     const { isDark } = useTheme();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [dashboardData, setDashboardData] = useState(null);
+    const [recentActivityData, setRecentActivityData] = useState([]);
 
     // Cargar datos del dashboard
     useEffect(() => {
@@ -16,8 +18,14 @@ export const DashboardAdmin = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await adminService.getDashboardStats();
-                setDashboardData(data);
+                const [dashData, activityData] = await Promise.all([
+                    adminService.getDashboardStats(),
+                    statsService.getRecentActivity(6)
+                ]);
+                setDashboardData(dashData);
+                if (activityData?.success) {
+                    setRecentActivityData(activityData.data || []);
+                }
             } catch (err) {
                 console.error('Error al cargar dashboard:', err);
                 setError('No se pudieron cargar las estadísticas del dashboard');
@@ -97,7 +105,7 @@ export const DashboardAdmin = () => {
         }
     ];
 
-    const recentActivity = dashboardData?.recentActivity || [];
+    console.log('Dashboard data loaded:', { dashboardData, recentActivityData });
 
     return (
         <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
@@ -147,22 +155,45 @@ export const DashboardAdmin = () => {
                             <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                                 Actividad Reciente
                             </h2>
-                            <TrendingUp className="text-primary-500" size={20} />
+                            <Activity className="text-blue-500" size={20} />
                         </div>
-                        <div className="space-y-4">
-                            {recentActivity.map((activity, index) => (
-                                <div key={index} className={`flex items-start gap-3 p-3 rounded-lg ${isDark ? 'bg-slate-800' : 'bg-slate-50'}`}>
-                                    <span className="text-2xl">{activity.icon}</span>
-                                    <div className="flex-1">
-                                        <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                                            {activity.message}
-                                        </p>
-                                        <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-                                            {activity.time}
-                                        </p>
+                        <div className="space-y-3 max-h-80 overflow-y-auto">
+                            {recentActivityData && recentActivityData.length > 0 ? (
+                                recentActivityData.map((activity) => (
+                                    <div 
+                                        key={activity.id} 
+                                        className={`flex items-start p-3 rounded-lg border-l-4 transition-all ${
+                                            isDark 
+                                                ? 'bg-slate-700/50 border-slate-600 hover:bg-slate-700' 
+                                                : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                                        }`}
+                                        style={{ borderLeftColor: activity.color || '#3b82f6' }}
+                                    >
+                                        <div className="flex-1">
+                                            <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                {activity.description}
+                                            </p>
+                                            <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                                                {activity.details}
+                                            </p>
+                                            <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                                                {new Date(activity.timestamp).toLocaleDateString('es-ES', {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </p>
+                                        </div>
                                     </div>
+                                ))
+                            ) : (
+                                <div className={`text-center py-8 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                                    <Activity size={32} className="mx-auto mb-3 opacity-40" />
+                                    <p className="text-sm">Sin actividad reciente</p>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </Card>
 
@@ -217,7 +248,7 @@ export const DashboardAdmin = () => {
                                     Acción Requerida
                                 </h3>
                                 <p className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                                    Hay {pendingUsers} cuenta(s) pendiente(s) de aprobación.
+                                    Hay {dashboardData?.pendingUsers} cuenta(s) pendiente(s) de aprobación.
                                     <a href="/admin/moderation" className="ml-2 underline text-primary-600 hover:text-primary-700">
                                         Ir a Moderación →
                                     </a>
@@ -226,6 +257,74 @@ export const DashboardAdmin = () => {
                         </div>
                     </Card>
                 )}
+
+                {/* Acciones Rápidas */}
+                <Card className="mt-6">
+                    <h2 className={`text-xl font-bold mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        Acciones Rápidas
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <a 
+                            href="/admin/usuarios"
+                            className={`p-4 rounded-lg font-semibold flex items-center justify-between transition-all hover:shadow-lg border-2 ${
+                                isDark 
+                                    ? 'bg-slate-800 border-blue-500/30 text-slate-200 hover:border-blue-500/60' 
+                                    : 'bg-white border-blue-200 text-slate-800 hover:border-blue-400'
+                            }`}
+                        >
+                            <span className="flex items-center">
+                                <Users size={20} className="mr-3" />
+                                Gestionar Usuarios
+                            </span>
+                            <ChevronRight size={18} />
+                        </a>
+                        
+                        <a 
+                            href="/admin/ofertas"
+                            className={`p-4 rounded-lg font-semibold flex items-center justify-between transition-all hover:shadow-lg border-2 ${
+                                isDark 
+                                    ? 'bg-slate-800 border-green-500/30 text-slate-200 hover:border-green-500/60' 
+                                    : 'bg-white border-green-200 text-slate-800 hover:border-green-400'
+                            }`}
+                        >
+                            <span className="flex items-center">
+                                <Briefcase size={20} className="mr-3" />
+                                Gestionar Ofertas
+                            </span>
+                            <ChevronRight size={18} />
+                        </a>
+
+                        <a 
+                            href="/admin/reportes"
+                            className={`p-4 rounded-lg font-semibold flex items-center justify-between transition-all hover:shadow-lg border-2 ${
+                                isDark 
+                                    ? 'bg-slate-800 border-purple-500/30 text-slate-200 hover:border-purple-500/60' 
+                                    : 'bg-white border-purple-200 text-slate-800 hover:border-purple-400'
+                            }`}
+                        >
+                            <span className="flex items-center">
+                                <FileText size={20} className="mr-3" />
+                                Ver Reportes
+                            </span>
+                            <ChevronRight size={18} />
+                        </a>
+
+                        <a 
+                            href="/admin/moderation"
+                            className={`p-4 rounded-lg font-semibold flex items-center justify-between transition-all hover:shadow-lg border-2 ${
+                                isDark 
+                                    ? 'bg-slate-800 border-orange-500/30 text-slate-200 hover:border-orange-500/60' 
+                                    : 'bg-white border-orange-200 text-slate-800 hover:border-orange-400'
+                            }`}
+                        >
+                            <span className="flex items-center">
+                                <AlertTriangle size={20} className="mr-3" />
+                                Moderación
+                            </span>
+                            <ChevronRight size={18} />
+                        </a>
+                    </div>
+                </Card>
             </div>
         </div>
     );
