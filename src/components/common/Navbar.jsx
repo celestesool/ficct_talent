@@ -1,7 +1,6 @@
 import {
   Award,
   BarChart3,
-  Bell,
   BookOpen,
   Brain,
   Briefcase,
@@ -30,7 +29,6 @@ export const Navbar = () => {
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [isNotificationsDropdownOpen, setIsNotificationsDropdownOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,44 +37,6 @@ export const Navbar = () => {
     logout();
     navigate('/');
   };
-
-  // Datos simulados de notificaciones
-  const mockNotifications = [
-    {
-      id: 1,
-      title: "Nueva oferta de trabajo",
-      company: "Tech Solutions SA",
-      type: "Desarrollo Web",
-      time: "Hace 2 horas",
-      isNew: true
-    },
-    {
-      id: 2,
-      title: "Tu perfil fue visto",
-      company: "Digital Innovators",
-      type: "Recursos Humanos",
-      time: "Hace 5 horas",
-      isNew: true
-    },
-    {
-      id: 3,
-      title: "Oferta de práctica profesional",
-      company: "StartUp Labs",
-      type: "Frontend Developer",
-      time: "Ayer",
-      isNew: false
-    },
-    {
-      id: 4,
-      title: "Recordatorio: CV pendiente",
-      company: "Sistema FICCT",
-      type: "Recordatorio",
-      time: "Ayer",
-      isNew: false
-    }
-  ];
-
-  const newNotificationsCount = mockNotifications.filter(notification => notification.isNew).length;
 
   // DETECTAR TIPO DE USUARIO POR LA RUTA ACTUAL
   const currentPath = location.pathname;
@@ -146,14 +106,7 @@ export const Navbar = () => {
     setIsNotificationsDropdownOpen(false);
   };
 
-  const handleNotificationClick = (notificationId) => {
-    // Aquí puedes manejar la acción cuando se hace clic en una notificación
-    console.log('Notificación clickeada:', notificationId);
-    setIsNotificationsDropdownOpen(false);
-    
-    // Ejemplo: navegar a una página específica basada en la notificación
-    // navigate('/estudiante/ofertas');
-  };
+
 
   return (
     <nav className={`${isDark
@@ -243,105 +196,7 @@ export const Navbar = () => {
                   </div>
                 ))}
 
-                {/* Icono de Notificaciones */}
-                <div className="relative z-40">
-                  <button
-                    onClick={() => setIsNotificationsDropdownOpen(!isNotificationsDropdownOpen)}
-                    className={`
-                      flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium relative
-                      ${isNotificationsDropdownOpen
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
-                        : isDark
-                          ? 'text-slate-300 hover:bg-slate-800 hover:text-white hover:shadow-lg'
-                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-lg'
-                      }
-                    `}
-                  >
-                    <Bell size={17} />
-                    {newNotificationsCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {newNotificationsCount}
-                      </span>
-                    )}
-                  </button>
 
-                  {/* Dropdown de Notificaciones */}
-                  {isNotificationsDropdownOpen && (
-                    <div className={`
-                      absolute top-full right-0 mt-2 w-80 rounded-xl shadow-lg border transition-all duration-200 z-50
-                      ${isDark
-                        ? 'bg-slate-800 border-slate-700'
-                        : 'bg-white border-slate-200'
-                      }
-                    `}>
-                      <div className="p-4">
-                        <div className="flex justify-between items-center mb-3">
-                          <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                            Notificaciones
-                          </h3>
-                          {newNotificationsCount > 0 && (
-                            <span className={`text-xs px-2 py-1 rounded-full ${isDark ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600'}`}>
-                              {newNotificationsCount} nuevas
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="space-y-3 max-h-96 overflow-y-auto">
-                          {mockNotifications.map((notification) => (
-                            <div
-                              key={notification.id}
-                              onClick={() => handleNotificationClick(notification.id)}
-                              className={`
-                                p-3 rounded-lg cursor-pointer transition-all duration-200 border
-                                ${notification.isNew
-                                  ? isDark
-                                    ? 'bg-blue-900/20 border-blue-700/50 hover:bg-blue-900/30'
-                                    : 'bg-blue-50 border-blue-200 hover:bg-blue-100'
-                                  : isDark
-                                    ? 'bg-slate-700/50 border-slate-600 hover:bg-slate-700'
-                                    : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
-                                }
-                              `}
-                            >
-                              <div className="flex justify-between items-start mb-1">
-                                <h4 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                  {notification.title}
-                                </h4>
-                                {notification.isNew && (
-                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                                )}
-                              </div>
-                              <p className={`text-sm mb-1 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                                {notification.company}
-                              </p>
-                              <div className="flex justify-between items-center">
-                                <span className={`text-xs px-2 py-1 rounded-full ${isDark ? 'bg-slate-600 text-slate-300' : 'bg-slate-200 text-slate-600'}`}>
-                                  {notification.type}
-                                </span>
-                                <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                  {notification.time}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        <button
-                          onClick={() => setIsNotificationsDropdownOpen(false)}
-                          className={`
-                            w-full mt-3 py-2 text-sm rounded-lg transition-all duration-200 font-medium
-                            ${isDark
-                              ? 'bg-slate-700 hover:bg-slate-600 text-slate-300'
-                              : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
-                            }
-                          `}
-                        >
-                          Ver todas las notificaciones
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
             ) : (
               // Navegación simple para empresa y admin
@@ -493,78 +348,6 @@ export const Navbar = () => {
                       <Home size={18} />
                       Dashboard
                     </button>
-
-                    {/* Notificaciones en mobile */}
-                    <button
-                      onClick={() => setIsNotificationsDropdownOpen(!isNotificationsDropdownOpen)}
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium relative
-                        ${isNotificationsDropdownOpen
-                          ? 'bg-blue-600 text-white'
-                          : isDark
-                            ? 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                        }
-                      `}
-                    >
-                      <Bell size={18} />
-                      Notificaciones
-                      {newNotificationsCount > 0 && (
-                        <span className="absolute right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                          {newNotificationsCount}
-                        </span>
-                      )}
-                    </button>
-
-                    {isNotificationsDropdownOpen && (
-                      <div className={`
-                        mt-2 rounded-lg border p-3
-                        ${isDark
-                          ? 'bg-slate-700 border-slate-600'
-                          : 'bg-slate-50 border-slate-200'
-                        }
-                      `}>
-                        <div className="space-y-2 max-h-60 overflow-y-auto">
-                          {mockNotifications.map((notification) => (
-                            <div
-                              key={notification.id}
-                              onClick={() => handleNotificationClick(notification.id)}
-                              className={`
-                                p-2 rounded-lg cursor-pointer transition-all duration-200 border
-                                ${notification.isNew
-                                  ? isDark
-                                    ? 'bg-blue-900/20 border-blue-700/50'
-                                    : 'bg-blue-50 border-blue-200'
-                                  : isDark
-                                    ? 'bg-slate-600 border-slate-500'
-                                    : 'bg-white border-slate-200'
-                                }
-                              `}
-                            >
-                              <div className="flex justify-between items-start mb-1">
-                                <h4 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                  {notification.title}
-                                </h4>
-                                {notification.isNew && (
-                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                                )}
-                              </div>
-                              <p className={`text-xs mb-1 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                                {notification.company}
-                              </p>
-                              <div className="flex justify-between items-center">
-                                <span className={`text-xs px-1 py-0.5 rounded ${isDark ? 'bg-slate-500 text-slate-300' : 'bg-slate-200 text-slate-600'}`}>
-                                  {notification.type}
-                                </span>
-                                <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                  {notification.time}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
 
                     {/* Categorías en mobile */}
                     {estudianteRoutes.map((group, groupIndex) => (
