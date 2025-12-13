@@ -39,7 +39,7 @@ export const DashboardEmpresa = () => {
   // =====================================================
   useEffect(() => {
     loadDashboardData();
-    
+
     // Limpiar caché al desmontar
     return () => {
       dashboardCache.clearAll();
@@ -59,7 +59,7 @@ export const DashboardEmpresa = () => {
 
       // ✅ OPTIMIZACIÓN 1: Cargar en paralelo (no secuencial)
       const startTime = performance.now();
-      
+
       const [jobsResult, viewsResult, announcementsResult] = await Promise.all([
         dashboardCache.get(
           `jobs_${companyId}`,
@@ -82,8 +82,8 @@ export const DashboardEmpresa = () => {
       console.log(`⚡ Dashboard data loaded in ${(endTime - startTime).toFixed(2)}ms`);
 
       // Ensure jobs is always an array
-      const jobList = jobsResult.success && Array.isArray(jobsResult.data) 
-        ? jobsResult.data 
+      const jobList = jobsResult.success && Array.isArray(jobsResult.data)
+        ? jobsResult.data
         : [];
 
       // ===========================
@@ -190,7 +190,7 @@ export const DashboardEmpresa = () => {
 
       // 3) SET VIEWS AND ANNOUNCEMENTS
       setProfileViews(viewsResult || 0);
-      
+
       if (announcementsResult) {
         const filtered = announcementsResult.filter(a => a.target === 'companies' || a.target === 'all');
         setAnnouncements(filtered.slice(0, 3));
@@ -223,30 +223,35 @@ export const DashboardEmpresa = () => {
     return total + hired;
   }, 0);
 
+  // Stats con diseño de gradientes premium
   const stats = [
     {
       label: 'Ofertas Activas',
       value: offers.filter(o => o.is_active).length,
       icon: Briefcase,
-      color: 'purple'
+      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      iconBg: 'rgba(255,255,255,0.2)',
     },
     {
       label: 'Candidatos',
       value: candidates.length,
       icon: Users,
-      color: 'blue'
+      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      iconBg: 'rgba(255,255,255,0.2)',
     },
     {
       label: 'Vistas del Perfil',
       value: profileViews,
       icon: Eye,
-      color: 'green'
+      gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      iconBg: 'rgba(255,255,255,0.2)',
     },
     {
       label: 'Contrataciones',
       value: hiredCount,
       icon: CheckCircle,
-      color: 'orange'
+      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      iconBg: 'rgba(255,255,255,0.2)',
     },
   ];
 
@@ -282,12 +287,20 @@ export const DashboardEmpresa = () => {
                 Gestiona tus ofertas y encuentra el mejor talento
               </p>
             </div>
-            <Button variant="secondary" onClick={handleNewOffer}>
-              <div className="flex items-center gap-2">
-                <Plus size={18} />
-                Nueva Oferta
-              </div>
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={() => navigate('/empresa/reportes')}>
+                <div className="flex items-center gap-2">
+                  <FileText size={18} />
+                  Reportes
+                </div>
+              </Button>
+              <Button variant="primary" onClick={handleNewOffer}>
+                <div className="flex items-center gap-2">
+                  <Plus size={18} />
+                  Nueva Oferta
+                </div>
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -328,35 +341,43 @@ export const DashboardEmpresa = () => {
           </Card>
         )}
 
-        {/* Stats Grid */}
+        {/* Stats Grid - Diseño Premium con Gradientes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, idx) => (
-            <Card key={idx} title={stat.tooltip || ''}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {stat.label}
-                  </p>
-                  <p className={`text-3xl font-bold mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    {stat.value}
-                  </p>
+            <div
+              key={idx}
+              className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:translate-y-[-4px] hover:scale-[1.02]"
+              style={{ background: stat.gradient }}
+            >
+              {/* Efecto de ola decorativa */}
+              <div
+                className="absolute bottom-0 left-0 right-0 h-16 opacity-20"
+                style={{
+                  background: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1440 320\'%3E%3Cpath fill=\'%23ffffff\' d=\'M0,160L48,138.7C96,117,192,75,288,80C384,85,480,139,576,154.7C672,171,768,149,864,133.3C960,117,1056,107,1152,112C1248,117,1344,139,1392,149.3L1440,160L1440,320L0,320Z\'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom',
+                  backgroundSize: 'cover'
+                }}
+              />
+
+              <div className="relative p-6">
+                {/* Icono en círculo semi-transparente */}
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: stat.iconBg }}
+                >
+                  <stat.icon className="text-white" size={24} strokeWidth={2} />
                 </div>
-                <div className={`p-3 rounded-lg ${stat.color === 'purple' ? 'bg-accent-300 dark:bg-accent-700/20' :
-                  stat.color === 'blue' ? 'bg-primary-100 dark:bg-primary-900/20' :
-                    stat.color === 'green' ? 'bg-green-100 dark:bg-green-900/20' :
-                      'bg-orange-100 dark:bg-orange-900/20'
-                  }`}>
-                  <stat.icon
-                    className={`${stat.color === 'purple' ? 'text-accent-600' :
-                      stat.color === 'blue' ? 'text-primary-600' :
-                        stat.color === 'green' ? 'text-green-600' :
-                          'text-orange-600'
-                      }`}
-                    size={24}
-                  />
-                </div>
+
+                {/* Label */}
+                <p className="text-white/80 text-sm font-medium mb-1">
+                  {stat.label}
+                </p>
+
+                {/* Valor grande */}
+                <p className="text-white text-3xl lg:text-4xl font-bold">
+                  {stat.value}
+                </p>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
 
@@ -511,10 +532,10 @@ export const DashboardEmpresa = () => {
                           {candidate.name || 'Candidato'}
                         </p>
                         <span className={`text-sm font-bold px-2 py-0.5 rounded ${candidate.match >= 70
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : candidate.match >= 40
-                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                              : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          : candidate.match >= 40
+                            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                           }`}>
                           {candidate.match}%
                         </span>

@@ -33,6 +33,7 @@ import { DashboardEmpresa } from './pages/empresa/DashboardEmpresa';
 import { OfertasPage } from './pages/empresa/OfertasPage';
 import { NotificationsPage } from './pages/empresa/NotificationsPage';
 import { RecommendationsPage } from './pages/empresa/RecommendationsPage';
+import { ReportesEmpresa } from './pages/empresa/ReportesEmpresa';
 
 // Páginas de Admin
 import { DashboardAdmin } from './pages/admin/DashboardAdminNew';
@@ -92,6 +93,7 @@ function App() {
                 <Route path="notificaciones" element={<NotificationsPage />} />
                 <Route path="recomendaciones" element={<RecommendationsPage />} />
                 <Route path="recomendaciones/:jobId" element={<RecommendationsPage />} />
+                <Route path="reportes" element={<ReportesEmpresa />} />
               </Route>
 
               {/* Rutas de Administrador */}

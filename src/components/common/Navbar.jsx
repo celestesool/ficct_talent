@@ -21,6 +21,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { NotificationDropdown } from './NotificationDropdown';
 import { ThemeToggle } from './ThemeToggle';
+import { ThemeSelector } from './ThemeSelector';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -232,6 +233,10 @@ export const Navbar = () => {
             {/* Notificaciones - Para estudiantes y empresas */}
             {(isEstudiante || !isAdmin) && <NotificationDropdown />}
 
+            {/* Selector de paleta de colores */}
+            <ThemeSelector />
+
+            {/* Toggle modo oscuro/claro */}
             <ThemeToggle />
 
             {/* Perfil de usuario con dropdown */}

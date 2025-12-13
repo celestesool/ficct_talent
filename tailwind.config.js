@@ -8,81 +8,88 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        //  PRIMARY - Turquesa Suave Profesional
+        // PRIMARY - Usa variables CSS dinámicas del tema
         primary: {
-          50: '#F0F7F8',      // Muy claro
-          100: '#E1EFF1',     // Claro
-          200: '#C3DFE3',     // Medio claro
-          300: '#A5CFD5',     // Medio
-          400: '#8CB1B9',     // PRINCIPAL - Turquesa suave
-          500: '#8CB1B9',     // Mismo que 400 (tu color principal)
-          600: '#6A9AA5',     // Hover oscuro
-          700: '#4F7B87',     // Muy oscuro
-          800: '#3A5C68',     // Casi negro turquesa
-          900: '#273F49',     // Negro turquesa
+          50: 'color-mix(in srgb, var(--color-accent) 10%, white)',
+          100: 'color-mix(in srgb, var(--color-accent) 20%, white)',
+          200: 'color-mix(in srgb, var(--color-accent) 30%, white)',
+          300: 'color-mix(in srgb, var(--color-accent) 50%, white)',
+          400: 'var(--color-accent)',
+          500: 'var(--color-accent)',
+          600: 'var(--color-accent-hover)',
+          700: 'var(--color-primary-dark)',
+          800: 'color-mix(in srgb, var(--color-primary-dark) 80%, black)',
+          900: 'color-mix(in srgb, var(--color-primary-dark) 60%, black)',
         },
 
-        //  NEUTRAL - Grises y Blancos
+        // ACCENT - También dinámico
+        accent: {
+          400: 'var(--color-accent)',
+          500: 'var(--color-accent)',
+          600: 'var(--color-accent-hover)',
+          3000: 'var(--color-accent)', // Para compatibilidad
+        },
+
+        // NEUTRAL - Grises y Blancos (estos se mantienen fijos)
         neutral: {
-          white: '#FFFFFF',    //  Fondo principal
-          border: '#D1D7D7',   // Bordes y separadores
+          white: '#FFFFFF',
+          border: 'var(--border-color)',
           text: {
-            primary: '#333333',   // Texto principal
-            secondary: '#666666', // Texto secundario
-            light: '#999999',     // Texto terciario
+            primary: 'var(--text-primary)',
+            secondary: 'var(--text-secondary)',
+            light: 'var(--text-light)',
           },
           bg: {
-            primary: '#FFFFFF',   // Fondo blanco puro
-            secondary: '#FAFAFA', // Gris casi blanco (si necesitas alternativa)
-            card: '#FFFFFF',      // Cards siempre blancas
+            primary: 'var(--bg-primary)',
+            secondary: 'var(--bg-secondary)',
+            card: 'var(--bg-card)',
           },
         },
 
-        // Alias para compatibilidad con componentes actuales
+        // SECONDARY - Grises neutros
         secondary: {
           100: '#FAFAFA',
-          200: '#D1D7D7',   // Borde
-          300: '#D1D7D7',
-          400: '#999999',
-          500: '#666666',   // Texto secundario
-          600: '#333333',   // Texto principal
-          700: '#333333',
-          800: '#333333',
-          900: '#333333',
+          200: 'var(--border-color)',
+          300: 'var(--border-color)',
+          400: 'var(--text-light)',
+          500: 'var(--text-secondary)',
+          600: 'var(--text-primary)',
+          700: 'var(--text-primary)',
+          800: 'var(--text-primary)',
+          900: 'var(--text-primary)',
         },
 
-        //  ACCENT - Mismo que primary para consistencia
-        accent: {
-          400: '#8CB1B9',
-          500: '#8CB1B9',
-          600: '#6A9AA5',
-        },
-
-        //  SEMANTIC COLORS
+        // SEMANTIC COLORS - Estos se mantienen fijos
         success: {
-          500: '#4CAF50',
-          600: '#45A049',
+          50: '#ECFDF5',
+          100: '#D1FAE5',
+          500: '#22C55E',
+          600: '#16A34A',
         },
         warning: {
-          500: '#FF9800',
-          600: '#FB8C00',
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          500: '#F59E0B',
+          600: '#D97706',
         },
         error: {
-          500: '#F44336',
-          600: '#E53935',
+          50: '#FEF2F2',
+          100: '#FEE2E2',
+          500: '#EF4444',
+          600: '#DC2626',
         },
       },
 
       fontFamily: {
-        sans: ['"Segoe UI"', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif'],
+        sans: ['Inter', '"Segoe UI"', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif'],
       },
 
       borderRadius: {
         'sm': '3px',
         'DEFAULT': '4px',
         'md': '4px',
-        'lg': '5px',
-        'xl': '5px',  // Máximo permitido
+        'lg': '6px',
+        'xl': '8px',
       },
 
       borderWidth: {
@@ -91,16 +98,16 @@ module.exports = {
       },
 
       spacing: {
-        'section': '40px',  // Espaciado entre secciones
-        'card': '40px',     // Padding en cards
-        'btn-y': '16px',    // Padding vertical botones
-        'btn-x': '45px',    // Padding horizontal botones
+        'section': '40px',
+        'card': '40px',
+        'btn-y': '16px',
+        'btn-x': '45px',
       },
 
       boxShadow: {
-        'subtle': '0 2px 8px rgba(140, 177, 185, 0.1)',
-        'hover': '0 4px 16px rgba(140, 177, 185, 0.15)',
-        'card': '0 1px 3px rgba(140, 177, 185, 0.08)',
+        'subtle': '0 2px 8px rgba(0, 0, 0, 0.08)',
+        'hover': '0 4px 16px rgba(0, 0, 0, 0.12)',
+        'card': '0 1px 3px rgba(0, 0, 0, 0.06)',
       },
 
       transitionDuration: {
@@ -116,6 +123,12 @@ module.exports = {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+      },
+
+      // Gradientes dinámicos
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-hero': 'var(--gradient-hero)',
       },
     },
   },

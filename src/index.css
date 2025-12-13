@@ -5,35 +5,43 @@
 @tailwind utilities;
 
 /* ================================================================
-   PALETA TURQUESA PROFESIONAL CENTRALIZADA
+   SISTEMA DE TEMAS DINÁMICO - Variables CSS
+   Estos valores son los defaults (tema celeste) y serán 
+   sobrescritos por JavaScript al cambiar de tema
    ================================================================ */
 
 :root {
-  /* COLORES PRINCIPALES */
-  --color-primary: 140 177 185;
-  /* #8CB1B9 - Turquesa suave */
-  --color-primary-hover: 106 154 165;
-  /* #6A9AA5 - Hover oscuro */
+  /* COLORES PRINCIPALES (sobrescritos por ThemeContext) */
+  --color-primary: #8CB1B9;
+  --color-primary-hover: #6A9AA5;
+  --color-primary-dark: #4F7B87;
 
-  --color-border: 209 215 215;
-  /* #D1D7D7 - Bordes */
-  --color-white: 255 255 255;
-  /* #FFFFFF - Fondo */
+  --color-accent: #8CB1B9;
+  --color-accent-hover: #6A9AA5;
+  --color-accent-light: #E1EFF1;
 
-  --color-text-primary: 51 51 51;
-  /* #333333 - Texto principal */
-  --color-text-secondary: 102 102 102;
-  /* #666666 - Texto secundario */
-  --color-text-light: 153 153 153;
-  /* #999999 - Texto terciario */
+  /* COLOR DE BOTONES (puede ser diferente del accent en algunos temas) */
+  --color-button: #8CB1B9;
+  --color-button-hover: #6A9AA5;
 
-  /* FONDOS Y SUPERFICIES */
-  --bg-primary: 255 255 255;
-  /* Blanco SIEMPRE */
-  --bg-secondary: 250 250 250;
-  /* Gris muy claro */
-  --bg-card: 255 255 255;
-  /* Cards blancas */
+  /* FONDOS */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F0F7F8;
+  --bg-card: #FFFFFF;
+
+  /* TEXTOS */
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-light: #999999;
+  --text-on-primary: #FFFFFF;
+
+  /* BORDES */
+  --border-color: #D1D7D7;
+  --border-light: #E1EFF1;
+
+  /* GRADIENTES */
+  --gradient-primary: linear-gradient(135deg, #8CB1B9 0%, #6A9AA5 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(140, 177, 185, 0.95), rgba(106, 154, 165, 0.9));
 
   /* MEDIDAS ESTANDARIZADAS */
   --border-radius-default: 4px;
@@ -50,12 +58,16 @@
   --btn-font-size: 1.1rem;
 }
 
-/* MODO OSCURO (Opcional) */
+/* MODO OSCURO */
 .dark {
-  --bg-primary: 30 30 30;
-  --bg-secondary: 45 45 45;
-  --color-text-primary: 240 240 240;
-  --color-text-secondary: 180 180 180;
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #2d2d2d;
+  --bg-card: #2d2d2d;
+  --text-primary: #f0f0f0;
+  --text-secondary: #b4b4b4;
+  --text-light: #808080;
+  --border-color: #404040;
+  --border-light: #333333;
 }
 
 /* ================================================================
@@ -72,8 +84,8 @@ body {
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: rgb(var(--bg-primary));
-  color: rgb(var(--color-text-primary));
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.6;
 }

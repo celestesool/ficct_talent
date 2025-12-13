@@ -140,60 +140,49 @@ export const DashboardAdmin = () => {
         );
     }
 
+    // Stats con diseño de gradientes premium
     const statCards = [
         {
             title: 'Total Estudiantes',
             value: stats.totalStudents || 0,
             icon: Users,
-            color: 'blue',
-            bgColor: 'bg-blue-50 dark:bg-blue-900/20',
-            textColor: 'text-blue-600 dark:text-blue-400',
-            borderColor: 'border-blue-200 dark:border-blue-700'
+            gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            iconBg: 'rgba(255,255,255,0.2)',
         },
         {
             title: 'Total Empresas',
             value: stats.totalCompanies || 0,
             icon: Building,
-            color: 'purple',
-            bgColor: 'bg-purple-50 dark:bg-purple-900/20',
-            textColor: 'text-purple-600 dark:text-purple-400',
-            borderColor: 'border-purple-200 dark:border-purple-700'
+            gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            iconBg: 'rgba(255,255,255,0.2)',
         },
         {
             title: 'Ofertas Activas',
             value: stats.activeJobs || 0,
             icon: Briefcase,
-            color: 'green',
-            bgColor: 'bg-green-50 dark:bg-green-900/20',
-            textColor: 'text-green-600 dark:text-green-400',
-            borderColor: 'border-green-200 dark:border-green-700'
+            gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            iconBg: 'rgba(255,255,255,0.2)',
         },
         {
             title: 'Postulaciones Totales',
             value: stats.totalApplications || 0,
             icon: FileText,
-            color: 'orange',
-            bgColor: 'bg-orange-50 dark:bg-orange-900/20',
-            textColor: 'text-orange-600 dark:text-orange-400',
-            borderColor: 'border-orange-200 dark:border-orange-700'
+            gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            iconBg: 'rgba(255,255,255,0.2)',
         },
         {
             title: 'Contrataciones',
             value: stats.totalHires || 0,
             icon: CheckCircle,
-            color: 'teal',
-            bgColor: 'bg-teal-50 dark:bg-teal-900/20',
-            textColor: 'text-teal-600 dark:text-teal-400',
-            borderColor: 'border-teal-200 dark:border-teal-700'
+            gradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+            iconBg: 'rgba(255,255,255,0.2)',
         },
         {
             title: 'Usuarios Pendientes',
             value: stats.pendingUsers || 0,
             icon: Clock,
-            color: 'yellow',
-            bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
-            textColor: 'text-yellow-600 dark:text-yellow-400',
-            borderColor: 'border-yellow-200 dark:border-yellow-700'
+            gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            iconBg: 'rgba(255,255,255,0.2)',
         }
     ];
 
@@ -225,26 +214,45 @@ export const DashboardAdmin = () => {
                     </div>
                 </div>
 
-                {/* Stats Grid */}
+                {/* Stats Grid - Diseño Premium con Gradientes */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     {statCards.map((stat, index) => {
                         const Icon = stat.icon;
                         return (
-                            <Card key={index} className={`border-2 ${stat.borderColor} hover:shadow-lg transition-all duration-300`}>
-                                <div className="flex items-start justify-between p-5">
-                                    <div className="flex-1">
-                                        <p className={`text-sm font-medium mb-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                                            {stat.title}
-                                        </p>
-                                        <h3 className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                            {stat.value}
-                                        </h3>
+                            <div
+                                key={index}
+                                className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:translate-y-[-4px] hover:scale-[1.02]"
+                                style={{ background: stat.gradient }}
+                            >
+                                {/* Efecto de ola decorativa */}
+                                <div
+                                    className="absolute bottom-0 left-0 right-0 h-16 opacity-20"
+                                    style={{
+                                        background: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1440 320\'%3E%3Cpath fill=\'%23ffffff\' d=\'M0,160L48,138.7C96,117,192,75,288,80C384,85,480,139,576,154.7C672,171,768,149,864,133.3C960,117,1056,107,1152,112C1248,117,1344,139,1392,149.3L1440,160L1440,320L0,320Z\'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom',
+                                        backgroundSize: 'cover'
+                                    }}
+                                />
+
+                                <div className="relative p-6">
+                                    {/* Icono en círculo semi-transparente */}
+                                    <div
+                                        className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                                        style={{ background: stat.iconBg }}
+                                    >
+                                        <Icon className="text-white" size={24} strokeWidth={2} />
                                     </div>
-                                    <div className={`p-4 rounded-xl ${stat.bgColor}`}>
-                                        <Icon className={stat.textColor} size={28} strokeWidth={2} />
-                                    </div>
+
+                                    {/* Label */}
+                                    <p className="text-white/80 text-sm font-medium mb-1">
+                                        {stat.title}
+                                    </p>
+
+                                    {/* Valor grande */}
+                                    <p className="text-white text-3xl lg:text-4xl font-bold">
+                                        {stat.value}
+                                    </p>
                                 </div>
-                            </Card>
+                            </div>
                         );
                     })}
                 </div>
@@ -342,8 +350,8 @@ export const DashboardAdmin = () => {
                             <button
                                 onClick={() => navigate('/admin/moderation')}
                                 className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
-                                        ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
-                                        : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
+                                    ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                                    : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
                                     }`}
                             >
                                 <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
@@ -362,8 +370,8 @@ export const DashboardAdmin = () => {
                             <button
                                 onClick={() => navigate('/admin/announcements')}
                                 className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
-                                        ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
-                                        : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
+                                    ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                                    : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
                                     }`}
                             >
                                 <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
@@ -382,8 +390,8 @@ export const DashboardAdmin = () => {
                             <button
                                 onClick={() => navigate('/admin/reports')}
                                 className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
-                                        ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
-                                        : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
+                                    ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                                    : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
                                     }`}
                             >
                                 <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">

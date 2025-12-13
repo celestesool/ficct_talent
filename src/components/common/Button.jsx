@@ -2,16 +2,14 @@ import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 /**
- * Sistema de Botones Profesional - Paleta Turquesa
+ * Sistema de Botones con Temas Dinámicos
+ * Los colores se adaptan automáticamente al tema seleccionado
  * 
  * VARIANTES:
- * - primary: Sólido turquesa (#8CB1B9) - Para acciones principales o sin jerarquía (opción 1)
- * - primary-outline: Outline turquesa - Para sin jerarquía (opción 2, MISMA importancia que primary)
- * - secondary: Gris (#D1D7D7) - Solo cuando SÍ hay jerarquía (acción menos importante)
- * - success/danger: Estados especiales
- * 
- * REGLA: Si "Estudiantes" y "Empresas" tienen la misma importancia,
- * usar primary + primary-outline. NO usar secondary.
+ * - primary: Sólido con color de botón del tema (rojo en UAGRM)
+ * - primary-outline: Outline con color de acento (azul en UAGRM)
+ * - secondary: Gris neutro
+ * - success/danger: Estados especiales (fijos)
  */
 
 export const Button = ({
@@ -21,60 +19,133 @@ export const Button = ({
   className = '',
   fullWidth = false,
   disabled = false,
-  size = 'md'
+  size = 'md',
+  type = 'button'
 }) => {
-  const { isDark } = useTheme();
+  const { isDark, currentTheme } = useTheme();
+  const colors = currentTheme?.colors || {};
+
+  // Colores para botones (usa buttonColor si existe, sino accent)
+  const buttonColor = colors.buttonColor || colors.accent || 'var(--color-button)';
+  const buttonHover = colors.buttonHover || colors.accentHover || 'var(--color-button-hover)';
 
   const sizes = {
     sm: 'px-[30px] py-[12px] text-base',
-    md: 'px-[45px] py-[16px] text-[1.1rem]',  // Estándar según specs
+    md: 'px-[45px] py-[16px] text-[1.1rem]',
     lg: 'px-[50px] py-[18px] text-[1.15rem]'
   };
 
   const baseStyles = `
     font-semibold transition-all duration-300 
-    rounded
+    rounded border-2
     ${sizes[size]}
     ${fullWidth ? 'w-full' : ''}
-    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.02] hover:shadow-lg'}
   `;
 
-  const variants = {
-    // 🌊 PRIMARY SÓLIDO - Turquesa (#8CB1B9)
-    // Para acciones principales o sin jerarquía (opción 1 de 2)
-    primary: isDark
-      ? 'bg-primary-500 border-2 border-primary-500 hover:bg-primary-600 hover:border-primary-600 text-white'
-      : 'bg-primary-500 border-2 border-primary-500 hover:bg-primary-600 hover:border-primary-600 text-white',
+  // Estilos dinámicos basados en el tema
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'primary':
+        // Botones primarios usan buttonColor (rojo en UAGRM, accent en otros)
+        return {
+          backgroundColor: buttonColor,
+          borderColor: buttonColor,
+          color: colors.textOnPrimary || '#FFFFFF',
+        };
 
-    // 🔲 PRIMARY OUTLINE - Turquesa borde
-    // Para sin jerarquía (opción 2 de 2) - MISMA importancia que primary sólido
-    'primary-outline': isDark
-      ? 'bg-transparent border-2 border-primary-500 hover:bg-primary-500 hover:border-primary-500 text-primary-500 hover:text-white'
-      : 'bg-transparent border-2 border-primary-500 hover:bg-primary-500 hover:border-primary-500 text-primary-500 hover:text-white',
+      case 'primary-outline':
+        // Outline usa el color de acento (azul en UAGRM)
+        return {
+          backgroundColor: 'transparent',
+          borderColor: colors.accent || 'var(--color-accent)',
+          color: colors.accent || 'var(--color-accent)',
+        };
 
-    // 🌫️ SECONDARY - Gris (#D1D7D7)
-    // Solo cuando SÍ hay jerarquía (acción menos importante)
-    secondary: isDark
-      ? 'bg-secondary-200 border-2 border-secondary-200 hover:bg-primary-500 hover:border-primary-500 text-secondary-600 hover:text-white'
-      : 'bg-secondary-200 border-2 border-secondary-200 hover:bg-primary-500 hover:border-primary-500 text-secondary-600 hover:text-white',
+      case 'secondary':
+        return {
+          backgroundColor: isDark ? '#404040' : '#E5E5E5',
+          borderColor: isDark ? '#404040' : '#E5E5E5',
+          color: isDark ? '#FFFFFF' : '#333333',
+        };
 
-    // 🔲 OUTLINE NEUTRO - Borde gris
-    outline: isDark
-      ? 'bg-transparent border-2 border-secondary-200 hover:border-primary-500 hover:bg-primary-50 text-secondary-600'
-      : 'bg-transparent border-2 border-secondary-200 hover:border-primary-500 hover:bg-primary-50 text-secondary-600',
+      case 'outline':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: colors.border || 'var(--border-color)',
+          color: isDark ? '#FFFFFF' : '#333333',
+        };
 
-    // 🟢 SUCCESS
-    success: 'bg-success-500 border-2 border-success-500 hover:bg-success-600 hover:border-success-600 text-white',
+      case 'success':
+        return {
+          backgroundColor: '#22C55E',
+          borderColor: '#22C55E',
+          color: '#FFFFFF',
+        };
 
-    // 🔴 DANGER
-    danger: 'bg-error-500 border-2 border-error-500 hover:bg-error-600 hover:border-error-600 text-white',
+      case 'danger':
+        return {
+          backgroundColor: '#EF4444',
+          borderColor: '#EF4444',
+          color: '#FFFFFF',
+        };
+
+      default:
+        return {
+          backgroundColor: buttonColor,
+          borderColor: buttonColor,
+          color: colors.textOnPrimary || '#FFFFFF',
+        };
+    }
+  };
+
+  const variantStyles = getVariantStyles();
+
+  // Manejar hover con JavaScript
+  const handleMouseEnter = (e) => {
+    if (disabled) return;
+
+    if (variant === 'primary') {
+      e.target.style.backgroundColor = buttonHover;
+      e.target.style.borderColor = buttonHover;
+    } else if (variant === 'primary-outline') {
+      e.target.style.backgroundColor = colors.accent || 'var(--color-accent)';
+      e.target.style.color = colors.textOnPrimary || '#FFFFFF';
+    } else if (variant === 'secondary') {
+      e.target.style.backgroundColor = buttonColor;
+      e.target.style.borderColor = buttonColor;
+      e.target.style.color = colors.textOnPrimary || '#FFFFFF';
+    } else if (variant === 'outline') {
+      e.target.style.borderColor = colors.accent || 'var(--color-accent)';
+      e.target.style.backgroundColor = colors.accentLight || 'var(--color-accent-light)';
+    } else if (variant === 'success') {
+      e.target.style.backgroundColor = '#16A34A';
+      e.target.style.borderColor = '#16A34A';
+    } else if (variant === 'danger') {
+      e.target.style.backgroundColor = '#DC2626';
+      e.target.style.borderColor = '#DC2626';
+    }
+  };
+
+  const handleMouseLeave = (e) => {
+    if (disabled) return;
+
+    // Restaurar estilos originales
+    const originalStyles = getVariantStyles();
+    e.target.style.backgroundColor = originalStyles.backgroundColor;
+    e.target.style.borderColor = originalStyles.borderColor;
+    e.target.style.color = originalStyles.color;
   };
 
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseStyles} ${variants[variant]} ${className}`}
+      className={`${baseStyles} ${className}`}
+      style={variantStyles}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {children}
     </button>
