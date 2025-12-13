@@ -47,6 +47,7 @@ const JobSearch = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [jobLoading, setJobLoading] = useState(false);
+  const [currentJobsSource, setCurrentJobsSource] = useState('local'); // 'local' o 'linkedin'
 
   // Cargar empleos reales al iniciar
   useEffect(() => {
@@ -114,16 +115,68 @@ const JobSearch = () => {
     setShowLinkedInView(false);
 
     try {
-      const linkedInUrl = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(searchTerm)}${location ? `&location=${encodeURIComponent(location)}` : ''}`;
-      const response = await axios.get(createProxyUrl(linkedInUrl), { timeout: 15000 });
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      
+      const response = await axios.get(`${apiUrl}/linkedin/search`, {
+        params: {
+          keywords: searchTerm,
+          location: location || undefined
+        },
+        timeout: 15000
+      });
 
-      if (response.data) {
-        setLinkedInHtml(response.data);
+      if (response.data.success && response.data.data.length > 0) {
+        // Mapear jobs del LinkedIn scraper al formato del componente
+        const mappedJobs = response.data.data.map((job, index) => ({
+          id: job.id || `linkedin-${index}`,
+          title: job.title,
+          company: {
+            name: job.company,
+            id: null
+          },
+          description: job.description || '',
+          location: job.location,
+          salary: job.salary || 'No especificado',
+          jobType: 'Full-time',
+          featured: false,
+          urgent: false,
+          remote: job.location?.toLowerCase().includes('remoto'),
+          isMock: false,
+          url: job.url,
+          source: job.source || 'linkedin'
+        }));
+        setJobs(mappedJobs);
+        setCurrentJobsSource('linkedin');
+        // Generar HTML para Vista LinkedIn
+        const htmlContent = generateLinkedInHTML(mappedJobs);
+        setLinkedInHtml(htmlContent);
+        setError('');
+        setShowLinkedInView(false); // Mostrar en vista App por defecto
+      } else {
+        setJobs([]);
+        setError(response.data.error || `No se encontraron ofertas para "${searchTerm}". Intenta con otros términos.`);
+        // Mostrar ofertas locales como fallback
+        const localResults = realJobs.filter(job => 
+          job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        if (localResults.length > 0) {
+          setJobs(localResults);
+          setError('LinkedIn no responde. Mostrando ofertas locales.');
+        }
       }
     } catch (err) {
-      console.error('Error LinkedIn:', err);
-      setError('No se pudo conectar con LinkedIn. Mostrando ofertas locales.');
-      setJobs(realJobs);
+      console.error('Error en búsqueda:', err);
+      setError('Error conectando con LinkedIn. Mostrando ofertas locales.');
+      
+      // Fallback a búsqueda local
+      const localResults = realJobs.filter(job => 
+        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      if (localResults.length > 0) {
+        setJobs(localResults);
+      }
     } finally {
       setLoading(false);
     }
@@ -133,6 +186,167 @@ const JobSearch = () => {
     if (!linkedInHtml) return '';
     const blob = new Blob([linkedInHtml], { type: 'text/html' });
     return URL.createObjectURL(blob);
+  };
+
+  const generateLinkedInHTML = (jobsList) => {
+    if (!jobsList || jobsList.length === 0) return '';
+    
+    const jobsHTML = jobsList.map((job, index) => `
+      <a href="${job.url}" target="_blank" rel="noopener noreferrer" class="job-card">
+        <div class="job-header">
+          <h3 class="job-title">${job.title}</h3>
+          <span class="job-type">Full-time</span>
+        </div>
+        <p class="company-name">${job.company?.name || job.company}</p>
+        <div class="job-meta">
+          <span class="location">${job.location}</span>
+          <span class="bullet">•</span>
+          <span class="salary">${job.salary || 'No especificado'}</span>
+        </div>
+      </a>
+    `).join('');
+
+    return `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>LinkedIn Jobs</title>
+        <style>
+          * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+          }
+          
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.5;
+          }
+          
+          .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 24px 16px;
+          }
+          
+          .header {
+            margin-bottom: 32px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 16px;
+          }
+          
+          .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 4px;
+          }
+          
+          .results-count {
+            font-size: 14px;
+            color: #666666;
+          }
+          
+          .jobs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+          }
+          
+          .job-card {
+            display: block;
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+          }
+          
+          .job-card:hover {
+            background-color: #f8f8f8;
+          }
+          
+          .job-card:last-child {
+            border-bottom: none;
+          }
+          
+          .job-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+          }
+          
+          .job-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0a66c2;
+            margin: 0;
+            flex: 1;
+            text-decoration: none;
+          }
+          
+          .job-card:hover .job-title {
+            text-decoration: underline;
+          }
+          
+          .job-type {
+            background-color: #f0f0f0;
+            color: #555555;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+            white-space: nowrap;
+          }
+          
+          .company-name {
+            font-size: 14px;
+            color: #555555;
+            font-weight: 500;
+            margin-bottom: 8px;
+          }
+          
+          .job-meta {
+            font-size: 13px;
+            color: #666666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+          
+          .location {
+            margin-right: 2px;
+          }
+          
+          .salary {
+            margin-left: 2px;
+          }
+          
+          .bullet {
+            color: #cccccc;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Jobs</h1>
+            <p class="results-count">Se encontraron ${jobsList.length} ofertas</p>
+          </div>
+          <div class="jobs-list">
+            ${jobsHTML}
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
   };
 
   const clearSearch = () => {
@@ -158,6 +372,12 @@ const JobSearch = () => {
   };
 
   const handleSeeDetails = async (job, e) => {
+    // Si es un job de LinkedIn, abre directamente el URL
+    if (job.source === 'linkedin' && job.url) {
+      window.open(job.url, '_blank');
+      return;
+    }
+
     // Si es un job real del backend
     setJobLoading(true);
     setIsModalOpen(true);
@@ -373,10 +593,12 @@ const JobSearch = () => {
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${!showLinkedInView ? 'bg-primary-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                   <LayoutGrid size={18} /> Vista App
                 </button>
-                <button onClick={() => setShowLinkedInView(true)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${showLinkedInView ? 'bg-accent-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                  <Eye size={18} /> Vista LinkedIn
-                </button>
+                {linkedInHtml && (
+                  <button onClick={() => setShowLinkedInView(true)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${showLinkedInView ? 'bg-blue-600 text-white' : isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                    <Eye size={18} /> Vista LinkedIn
+                  </button>
+                )}
               </div>
               <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>
                 {jobs.length} empleo{jobs.length !== 1 ? 's' : ''} encontrado{jobs.length !== 1 ? 's' : ''}
@@ -393,7 +615,7 @@ const JobSearch = () => {
                 <Globe size={20} /> Resultados reales de LinkedIn
               </h2>
             </div>
-            <iframe src={getLinkedInIframeSrc()} className="w-full h-screen rounded-b-lg" sandbox="allow-same-origin allow-scripts" />
+            <iframe src={getLinkedInIframeSrc()} className="w-full h-screen rounded-b-lg" sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox" />
           </Card>
         )}
 
@@ -411,7 +633,8 @@ const JobSearch = () => {
                     {job.featured && <span className="px-2 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold rounded-full">Destacado</span>}
                     {job.urgent && <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full">Urgente</span>}
                     {job.remote && <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full">Remoto</span>}
-                    {job.isMock === false && <span className="px-2 py-1 bg-primary-500 text-white text-xs font-bold rounded-full">Local</span>}
+                    {job.source === 'linkedin' && <span className="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded-full">LinkedIn</span>}
+                    {job.isMock === false && job.source !== 'linkedin' && <span className="px-2 py-1 bg-primary-500 text-white text-xs font-bold rounded-full">Local</span>}
                   </div>
 
                   <div className="flex justify-between items-start mb-4">

@@ -12,7 +12,12 @@ import {
   Phone,
   Search,
   User,
-  X
+  X,
+  CheckCircle,
+  XCircle,
+  Clock,
+  UserCheck,
+  FileText
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
@@ -26,8 +31,9 @@ import { companyJobService } from "../../api/services/companyService";
 import { recommendationService } from "../../services/recommendationService";
 
 export const CandidatosPage = () => {
-  const { isDark } = useTheme();
+  const { isDark, currentTheme } = useTheme();
   const navigate = useNavigate();
+  const colors = currentTheme?.colors || {};
 
   const [candidates, setCandidates] = useState([]);
   const [search, setSearch] = useState("");
@@ -198,12 +204,39 @@ export const CandidatosPage = () => {
   const statusColor = (s) => {
     switch (s) {
       case "aplicado":
-        return "bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300";
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300";
       case "revisado":
+        return "bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300";
+      case "entrevista":
+        return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-300";
+      case "prueba_tecnica":
+        return "bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300";
+      case "entrevista_final":
+        return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300";
+      case "aceptado":
         return "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300";
+      case "rechazado":
+        return "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300";
+      case "cancelado":
+        return "bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-300";
       default:
         return "bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-300";
     }
+  };
+
+  // Labels legibles para estados
+  const statusLabel = (s) => {
+    const labels = {
+      'aplicado': 'Aplicado',
+      'revisado': 'Revisado',
+      'entrevista': 'Entrevista',
+      'prueba_tecnica': 'Prueba Técnica',
+      'entrevista_final': 'Entrevista Final',
+      'aceptado': 'Aceptado',
+      'rechazado': 'Rechazado',
+      'cancelado': 'Cancelado'
+    };
+    return labels[s] || s;
   };
 
   // ===============================================
@@ -220,17 +253,84 @@ export const CandidatosPage = () => {
     setInterviewModal(candidate);
   };
 
+  // ===============================================
+  // ACTUALIZAR ESTADO DE POSTULACIÓN (Backend real)
+  // ===============================================
+  const updateApplicationStatus = async (applicationId, newStatus, candidateName) => {
+    try {
+      const response = await fetch(`http://localhost:3000/applications/${applicationId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (response.ok) {
+        // Actualizar estado localmente
+        setCandidates(candidates.map(c =>
+          c.id === applicationId
+            ? { ...c, status: newStatus }
+            : c
+        ));
+
+        const statusLabels = {
+          'aceptado': '✅ Aceptado',
+          'rechazado': '❌ Rechazado',
+          'entrevista': '📅 Entrevista programada',
+          'revisado': '👁️ Revisado',
+          'prueba_tecnica': '📝 Prueba técnica asignada'
+        };
+
+        alert(`${statusLabels[newStatus] || newStatus} - ${candidateName}`);
+        return true;
+      } else {
+        throw new Error('Error al actualizar estado');
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
+      alert(`Error al actualizar estado. Por favor intenta nuevamente.`);
+      return false;
+    }
+  };
+
+  // Acciones rápidas
+  const handleAccept = (candidate) => {
+    if (confirm(`¿Estás seguro de ACEPTAR a ${candidate.name}?`)) {
+      updateApplicationStatus(candidate.id, 'aceptado', candidate.name);
+    }
+  };
+
+  const handleReject = (candidate) => {
+    if (confirm(`¿Estás seguro de RECHAZAR a ${candidate.name}?`)) {
+      updateApplicationStatus(candidate.id, 'rechazado', candidate.name);
+    }
+  };
+
+  const handleMarkReviewed = (candidate) => {
+    updateApplicationStatus(candidate.id, 'revisado', candidate.name);
+  };
+
+  const handleAssignTechnicalTest = (candidate) => {
+    if (confirm(`¿Asignar prueba técnica a ${candidate.name}?`)) {
+      updateApplicationStatus(candidate.id, 'prueba_tecnica', candidate.name);
+    }
+  };
+
   const sendInterview = async () => {
     try {
-      // 🎨 MODO MOCK: Simular actualización de estado
-      alert(`✅ Entrevista programada para ${interviewModal.name} (MOCK)\nFecha: ${interviewDate}`);
+      // Actualizar estado en backend
+      const success = await updateApplicationStatus(
+        interviewModal.id,
+        'entrevista',
+        interviewModal.name
+      );
 
-      // Actualizar estado localmente
-      setCandidates(candidates.map(c =>
-        c.id === interviewModal.id
-          ? { ...c, status: 'interview' }
-          : c
-      ));
+      if (success) {
+        // TODO: En el futuro, enviar email con la fecha de entrevista
+        console.log(`Entrevista programada para: ${interviewDate}`);
+      }
 
       setInterviewModal(null);
       setInterviewDate("");
@@ -324,7 +424,7 @@ export const CandidatosPage = () => {
                 {/* Bubbles */}
                 <div className="flex justify-between mb-2">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor(c.status)}`}>
-                    {c.status}
+                    {statusLabel(c.status)}
                   </span>
 
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${matchColor(c.match)}`}>
@@ -388,14 +488,117 @@ export const CandidatosPage = () => {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-2">
-                  <Button fullWidth variant="primary" onClick={() => navigate(`/empresa/candidatos/${c.studentId}`)}>
-                    <Eye size={16} /> Ver Perfil Completo
-                  </Button>
+                <div className="flex flex-col gap-2">
+                  {/* Fila de acciones principales */}
+                  <div className="grid grid-cols-[1fr_auto_auto] gap-2">
+                    <button
+                      onClick={() => navigate(`/empresa/candidatos/${c.studentId}`)}
+                      className={`
+                        flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                        ${isDark
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                          : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }
+                      `}
+                      style={{ backgroundColor: colors.accent || '#3b82f6' }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                    >
+                      <Eye size={16} /> Ver Perfil
+                    </button>
 
-                  <Button variant="outline" onClick={() => contact(c)}>
-                    <Mail size={16} />
-                  </Button>
+                    <button
+                      onClick={() => openInterviewModal(c)}
+                      title="Programar Entrevista"
+                      className={`
+                        flex items-center justify-center px-3 py-2 rounded-lg transition-all border-2
+                        ${isDark
+                          ? 'border-slate-600 hover:bg-slate-700 text-slate-300'
+                          : 'border-slate-300 hover:bg-slate-100 text-slate-700'
+                        }
+                      `}
+                    >
+                      <Calendar size={16} />
+                    </button>
+
+                    <button
+                      onClick={() => contact(c)}
+                      title="Contactar por Email"
+                      className={`
+                        flex items-center justify-center px-3 py-2 rounded-lg transition-all border-2
+                        ${isDark
+                          ? 'border-slate-600 hover:bg-slate-700 text-slate-300'
+                          : 'border-slate-300 hover:bg-slate-100 text-slate-700'
+                        }
+                      `}
+                    >
+                      <Mail size={16} />
+                    </button>
+                  </div>
+
+                  {/* Botón de Marcar como Revisado - Solo si está en estado aplicado */}
+                  {c.status === 'aplicado' && (
+                    <button
+                      onClick={() => handleMarkReviewed(c)}
+                      className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                        bg-purple-50 text-purple-700 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:hover:bg-purple-900/30"
+                      title="Marcar como revisado"
+                    >
+                      <Eye size={14} />
+                      Marcar como Revisado
+                    </button>
+                  )}
+
+                  {/* Botón de Asignar Prueba Técnica - Solo si está en entrevista */}
+                  {c.status === 'entrevista' && (
+                    <button
+                      onClick={() => handleAssignTechnicalTest(c)}
+                      className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                        bg-orange-50 text-orange-700 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:hover:bg-orange-900/30"
+                      title="Asignar prueba técnica"
+                    >
+                      <FileText size={14} />
+                      Asignar Prueba Técnica
+                    </button>
+                  )}
+
+                  {/* Fila de decisiones - Solo si está en estado revisado o posterior */}
+                  {(c.status === 'revisado' || c.status === 'entrevista' || c.status === 'prueba_tecnica') && (
+                    <div className="flex gap-2 mt-1">
+                      <button
+                        onClick={() => handleAccept(c)}
+                        className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                          bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30"
+                        title="Aceptar candidato"
+                      >
+                        <CheckCircle size={14} />
+                        Aceptar
+                      </button>
+                      <button
+                        onClick={() => handleReject(c)}
+                        className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all
+                          bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                        title="Rechazar candidato"
+                      >
+                        <XCircle size={14} />
+                        Rechazar
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Mostrar estado si ya fue decidido */}
+                  {c.status === 'aceptado' && (
+                    <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      <CheckCircle size={16} />
+                      <span className="font-medium">Candidato Aceptado</span>
+                    </div>
+                  )}
+                  {c.status === 'rechazado' && (
+                    <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                      <XCircle size={16} />
+                      <span className="font-medium">Candidato Rechazado</span>
+                    </div>
+                  )}
                 </div>
 
               </Card>
@@ -409,202 +612,206 @@ export const CandidatosPage = () => {
       {/* ================================
            MODAL PERFIL COMPLETO
       ================================= */}
-      {selectedCandidate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+      {
+        selectedCandidate && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
 
-            {/* Header */}
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex items-start gap-4">
+              {/* Header */}
+              <div className="flex justify-between items-start mb-6">
+                <div className="flex items-start gap-4">
 
-                <div className={`
+                  <div className={`
                   w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold
                   ${isDark ? "bg-accent-600 text-white" : "bg-accent-300 text-accent-700"}
                 `}>
-                  {selectedCandidate.name.split(" ").map((n) => n[0]).join("")}
-                </div>
-
-                <div>
-                  <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                    {selectedCandidate.name}
-                  </h2>
-
-                  <p className={isDark ? "text-slate-400" : "text-slate-600"}>
-                    {selectedCandidate.appliedFor}
-                  </p>
-
-                  <div className="flex gap-2 mt-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${matchColor(selectedCandidate.match)}`}>
-                      {selectedCandidate.match}% Match
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusColor(selectedCandidate.status)}`}>
-                      {selectedCandidate.status}
-                    </span>
+                    {selectedCandidate.name.split(" ").map((n) => n[0]).join("")}
                   </div>
+
+                  <div>
+                    <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                      {selectedCandidate.name}
+                    </h2>
+
+                    <p className={isDark ? "text-slate-400" : "text-slate-600"}>
+                      {selectedCandidate.appliedFor}
+                    </p>
+
+                    <div className="flex gap-2 mt-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${matchColor(selectedCandidate.match)}`}>
+                        {selectedCandidate.match}% Match
+                      </span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusColor(selectedCandidate.status)}`}>
+                        {selectedCandidate.status}
+                      </span>
+                    </div>
+                  </div>
+
                 </div>
+
+                <button onClick={() => setSelectedCandidate(null)} className="p-2">
+                  <X size={24} className={isDark ? "text-slate-400" : "text-slate-600"} />
+                </button>
+              </div>
+
+              {/* Info */}
+              <div className="grid md:grid-cols-2 gap-6">
+
+                {/* Contact */}
+                <Card className="p-6">
+                  <h3 className={`text-lg font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>
+                    Información de Contacto
+                  </h3>
+
+                  <div className="space-y-3">
+
+                    <div className="flex gap-3">
+                      <Mail size={18} className="text-slate-500" />
+                      {selectedCandidate.email}
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Phone size={18} className="text-slate-500" />
+                      {selectedCandidate.phone}
+                    </div>
+
+                    <div className="flex gap-3">
+                      <MapPin size={18} className="text-slate-500" />
+                      Santa Cruz
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Calendar size={18} className="text-slate-500" />
+                      Aplicó el: {selectedCandidate.appliedDate}
+                    </div>
+
+                  </div>
+                </Card>
+
+                {/* Academic */}
+                <Card className="p-6">
+                  <h3 className={`text-lg font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>
+                    Información Académica
+                  </h3>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">GPA:</span>
+                      <span>{selectedCandidate.gpa}%</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Institución:</span>
+                      <span>{selectedCandidate.institution}</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Proyectos:</span>
+                      <span>{selectedCandidate.projects}</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Certificaciones:</span>
+                      <span>{selectedCandidate.certifications}</span>
+                    </div>
+                  </div>
+                </Card>
 
               </div>
 
-              <button onClick={() => setSelectedCandidate(null)} className="p-2">
-                <X size={24} className={isDark ? "text-slate-400" : "text-slate-600"} />
-              </button>
-            </div>
-
-            {/* Info */}
-            <div className="grid md:grid-cols-2 gap-6">
-
-              {/* Contact */}
-              <Card className="p-6">
+              {/* Skills */}
+              <Card className="mt-6 p-6">
                 <h3 className={`text-lg font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>
-                  Información de Contacto
+                  Habilidades Técnicas
                 </h3>
 
-                <div className="space-y-3">
-
-                  <div className="flex gap-3">
-                    <Mail size={18} className="text-slate-500" />
-                    {selectedCandidate.email}
-                  </div>
-
-                  <div className="flex gap-3">
-                    <Phone size={18} className="text-slate-500" />
-                    {selectedCandidate.phone}
-                  </div>
-
-                  <div className="flex gap-3">
-                    <MapPin size={18} className="text-slate-500" />
-                    Santa Cruz
-                  </div>
-
-                  <div className="flex gap-3">
-                    <Calendar size={18} className="text-slate-500" />
-                    Aplicó el: {selectedCandidate.appliedDate}
-                  </div>
-
-                </div>
-              </Card>
-
-              {/* Academic */}
-              <Card className="p-6">
-                <h3 className={`text-lg font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>
-                  Información Académica
-                </h3>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">GPA:</span>
-                    <span>{selectedCandidate.gpa}%</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Institución:</span>
-                    <span>{selectedCandidate.institution}</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Proyectos:</span>
-                    <span>{selectedCandidate.projects}</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Certificaciones:</span>
-                    <span>{selectedCandidate.certifications}</span>
-                  </div>
-                </div>
-              </Card>
-
-            </div>
-
-            {/* Skills */}
-            <Card className="mt-6 p-6">
-              <h3 className={`text-lg font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>
-                Habilidades Técnicas
-              </h3>
-
-              <div className="flex flex-wrap gap-2">
-                {selectedCandidate.skills.map((s, idx) => (
-                  <span
-                    key={idx}
-                    className={`
+                <div className="flex flex-wrap gap-2">
+                  {selectedCandidate.skills.map((s, idx) => (
+                    <span
+                      key={idx}
+                      className={`
                       px-3 py-2 rounded-lg text-sm font-medium
                       ${isDark ? "bg-accent-700/20 text-accent-400" : "bg-accent-300 text-accent-700"}
                     `}
-                  >
-                    {s}
-                  </span>
-                ))}
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Actions */}
+              <div className="flex gap-4 mt-6">
+
+                <Button
+                  variant="primary"
+                  fullWidth
+                  onClick={() => contact(selectedCandidate)}
+                >
+                  <Mail size={16} /> Contactar
+                </Button>
+
+                <Button
+                  variant="outline"
+                  fullWidth
+                  onClick={() => openInterviewModal(selectedCandidate)}
+                >
+                  <Briefcase size={16} /> Programar Entrevista
+                </Button>
+
+                <Button
+                  variant="outline"
+                  disabled
+                  fullWidth
+                >
+                  <Download size={16} /> CV (Próximamente)
+                </Button>
+
               </div>
+
             </Card>
-
-            {/* Actions */}
-            <div className="flex gap-4 mt-6">
-
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={() => contact(selectedCandidate)}
-              >
-                <Mail size={16} /> Contactar
-              </Button>
-
-              <Button
-                variant="outline"
-                fullWidth
-                onClick={() => openInterviewModal(selectedCandidate)}
-              >
-                <Briefcase size={16} /> Programar Entrevista
-              </Button>
-
-              <Button
-                variant="outline"
-                disabled
-                fullWidth
-              >
-                <Download size={16} /> CV (Próximamente)
-              </Button>
-
-            </div>
-
-          </Card>
-        </div>
-      )}
+          </div>
+        )
+      }
 
       {/* ================================
            MODAL ENTREVISTA
       ================================= */}
-      {interviewModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <Card className="p-6 w-full max-w-md">
+      {
+        interviewModal && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <Card className="p-6 w-full max-w-md">
 
-            <h2 className="text-xl font-bold mb-4">
-              Programar Entrevista
-            </h2>
+              <h2 className="text-xl font-bold mb-4">
+                Programar Entrevista
+              </h2>
 
-            <input
-              type="datetime-local"
-              value={interviewDate}
-              onChange={(e) => setInterviewDate(e.target.value)}
-              className="w-full p-3 border rounded-xl mb-4"
-            />
+              <input
+                type="datetime-local"
+                value={interviewDate}
+                onChange={(e) => setInterviewDate(e.target.value)}
+                className="w-full p-3 border rounded-xl mb-4"
+              />
 
-            <div className="flex gap-2">
-              <Button fullWidth variant="primary" onClick={sendInterview}>
-                Confirmar
-              </Button>
+              <div className="flex gap-2">
+                <Button fullWidth variant="primary" onClick={sendInterview}>
+                  Confirmar
+                </Button>
 
-              <Button
-                fullWidth
-                variant="outline"
-                onClick={() => setInterviewModal(null)}
-              >
-                Cancelar
-              </Button>
-            </div>
+                <Button
+                  fullWidth
+                  variant="outline"
+                  onClick={() => setInterviewModal(null)}
+                >
+                  Cancelar
+                </Button>
+              </div>
 
-          </Card>
-        </div>
-      )}
+            </Card>
+          </div>
+        )
+      }
 
-    </div>
+    </div >
   );
 };

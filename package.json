@@ -11,6 +11,7 @@
     "axios": "^1.12.2",
     "cheerio": "^1.1.2",
     "date-fns": "^4.1.0",
+    "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.3",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
@@ -20,6 +21,7 @@
     "react-router-dom": "^7.9.4",
     "recharts": "^3.5.1",
     "tinymce": "^8.2.0",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

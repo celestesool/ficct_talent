@@ -51,18 +51,30 @@ export const ApplicationDetailsModal = ({ applicationId, onClose, onWithdraw }) 
   }, [applicationId]);
 
   const getStatusConfig = (status) => {
+    const statusLower = status?.toLowerCase() || 'aplicado';
+
     const configs = {
-      applied: { color: 'blue', icon: Clock, label: 'Aplicado', description: 'Tu postulación ha sido recibida y está en revisión inicial.' },
-      reviewed: { color: 'yellow', icon: Eye, label: 'Revisado', description: 'Tu perfil ha sido evaluado por el equipo de reclutamiento.' },
-      interview: { color: 'purple', icon: Calendar, label: 'Entrevista', description: 'Has sido invitado a una entrevista. ¡Prepárate!' },
-      technical_test: { color: 'indigo', icon: FileText, label: 'Prueba Técnica', description: 'Es hora de demostrar tus habilidades técnicas.' },
-      final_interview: { color: 'purple', icon: TrendingUp, label: 'Entrevista Final', description: 'Último paso antes de la decisión.' },
-      accepted: { color: 'green', icon: CheckCircle, label: 'Aceptado', description: '¡Felicidades! Has sido seleccionado para el puesto.' },
-      rejected: { color: 'red', icon: XCircle, label: 'Rechazado', description: 'Lamentamos informarte que no has sido seleccionado esta vez.' },
-      withdrawn: { color: 'gray', icon: XCircle, label: 'Cancelado', description: 'La postulación ha sido retirada.' }
+      // Estados en español (del backend)
+      'aplicado': { color: 'blue', icon: Clock, label: 'Aplicado', description: 'Tu postulación ha sido recibida. La empresa está revisando tu perfil.' },
+      'revisado': { color: 'yellow', icon: Eye, label: 'Revisado', description: 'Tu perfil ha sido revisado. La empresa te contactará para los siguientes pasos.' },
+      'entrevista': { color: 'purple', icon: Calendar, label: 'Entrevista Programada', description: 'La empresa ha programado una entrevista contigo. Revisa tu correo para los detalles (fecha, hora, lugar o link de videollamada).' },
+      'prueba_tecnica': { color: 'indigo', icon: FileText, label: 'Prueba Técnica', description: 'Se te ha asignado una prueba técnica. La empresa te enviará los detalles por correo electrónico.' },
+      'entrevista_final': { color: 'purple', icon: TrendingUp, label: 'Entrevista Final', description: 'Has llegado a la entrevista final. ¡Prepárate bien!' },
+      'aceptado': { color: 'green', icon: CheckCircle, label: '¡Aceptado!', description: '¡Felicidades! Has sido seleccionado para el puesto. La empresa se comunicará contigo pronto.' },
+      'rechazado': { color: 'red', icon: XCircle, label: 'No seleccionado', description: 'Gracias por tu interés. En esta ocasión la empresa ha decidido continuar con otros candidatos.' },
+      'cancelado': { color: 'gray', icon: XCircle, label: 'Cancelado', description: 'Esta postulación ha sido cancelada.' },
+      // Soporte inglés por compatibilidad
+      'applied': { color: 'blue', icon: Clock, label: 'Aplicado', description: 'Tu postulación ha sido recibida. La empresa está revisando tu perfil.' },
+      'reviewed': { color: 'yellow', icon: Eye, label: 'Revisado', description: 'Tu perfil ha sido revisado. La empresa te contactará para los siguientes pasos.' },
+      'interview': { color: 'purple', icon: Calendar, label: 'Entrevista Programada', description: 'La empresa ha programado una entrevista contigo. Revisa tu correo para los detalles.' },
+      'technical_test': { color: 'indigo', icon: FileText, label: 'Prueba Técnica', description: 'Se te ha asignado una prueba técnica. La empresa te enviará los detalles por correo electrónico.' },
+      'final_interview': { color: 'purple', icon: TrendingUp, label: 'Entrevista Final', description: 'Has llegado a la entrevista final. ¡Prepárate bien!' },
+      'accepted': { color: 'green', icon: CheckCircle, label: '¡Aceptado!', description: '¡Felicidades! Has sido seleccionado para el puesto. La empresa se comunicará contigo pronto.' },
+      'rejected': { color: 'red', icon: XCircle, label: 'No seleccionado', description: 'Gracias por tu interés. En esta ocasión la empresa ha decidido continuar con otros candidatos.' },
+      'withdrawn': { color: 'gray', icon: XCircle, label: 'Cancelado', description: 'Esta postulación ha sido cancelada.' }
     };
 
-    return configs[status] || configs.applied;
+    return configs[statusLower] || configs['aplicado'];
   };
 
   const formatDate = (dateString) => {
@@ -88,30 +100,33 @@ export const ApplicationDetailsModal = ({ applicationId, onClose, onWithdraw }) 
   };
 
   const getHistoryItems = () => {
-    const History = [];
+    const HistoryList = [];
     const dates = {
-      applied_at: { label: 'Aplicación Enviada', icon: ClockIcon, status: 'applied' },
-      reviewed_at: { label: 'Revisión Realizada', icon: Eye, status: 'reviewed' },
-      interview_at: { label: 'Entrevista Programada', icon: Calendar, status: 'interview' },
-      technical_test_at: { label: 'Prueba Técnica Completada', icon: FileText, status: 'technical_test' },
-      decided_at: { label: 'Decisión Final', icon: TrendingUp, status: 'final_interview' }
+      applied_at: { label: 'Aplicación Enviada', icon: ClockIcon, statuses: ['applied', 'aplicado'] },
+      reviewed_at: { label: 'Revisión Realizada', icon: Eye, statuses: ['reviewed', 'revisado'] },
+      interview_at: { label: 'Entrevista Programada', icon: Calendar, statuses: ['interview', 'entrevista'] },
+      technical_test_at: { label: 'Prueba Técnica Completada', icon: FileText, statuses: ['technical_test', 'prueba_tecnica'] },
+      decided_at: { label: 'Decisión Final', icon: TrendingUp, statuses: ['accepted', 'rejected', 'aceptado', 'rechazado'] }
     };
+
+    const statusLower = application.status?.toLowerCase() || 'aplicado';
+    const finalStatuses = ['accepted', 'rejected', 'withdrawn', 'aceptado', 'rechazado', 'cancelado'];
 
     Object.entries(dates).forEach(([key, item]) => {
       const date = application[key];
-      const isCompleted = application.status === 'accepted' || application.status === 'rejected' || application.status === 'withdrawn' || (key === 'applied_at');
-      const currentStatus = getStatusConfig(application.status);
+      const isCompleted = finalStatuses.includes(statusLower) || (key === 'applied_at' && date);
+      const isCurrent = item.statuses.includes(statusLower) && date !== null;
 
-      History.push({
+      HistoryList.push({
         ...item,
         date: formatDate(date),
-        completed: date !== null && isCompleted,
-        isCurrent: application.status === item.status && date !== null,
+        completed: date !== null,
+        isCurrent: isCurrent,
         description: date ? `Completado el ${formatDate(date)}` : 'Pendiente de actualización'
       });
     });
 
-    return History;
+    return HistoryList;
   };
 
   if (loading) {
@@ -193,11 +208,10 @@ export const ApplicationDetailsModal = ({ applicationId, onClose, onWithdraw }) 
               <div className="space-y-4">
                 {HistoryItems.map((item, index) => (
                   <div key={index} className="flex items-center gap-4">
-                    <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
-                      item.completed ? `bg-${statusConfig.color}-100 text-${statusConfig.color}-600` :
+                    <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${item.completed ? `bg-${statusConfig.color}-100 text-${statusConfig.color}-600` :
                       item.isCurrent ? 'bg-yellow-100 text-yellow-600 border-2 border-yellow-200' :
-                      'bg-gray-100 text-gray-400'
-                    }`}>
+                        'bg-gray-100 text-gray-400'
+                      }`}>
                       {item.date !== 'Pendiente' ? '✓' : index + 1}
                     </div>
                     <div className="flex-1">
@@ -245,11 +259,10 @@ export const ApplicationDetailsModal = ({ applicationId, onClose, onWithdraw }) 
               <div>
                 <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Activo:</span>
                 <p className={isDark ? 'text-white' : 'text-slate-900'}>
-                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    application.job.is_active 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${application.job.is_active
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                    }`}>
                     {application.job.is_active ? 'Sí' : 'No'}
                   </span>
                 </p>
@@ -346,7 +359,7 @@ export const ApplicationDetailsModal = ({ applicationId, onClose, onWithdraw }) 
               </div>
             </div>
           </div>
-         
+
           {/* Carta de Presentación */}
           {application.cover_letter && (
             <div>
@@ -409,7 +422,7 @@ export const ApplicationDetailsModal = ({ applicationId, onClose, onWithdraw }) 
             <Button variant="outline" onClick={onClose} className="flex-1">
               Cerrar
             </Button>
-            {!['accepted', 'rejected', 'withdrawn'].includes(application.status) && (
+            {!['accepted', 'rejected', 'withdrawn', 'aceptado', 'rechazado', 'cancelado'].includes(application.status?.toLowerCase()) && (
               <Button
                 variant="danger"
                 onClick={() => {

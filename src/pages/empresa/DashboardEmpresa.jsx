@@ -9,7 +9,8 @@ import {
   Users,
   Clock,
   Send,
-  UserPlus
+  UserPlus,
+  ArrowRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
@@ -24,8 +25,10 @@ import { recommendationService } from '../../services/recommendationService';
 import { dashboardCache } from '../../utils/cacheManager';
 
 export const DashboardEmpresa = () => {
-  const { isDark } = useTheme();
+  const { isDark, currentTheme } = useTheme();
   const navigate = useNavigate();
+  const colors = currentTheme?.colors || {};
+  const accentColor = colors.accent || '#6366f1';
 
   const [offers, setOffers] = useState([]);
   const [candidates, setCandidates] = useState([]);
@@ -223,35 +226,47 @@ export const DashboardEmpresa = () => {
     return total + hired;
   }, 0);
 
-  // Stats con diseño de gradientes premium
+  // Stats con diseño limpio
   const stats = [
     {
       label: 'Ofertas Activas',
       value: offers.filter(o => o.is_active).length,
       icon: Briefcase,
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      iconBg: 'rgba(255,255,255,0.2)',
+      color: 'indigo',
+      bgLight: 'bg-indigo-100',
+      bgDark: 'bg-indigo-900/30',
+      textLight: 'text-indigo-600',
+      textDark: 'text-indigo-400'
     },
     {
       label: 'Candidatos',
       value: candidates.length,
       icon: Users,
-      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-      iconBg: 'rgba(255,255,255,0.2)',
+      color: 'blue',
+      bgLight: 'bg-blue-100',
+      bgDark: 'bg-blue-900/30',
+      textLight: 'text-blue-600',
+      textDark: 'text-blue-400'
     },
     {
       label: 'Vistas del Perfil',
       value: profileViews,
       icon: Eye,
-      gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-      iconBg: 'rgba(255,255,255,0.2)',
+      color: 'green',
+      bgLight: 'bg-green-100',
+      bgDark: 'bg-green-900/30',
+      textLight: 'text-green-600',
+      textDark: 'text-green-400'
     },
     {
       label: 'Contrataciones',
       value: hiredCount,
       icon: CheckCircle,
-      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-      iconBg: 'rgba(255,255,255,0.2)',
+      color: 'pink',
+      bgLight: 'bg-pink-100',
+      bgDark: 'bg-pink-900/30',
+      textLight: 'text-pink-600',
+      textDark: 'text-pink-400'
     },
   ];
 
@@ -268,6 +283,46 @@ export const DashboardEmpresa = () => {
   }));
 
   const topCandidates = candidates.slice(0, 3);
+
+  // Acciones Rápidas para Empresa
+  const quickActions = [
+    {
+      title: 'Nueva Oferta',
+      description: 'Publica una nueva oferta laboral',
+      icon: Plus,
+      path: '/empresa/ofertas/nueva'
+    },
+    {
+      title: 'Ver Ofertas',
+      description: 'Gestiona tus ofertas publicadas',
+      icon: Briefcase,
+      path: '/empresa/ofertas'
+    },
+    {
+      title: 'Candidatos',
+      description: 'Revisa candidatos postulados',
+      icon: Users,
+      path: '/empresa/candidatos'
+    },
+    {
+      title: 'Reportes',
+      description: 'Estadísticas y análisis',
+      icon: FileText,
+      path: '/empresa/reportes'
+    },
+    {
+      title: 'Mensajes',
+      description: 'Comunícate con candidatos',
+      icon: Send,
+      path: '/empresa/mensajes'
+    },
+    {
+      title: 'Perfil Empresa',
+      description: 'Actualiza información de tu empresa',
+      icon: UserPlus,
+      path: '/empresa/perfil'
+    }
+  ];
 
   // =====================================================
   // UI (UNCHANGED)
@@ -304,87 +359,159 @@ export const DashboardEmpresa = () => {
           </div>
         </div>
 
-        {/* Anuncios */}
+        {/* Anuncios - Encapsulados con fondo del tema */}
         {announcements.length > 0 && (
-          <Card className="mt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <div
+            className="mb-8 max-w-5xl mx-auto p-6 rounded-2xl border relative"
+            style={{
+              backgroundColor: isDark ? `${accentColor}40` : `${accentColor}26`,
+              borderColor: `${accentColor}33`
+            }}
+          >
+            <div className="flex items-center gap-2 mb-5">
+              <Megaphone size={20} style={{ color: accentColor }} />
+              <h2 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Anuncios
               </h2>
-              <Megaphone size={20} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
             </div>
 
-            <div className="space-y-3">
-              {announcements.map((announcement) => (
-                <div
-                  key={announcement.id}
-                  className={`
-            p-3 rounded-lg border-l-4
-            ${announcement.type === 'info' ? 'border-blue-500' :
-                      announcement.type === 'warning' ? 'border-yellow-500' :
-                        announcement.type === 'success' ? 'border-green-500' : 'border-red-500'}
-            ${isDark ? 'bg-slate-700' : 'bg-slate-100'}
-          `}
-                >
-                  <h3 className={`font-bold text-sm mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    {announcement.title}
-                  </h3>
-                  <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                    {announcement.message}
-                  </p>
-                  <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-                    {new Date(announcement.created_at).toLocaleDateString('es-ES')}
-                  </p>
-                </div>
-              ))}
+            <div className={`grid gap-4 ${announcements.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+              {announcements.map((ann) => {
+                // Usar el color del tema para todos los anuncios
+                const style = {
+                  bg: isDark ? `${accentColor}26` : `${accentColor}14`,
+                  border: `${accentColor}4D`,
+                  iconBg: `${accentColor}40`,
+                  textColor: isDark ? 'text-slate-100' : 'text-slate-900',
+                  textSecondary: isDark ? 'text-slate-300' : 'text-slate-700'
+                };
+
+                return (
+                  <Card
+                    key={ann.id}
+                    className="p-5 transition-all duration-200 hover:shadow-md cursor-pointer border"
+                    style={{
+                      backgroundColor: style.bg,
+                      borderColor: style.border
+                    }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div
+                        className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: style.iconBg }}
+                      >
+                        <Megaphone size={20} style={{ color: accentColor }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`font-semibold text-base mb-1.5 ${style.textColor}`}>
+                          {ann.title}
+                        </h3>
+                        <p className={`text-sm line-clamp-2 ${style.textSecondary}`}>
+                          {ann.message}
+                        </p>
+                        {ann.created_at && (
+                          <p className={`text-xs mt-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                            {new Date(ann.created_at).toLocaleDateString('es-ES', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
-          </Card>
+          </div>
         )}
 
-        {/* Stats Grid - Diseño Premium con Gradientes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Stats Grid - Estilo Limpio */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((stat, idx) => (
-            <div
-              key={idx}
-              className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:translate-y-[-4px] hover:scale-[1.02]"
-              style={{ background: stat.gradient }}
-            >
-              {/* Efecto de ola decorativa */}
-              <div
-                className="absolute bottom-0 left-0 right-0 h-16 opacity-20"
-                style={{
-                  background: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1440 320\'%3E%3Cpath fill=\'%23ffffff\' d=\'M0,160L48,138.7C96,117,192,75,288,80C384,85,480,139,576,154.7C672,171,768,149,864,133.3C960,117,1056,107,1152,112C1248,117,1344,139,1392,149.3L1440,160L1440,320L0,320Z\'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom',
-                  backgroundSize: 'cover'
-                }}
-              />
-
-              <div className="relative p-6">
-                {/* Icono en círculo semi-transparente */}
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                  style={{ background: stat.iconBg }}
-                >
-                  <stat.icon className="text-white" size={24} strokeWidth={2} />
-                </div>
-
-                {/* Label */}
-                <p className="text-white/80 text-sm font-medium mb-1">
+            <Card key={idx} className="p-3">
+              <div className="flex items-start justify-between mb-2">
+                <p className={`text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                   {stat.label}
                 </p>
-
-                {/* Valor grande */}
-                <p className="text-white text-3xl lg:text-4xl font-bold">
-                  {stat.value}
-                </p>
+                <div className={`p-2 rounded-lg ${isDark ? stat.bgDark : stat.bgLight}`}>
+                  <stat.icon className={`${isDark ? stat.textDark : stat.textLight}`} size={22} />
+                </div>
               </div>
-            </div>
+              <h3 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {stat.value}
+              </h3>
+            </Card>
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        {/* Layout principal: 2/3 + 1/3 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* Recent Offers */}
+          {/* Columna izquierda - Acciones Rápidas y Ofertas */}
           <div className="lg:col-span-2">
+
+            {/* Acciones Rápidas - Estilo Polaroid */}
+            <h2 className={`text-lg font-bold mb-5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Acciones Rápidas
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5 mb-6">
+              {quickActions.map((action, idx) => (
+                <Card
+                  key={idx}
+                  onClick={() => navigate(action.path)}
+                  className={`
+                    group cursor-pointer transition-all duration-300
+                    hover:shadow-xl hover:translate-y-[-4px]
+                    p-6 pb-8
+                    border-b-8
+                  `}
+                  style={{
+                    borderBottomColor: accentColor,
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  }}
+                >
+                  {/* Ícono centrado grande */}
+                  <div className="flex justify-center mb-4">
+                    <div
+                      className="w-16 h-16 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
+                      style={{ backgroundColor: `${accentColor}15` }}
+                    >
+                      <action.icon size={32} style={{ color: accentColor }} />
+                    </div>
+                  </div>
+
+                  {/* Título centrado */}
+                  <h3 className={`font-bold text-base mb-2 text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    {action.title}
+                  </h3>
+
+                  {/* Descripción centrada */}
+                  <p className={`text-sm leading-relaxed text-center ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    {action.description}
+                  </p>
+
+                  {/* Indicador de acción en hover */}
+                  <div className="mt-4 flex justify-center">
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span
+                        className="text-xs font-medium"
+                        style={{ color: accentColor }}
+                      >
+                        Ir
+                      </span>
+                      <ArrowRight
+                        size={14}
+                        style={{ color: accentColor }}
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Ofertas Recientes */}
             <Card>
               <div className="flex justify-between items-center mb-4">
                 <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>

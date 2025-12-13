@@ -7,19 +7,22 @@ if (!key) {
 
 // Prompt estricto para mejorar el CV
 const IMPROVE_CV_PROMPT = `
-Eres un experto en redacción de CVs para reclutadores de tecnología.
+Eres un experto en redaccion de CVs para reclutadores de tecnologia.
 
-TAREA: Mejora el siguiente CV para hacerlo más profesional, impactante y atractivo.
+TAREA: Mejora el siguiente CV para hacerlo mas profesional e impactante.
 
 REGLAS ESTRICTAS:
 1. NO agregues ni elimines campos.
 2. NO cambies nombres de propiedades.
 3. Solo mejora el texto dentro de los campos existentes.
-4. Usa lenguaje técnico, cuantificable y orientado a resultados.
-5. Mantén el mismo idioma del CV original.
-6. Si un campo está vacío, déjalo vacío (no inventes).
+4. Usa lenguaje tecnico, cuantificable y orientado a resultados.
+5. Manten el mismo idioma del CV original (espanol).
+6. Si un campo esta vacio, dejalo vacio (no inventes).
 7. Devuelve SOLO el JSON mejorado, sin markdown, sin explicaciones.
-8. las palabras con acento, agregalas sin acento.
+8. Las descripciones de proyectos deben ser CORTAS (150-180 caracteres en UNA SOLA LINEA, sin saltos). Incluye: tecnologias principales, funcionalidad clave y un logro medible.
+9. El resumen profesional (bio) debe ser un PARRAFO de 250-300 caracteres en UNA SOLA LINEA, destacando: perfil profesional, areas de experiencia, tecnologias y objetivos.
+10. NO uses acentos ni caracteres especiales (usa 'a' en vez de 'a', etc).
+11. IMPORTANTE: NO uses saltos de linea dentro de ningun valor de string. Todo debe estar en una sola linea.
 
 CV ACTUAL:
 {JSON_INPUT}
@@ -50,7 +53,7 @@ export async function improveCVWithAI(currentCV) {
           },
         ],
         temperature: 0.1,
-        max_tokens: 2000,
+        max_tokens: 4096,
       }),
     });
 
@@ -91,6 +94,19 @@ function parseImprovedCV(text) {
     }
 
     cleanText = cleanText.trim();
+
+    // Limpiar saltos de línea dentro de strings JSON (error común de LLMs)
+    // Reemplaza saltos de línea dentro de strings por espacios
+    cleanText = cleanText.replace(/"([^"]*)\n([^"]*)"/g, (match, p1, p2) => {
+      return `"${p1} ${p2}"`;
+    });
+    
+    // Repetir varias veces para strings con múltiples saltos
+    for (let i = 0; i < 5; i++) {
+      cleanText = cleanText.replace(/"([^"]*)\n([^"]*)"/g, (match, p1, p2) => {
+        return `"${p1} ${p2}"`;
+      });
+    }
 
     // Intentar parsear JSON
     if (cleanText.startsWith('{') || cleanText.startsWith('[')) {

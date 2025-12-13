@@ -40,6 +40,9 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { statsService } from '../../api/services/statsService';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import html2canvas from 'html2canvas';
+import { useRef } from 'react';
+import * as XLSX from 'xlsx';
 
 const ReportsPage = () => {
     const { isDark } = useTheme();
@@ -50,6 +53,16 @@ const ReportsPage = () => {
     const [trends, setTrends] = useState([]);
     const [jobsByCategory, setJobsByCategory] = useState([]);
     const [recentActivity, setRecentActivity] = useState([]);
+    const [applicationStatus, setApplicationStatus] = useState([
+        { name: 'Pendiente', value: 0, color: '#f59e0b' },
+        { name: 'En revisión', value: 0, color: '#3b82f6' },
+        { name: 'Aceptada', value: 0, color: '#10b981' },
+        { name: 'Rechazada', value: 0, color: '#ef4444' }
+    ]);
+    const [exportingCharts, setExportingCharts] = useState(false);
+
+    // Ref para capturar la sección de gráficos
+    const chartsRef = useRef(null);
 
     // Colores para categorías
     const categoryColors = {
@@ -68,16 +81,17 @@ const ReportsPage = () => {
 
         try {
             // Cargar estadísticas del dashboard con reintentos
-            let dashboardResult, trendsResult, categoriesResult, activityResult;
+            let dashboardResult, trendsResult, categoriesResult, activityResult, applicationStatsResult;
             let lastError = null;
 
             for (let attempt = 0; attempt < retries; attempt++) {
                 try {
-                    [dashboardResult, trendsResult, categoriesResult, activityResult] = await Promise.all([
+                    [dashboardResult, trendsResult, categoriesResult, activityResult, applicationStatsResult] = await Promise.all([
                         statsService.getDashboardStats(),
                         statsService.getMonthlyTrends(),
                         statsService.getJobsByCategory(),
-                        statsService.getRecentActivity(8)
+                        statsService.getRecentActivity(8),
+                        statsService.getApplicationStats()
                     ]);
                     break; // Éxito, salir del loop
                 } catch (err) {
@@ -124,6 +138,63 @@ const ReportsPage = () => {
             // Procesar actividad reciente
             if (activityResult?.success) {
                 setRecentActivity(activityResult.data);
+            }
+
+            // Procesar estadísticas de postulaciones por estado
+            if (applicationStatsResult?.success && applicationStatsResult.data) {
+                const statusData = applicationStatsResult.data.byStatus || {
+                    applied: 0,
+                    reviewed: 0,
+                    interview: 0,
+                    technicalTest: 0,
+                    finalInterview: 0,
+                    accepted: 0,
+                    rejected: 0,
+                    withdrawn: 0
+                };
+                
+                const statusColors = {
+                    applied: '#f59e0b',      // Amarillo - Pendiente
+                    reviewed: '#3b82f6',     // Azul - En revisión
+                    interview: '#8b5cf6',    // Púrpura - Entrevista
+                    technicalTest: '#06b6d4', // Cyan - Prueba técnica
+                    finalInterview: '#ec4899', // Rosa - Entrevista final
+                    accepted: '#10b981',     // Verde - Aceptada
+                    rejected: '#ef4444',     // Rojo - Rechazada
+                    withdrawn: '#6b7280',    // Gris - Cancelada
+                };
+                const statusLabels = {
+                    applied: 'Pendiente',
+                    reviewed: 'En revisión',
+                    interview: 'Entrevista',
+                    technicalTest: 'Prueba técnica',
+                    finalInterview: 'Entrevista final',
+                    accepted: 'Aceptada',
+                    rejected: 'Rechazada',
+                    withdrawn: 'Cancelada',
+                };
+                
+                // Convertir los datos a formato para el gráfico, incluyendo todos los estados
+                const applicationStatusData = [
+                    { name: statusLabels.applied, value: statusData.applied || 0, color: statusColors.applied },
+                    { name: statusLabels.reviewed, value: statusData.reviewed || 0, color: statusColors.reviewed },
+                    { name: statusLabels.interview, value: statusData.interview || 0, color: statusColors.interview },
+                    { name: statusLabels.technicalTest, value: statusData.technicalTest || 0, color: statusColors.technicalTest },
+                    { name: statusLabels.finalInterview, value: statusData.finalInterview || 0, color: statusColors.finalInterview },
+                    { name: statusLabels.accepted, value: statusData.accepted || 0, color: statusColors.accepted },
+                    { name: statusLabels.rejected, value: statusData.rejected || 0, color: statusColors.rejected },
+                    { name: statusLabels.withdrawn, value: statusData.withdrawn || 0, color: statusColors.withdrawn }
+                ];
+                
+                setApplicationStatus(applicationStatusData);
+            } else {
+                // Si no hay datos, mantener los valores en 0
+                setApplicationStatus([
+                    { name: 'Pendiente', value: 0, color: '#f59e0b' },
+                    { name: 'En revisión', value: 0, color: '#3b82f6' },
+                    { name: 'Aceptada', value: 0, color: '#10b981' },
+                    { name: 'Rechazada', value: 0, color: '#ef4444' }
+                ]);
             }
         } catch (err) {
             console.error('Error loading stats after retries:', err);
@@ -273,23 +344,188 @@ const ReportsPage = () => {
         doc.save(`reporte-ficct-talent-${new Date().toISOString().split('T')[0]}.pdf`);
     };
 
-    const handleExportExcel = async () => {
-        const result = await statsService.exportReportExcel();
-        if (result.success) {
-            const url = window.URL.createObjectURL(result.data);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `reporte-ficct-talent-${new Date().toISOString().split('T')[0]}.xlsx`;
-            link.click();
+    // Exportar gráficos como PDF con imágenes
+    const handleExportChartsPDF = async () => {
+        if (!chartsRef.current) return;
+
+        setExportingCharts(true);
+
+        try {
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const today = new Date().toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Título
+            doc.setFontSize(22);
+            doc.setTextColor(99, 102, 241);
+            doc.text('FICCT Talent', 105, 15, { align: 'center' });
+
+            doc.setFontSize(14);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Estadísticas Visuales', 105, 22, { align: 'center' });
+
+            doc.setFontSize(10);
+            doc.text(`Generado: ${today}`, 105, 28, { align: 'center' });
+
+            // Línea separadora
+            doc.setDrawColor(99, 102, 241);
+            doc.setLineWidth(0.5);
+            doc.line(20, 32, 190, 32);
+
+            // Capturar la sección de gráficos
+            const canvas = await html2canvas(chartsRef.current, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: isDark ? '#0f172a' : '#f8fafc'
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 170;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            // Si la imagen es muy alta, dividir en páginas
+            const pageHeight = 250;
+            let yPosition = 38;
+            let remainingHeight = imgHeight;
+            let sourceY = 0;
+
+            while (remainingHeight > 0) {
+                const sliceHeight = Math.min(remainingHeight, pageHeight);
+                const sliceRatio = sliceHeight / imgHeight;
+
+                // Calcular la porción del canvas a usar
+                const sourceHeight = canvas.height * sliceRatio;
+
+                // Crear un canvas temporal para la porción
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = sourceHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(
+                    canvas,
+                    0, sourceY, canvas.width, sourceHeight,
+                    0, 0, canvas.width, sourceHeight
+                );
+
+                const sliceImgData = tempCanvas.toDataURL('image/png');
+                doc.addImage(sliceImgData, 'PNG', 20, yPosition, imgWidth, sliceHeight);
+
+                remainingHeight -= sliceHeight;
+                sourceY += sourceHeight;
+
+                if (remainingHeight > 0) {
+                    doc.addPage();
+                    yPosition = 15;
+                }
+            }
+
+            // Pie de página
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150);
+                doc.text(
+                    `FICCT Talent - Estadísticas Visuales - Página ${i} de ${pageCount}`,
+                    105,
+                    doc.internal.pageSize.height - 10,
+                    { align: 'center' }
+                );
+            }
+
+            doc.save(`estadisticas-ficct-talent-${new Date().toISOString().split('T')[0]}.pdf`);
+        } catch (error) {
+            console.error('Error exporting charts:', error);
+            alert('Error al exportar los gráficos. Por favor, intenta nuevamente.');
+        } finally {
+            setExportingCharts(false);
         }
     };
 
-    const applicationStatus = [
-        { name: 'Pendiente', value: 67, color: '#f59e0b' },
-        { name: 'En revisión', value: 45, color: '#3b82f6' },
-        { name: 'Aceptada', value: 89, color: '#10b981' },
-        { name: 'Rechazada', value: 33, color: '#ef4444' }
-    ];
+    const handleExportExcel = () => {
+        // Crear libro de trabajo
+        const wb = XLSX.utils.book_new();
+
+        // Hoja 1: Resumen General
+        const resumenData = [
+            ['FICCT Talent - Reporte de Estadísticas'],
+            ['Generado:', new Date().toLocaleDateString('es-ES')],
+            [''],
+            ['Métrica', 'Total', 'Activos/Pendientes', 'Crecimiento %'],
+            ['Estudiantes', stats?.totalStudents || 0, Math.floor((stats?.totalStudents || 0) * 0.85), stats?.studentsGrowth || 0],
+            ['Empresas', stats?.totalCompanies || 0, Math.floor((stats?.totalCompanies || 0) * 0.9), stats?.companiesGrowth || 0],
+            ['Ofertas Laborales', stats?.totalJobs || 0, stats?.activeJobs || 0, stats?.jobsGrowth || 0],
+            ['Postulaciones', stats?.totalApplications || 0, stats?.pendingApplications || 0, stats?.applicationsGrowth || 0],
+        ];
+        const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
+        wsResumen['!cols'] = [{ wch: 20 }, { wch: 12 }, { wch: 18 }, { wch: 15 }];
+        XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen General');
+
+        // Hoja 2: Estado de Postulaciones
+        const postulacionesData = [
+            ['Estado de Postulaciones'],
+            [''],
+            ['Estado', 'Cantidad'],
+            ['Pendiente', 67],
+            ['En revisión', 45],
+            ['Aceptada', 89],
+            ['Rechazada', 33],
+            [''],
+            ['Total', 234],
+        ];
+        const wsPostulaciones = XLSX.utils.aoa_to_sheet(postulacionesData);
+        wsPostulaciones['!cols'] = [{ wch: 15 }, { wch: 12 }];
+        XLSX.utils.book_append_sheet(wb, wsPostulaciones, 'Postulaciones');
+
+        // Hoja 3: Habilidades Demandadas
+        const habilidadesData = [
+            ['Habilidades Más Demandadas'],
+            [''],
+            ['Habilidad', 'Demanda'],
+            ['JavaScript', 92],
+            ['React', 89],
+            ['Node.js', 76],
+            ['Python', 68],
+            ['SQL', 61],
+            ['TypeScript', 54],
+        ];
+        const wsHabilidades = XLSX.utils.aoa_to_sheet(habilidadesData);
+        wsHabilidades['!cols'] = [{ wch: 15 }, { wch: 12 }];
+        XLSX.utils.book_append_sheet(wb, wsHabilidades, 'Habilidades');
+
+        // Hoja 4: Ofertas por Categoría
+        if (jobsByCategory.length > 0) {
+            const categoriasData = [
+                ['Ofertas por Categoría'],
+                [''],
+                ['Categoría', 'Cantidad'],
+                ...jobsByCategory.map(cat => [cat.name, cat.value])
+            ];
+            const wsCategorias = XLSX.utils.aoa_to_sheet(categoriasData);
+            wsCategorias['!cols'] = [{ wch: 15 }, { wch: 12 }];
+            XLSX.utils.book_append_sheet(wb, wsCategorias, 'Categorías');
+        }
+
+        // Hoja 5: Tendencias Mensuales
+        if (trends.length > 0) {
+            const tendenciasData = [
+                ['Tendencias Mensuales'],
+                [''],
+                ['Mes', 'Estudiantes', 'Empresas', 'Ofertas', 'Postulaciones'],
+                ...trends.map(t => [t.month, t.students || 0, t.companies || 0, t.jobs || 0, t.applications || 0])
+            ];
+            const wsTendencias = XLSX.utils.aoa_to_sheet(tendenciasData);
+            wsTendencias['!cols'] = [{ wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 14 }];
+            XLSX.utils.book_append_sheet(wb, wsTendencias, 'Tendencias');
+        }
+
+        // Descargar archivo
+        XLSX.writeFile(wb, `reporte-ficct-talent-${new Date().toISOString().split('T')[0]}.xlsx`);
+    };
 
     const topSkills = [
         { skill: 'React', count: 89 },
@@ -449,9 +685,18 @@ const ReportsPage = () => {
                                 <Download size={16} className="mr-2" />
                                 Excel
                             </Button>
-                            <Button variant="primary" size="sm" onClick={handleExportPDF}>
+                            <Button variant="outline" size="sm" onClick={handleExportPDF}>
                                 <FileText size={16} className="mr-2" />
-                                PDF
+                                PDF Tablas
+                            </Button>
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={handleExportChartsPDF}
+                                disabled={exportingCharts}
+                            >
+                                <BarChart3 size={16} className="mr-2" />
+                                {exportingCharts ? 'Exportando...' : 'PDF Gráficos'}
                             </Button>
                         </div>
                     </div>
@@ -489,8 +734,8 @@ const ReportsPage = () => {
                     />
                 </div>
 
-                {/* Gráficos principales */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                {/* Gráficos principales - Con ref para exportar */}
+                <div ref={chartsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
                     {/* Tendencia mensual */}
                     <Card className="p-6">

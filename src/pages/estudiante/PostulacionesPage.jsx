@@ -115,18 +115,31 @@ export const PostulacionesPage = () => {
   // ------------------------------------------
 
   const getStatusConfig = (status) => {
+    // Mapear estados del backend (español) a config
+    const statusLower = status?.toLowerCase() || 'aplicado';
+
     const configs = {
-      applied: { color: 'blue', icon: Clock, label: 'Aplicado' },
-      reviewed: { color: 'yellow', icon: Eye, label: 'Revisado' },
-      interview: { color: 'purple', icon: Calendar, label: 'Entrevista' },
-      technical_test: { color: 'indigo', icon: FileText, label: 'Prueba Técnica' },
-      final_interview: { color: 'purple', icon: TrendingUp, label: 'Entrevista Final' },
-      accepted: { color: 'green', icon: CheckCircle, label: 'Aceptado' },
-      rejected: { color: 'red', icon: XCircle, label: 'Rechazado' },
-      withdrawn: { color: 'gray', icon: XCircle, label: 'Cancelado' }
+      // Estados en español (del backend)
+      'aplicado': { color: 'blue', icon: Clock, label: 'Aplicado' },
+      'revisado': { color: 'yellow', icon: Eye, label: 'Revisado' },
+      'entrevista': { color: 'purple', icon: Calendar, label: 'Entrevista Programada' },
+      'prueba_tecnica': { color: 'indigo', icon: FileText, label: 'Prueba Técnica' },
+      'entrevista_final': { color: 'purple', icon: TrendingUp, label: 'Entrevista Final' },
+      'aceptado': { color: 'green', icon: CheckCircle, label: 'Aceptado' },
+      'rechazado': { color: 'red', icon: XCircle, label: 'Rechazado' },
+      'cancelado': { color: 'gray', icon: XCircle, label: 'Cancelado' },
+      // También soportar en inglés por compatibilidad
+      'applied': { color: 'blue', icon: Clock, label: 'Aplicado' },
+      'reviewed': { color: 'yellow', icon: Eye, label: 'Revisado' },
+      'interview': { color: 'purple', icon: Calendar, label: 'Entrevista Programada' },
+      'technical_test': { color: 'indigo', icon: FileText, label: 'Prueba Técnica' },
+      'final_interview': { color: 'purple', icon: TrendingUp, label: 'Entrevista Final' },
+      'accepted': { color: 'green', icon: CheckCircle, label: 'Aceptado' },
+      'rejected': { color: 'red', icon: XCircle, label: 'Rechazado' },
+      'withdrawn': { color: 'gray', icon: XCircle, label: 'Cancelado' }
     };
 
-    return configs[status] || configs.applied;
+    return configs[statusLower] || configs['aplicado'];
   };
 
   const formatDate = (dateString) => {
@@ -254,7 +267,7 @@ export const PostulacionesPage = () => {
                         <Eye size={16} className={isDark ? 'text-slate-400' : 'text-slate-600'} />
                       </button>
 
-                      {!['accepted', 'rejected', 'withdrawn'].includes(application.status) && (
+                      {!['ACCEPTED', 'REJECTED', 'WITHDRAWN', 'accepted', 'rejected', 'withdrawn'].includes(application.status) && (
                         <button
                           onClick={() => handleWithdrawApplication(application.id)}
                           className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-red-900/20' : 'hover:bg-red-50'

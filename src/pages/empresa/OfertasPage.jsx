@@ -21,16 +21,18 @@ import {
 } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
 import { useTheme } from '../../contexts/ThemeContext';
 import { companyJobService } from '../../api/services/companyService';
+import { recommendationService } from '../../services/recommendationService';
 
 const OfertasPage = () => {
   const { isDark } = useTheme();
   const navigate = useNavigate();
+  const { id: jobIdFromUrl } = useParams();
 
   const [showModal, setShowModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
@@ -38,6 +40,12 @@ const OfertasPage = () => {
   const [filterStatus, setFilterStatus] = useState('all');
 
   const [offers, setOffers] = useState([]);
+  
+  // Candidates modal state
+  const [showCandidatesModal, setShowCandidatesModal] = useState(false);
+  const [selectedJobForCandidates, setSelectedJobForCandidates] = useState(null);
+  const [candidates, setCandidates] = useState([]);
+  const [loadingCandidates, setLoadingCandidates] = useState(false);
 
   // Automapped OFFER form
   const [newOffer, setNewOffer] = useState({
@@ -54,6 +62,18 @@ const OfertasPage = () => {
     loadOffers();
   }, []);
 
+  // Handle jobId from URL parameter
+  useEffect(() => {
+    if (jobIdFromUrl) {
+      const job = offers.find(o => o.id === jobIdFromUrl);
+      if (job) {
+        setSelectedJobForCandidates(job);
+        setShowCandidatesModal(true);
+        loadCandidatesForJob(jobIdFromUrl);
+      }
+    }
+  }, [jobIdFromUrl, offers]);
+
   async function loadOffers() {
     try {
       const companyId = localStorage.getItem("user_id") || "1";
@@ -68,9 +88,14 @@ const OfertasPage = () => {
           const deadline = new Date(job.deadline);
           const isExpired = deadline < today;
           
+          // Contar solo aplicaciones activas (excluir WITHDRAWN)
+          const activeApplications = job.applications?.filter(app => 
+            app.status !== 'WITHDRAWN' && app.status !== 'withdrawn'
+          ) || [];
+          
           return {
             ...job,
-            applicants: job.applications?.length || 0,
+            applicants: activeApplications.length,
             isExpired: isExpired,
             // Si está expirada, forzar is_active a false en UI
             is_active: isExpired ? false : job.is_active
@@ -84,7 +109,42 @@ const OfertasPage = () => {
     }
   }
 
-
+  async function loadCandidatesForJob(jobId) {
+    try {
+      setLoadingCandidates(true);
+      // Get recommended candidates sorted by match score (descending)
+      const recommendedResult = await recommendationService.getRecommendedCandidatesForJob(jobId, 100);
+      
+      // Get applications for the job to get CV and cover letter
+      const applicationsResult = await companyJobService.getApplicationsForJob(jobId);
+      
+      let candidatesData = Array.isArray(recommendedResult) ? recommendedResult : [];
+      const applications = Array.isArray(applicationsResult) ? applicationsResult : [];
+      
+      // Filtrar solo aplicaciones activas (excluir WITHDRAWN)
+      const activeApplications = applications.filter(app => 
+        app.status !== 'WITHDRAWN' && app.status !== 'withdrawn'
+      );
+      
+      // Merge application data with recommendations
+      const mergedCandidates = candidatesData.map(candidate => {
+        const application = activeApplications.find(app => app.student?.id === candidate.studentId);
+        return {
+          ...candidate,
+          cvUrl: application?.resume_url || null,
+          presentationLetter: application?.cover_letter || null,
+          applicationId: application?.id || null
+        };
+      }).filter(candidate => candidate.applicationId !== null); // Solo mostrar candidatos con aplicación activa
+      
+      setCandidates(mergedCandidates);
+    } catch (err) {
+      console.error("Error loading candidates:", err);
+      setCandidates([]);
+    } finally {
+      setLoadingCandidates(false);
+    }
+  }
   const handleOpenModal = (offer = null) => {
     if (offer) {
       setEditingOffer(offer);
@@ -187,6 +247,17 @@ const OfertasPage = () => {
       console.error("Delete error:", err);
       alert("Error al eliminar la oferta");
     }
+  };
+
+  // -------------------------------------------------------
+  // CANDIDATES MODAL HANDLER
+  // -------------------------------------------------------
+  const handleCloseCandidatesModal = () => {
+    setShowCandidatesModal(false);
+    setCandidates([]);
+    setSelectedJobForCandidates(null);
+    // Navigate back to ofertas page (remove :id from URL)
+    navigate('/empresa/ofertas');
   };
 
   // -------------------------------------------------------
@@ -508,8 +579,151 @@ const OfertasPage = () => {
         </div>
       )}
 
+      {/* CANDIDATES MODAL */}
+      {showCandidatesModal && selectedJobForCandidates && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+
+            <div className="flex justify-between mb-6">
+              <div>
+                <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Candidatos para: {selectedJobForCandidates.title}
+                </h2>
+                <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                  Ordenados por puntuación de compatibilidad (IA)
+                </p>
+              </div>
+              <button onClick={handleCloseCandidatesModal}>
+                <X size={24} />
+              </button>
+            </div>
+
+            {loadingCandidates ? (
+              <div className="text-center py-12">
+                <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                  Cargando candidatos...
+                </p>
+              </div>
+            ) : candidates.length === 0 ? (
+              <div className="text-center py-12">
+                <Users size={64} className={isDark ? 'text-slate-600' : 'text-slate-400'} />
+                <h3 className={`text-xl font-bold mt-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  No hay candidatos aún
+                </h3>
+                <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                  Los estudiantes que se postulen aparecerán aquí
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {candidates.map((candidate, idx) => (
+                  <Card key={candidate.studentId || idx} className={`p-4 ${isDark ? 'bg-slate-800' : 'bg-gray-100'}`}>
+                    <div className="flex flex-col gap-3">
+                      {/* Candidate Header */}
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            {candidate.studentName || candidate.name || 'Candidato sin nombre'}
+                          </h3>
+                        </div>
+                        {candidate.matchScore !== undefined && (
+                          <div className="flex items-center gap-2">
+                            <div className="text-center">
+                              <div className={`text-3xl font-bold ${
+                                candidate.matchScore >= 80 ? 'text-green-500' :
+                                candidate.matchScore >= 60 ? 'text-yellow-500' :
+                                'text-red-500'
+                              }`}>
+                                {Math.round(candidate.matchScore || 0)}%
+                              </div>
+                              <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                                Compatibilidad
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Skills */}
+                      {candidate.matchedSkills && candidate.matchedSkills.length > 0 && (
+                        <div>
+                          <p className={`text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                            Habilidades coincidentes:
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {candidate.matchedSkills.slice(0, 5).map((skill, sidx) => (
+                              <span key={sidx} className={`px-3 py-1 rounded-full text-sm ${
+                                isDark ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-700'
+                              }`}>
+                                {skill}
+                              </span>
+                            ))}
+                            {candidate.matchedSkills.length > 5 && (
+                              <span className={`px-3 py-1 rounded-full text-sm ${
+                                isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-300 text-slate-700'
+                              }`}>
+                                +{candidate.matchedSkills.length - 5} más
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Presentation Letter */}
+                      {candidate.presentationLetter && (
+                        <div>
+                          <p className={`text-sm font-semibold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                            Carta de presentación:
+                          </p>
+                          <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'} line-clamp-3`}>
+                            {candidate.presentationLetter}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* CV Link */}
+                      <div className="flex gap-3 pt-2 border-t" style={{ borderColor: isDark ? '#475569' : '#e2e8f0' }}>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => {
+                            if (candidate.cvUrl) {
+                              window.open(candidate.cvUrl, '_blank');
+                            }
+                          }}
+                          disabled={!candidate.cvUrl}
+                          className={!candidate.cvUrl ? 'opacity-50 cursor-not-allowed' : ''}
+                        >
+                          <Eye size={16} />
+                          Ver CV
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/empresa/candidatos/${candidate.studentId || candidate.id}`)}
+                        >
+                          Ver Perfil Completo
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-4 mt-6">
+              <Button variant="outline" fullWidth onClick={handleCloseCandidatesModal}>
+                Cerrar
+              </Button>
+            </div>
+
+          </Card>
+        </div>
+      )}
+
     </div>
   );
 };
 
 export { OfertasPage };
+

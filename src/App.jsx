@@ -9,6 +9,7 @@ import { LoginPage } from './pages/LoginPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { RegistroPage } from './pages/RegistroPage';
 import { SobreNosotrosPage } from "./pages/SobreNosotrosPage";
+import { CVViewPage } from './pages/CVViewPage';
 
 // Páginas de Estudiante
 import { CertificacionesPage } from './pages/estudiante/CertificacionesPage';
@@ -61,6 +62,7 @@ function App() {
               <Route path="/admin-login" element={<AdminLoginPage />} />
               <Route path="/:userType/registro" element={<RegistroPage />} />
               <Route path="/confirmar" element={<ConfirmEmailPage />} />
+              <Route path="/cv/:storageKey" element={<CVViewPage />} />
 
               {/* Rutas de Estudiante */}
               <Route path="/estudiante" element={<StudentLayout />}>

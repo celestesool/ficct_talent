@@ -5,8 +5,8 @@ export const COLOR_THEMES = {
     // Tema Celeste (El actual)
     celeste: {
         id: 'celeste',
-        name: 'Celeste Profesional',
-        icon: '🌊',
+        name: 'Ejecutivo',
+        icon: ' ',
         description: 'Tonos turquesa suaves y profesionales',
         colors: {
             // Header/Navbar
@@ -44,7 +44,7 @@ export const COLOR_THEMES = {
     uagrm: {
         id: 'uagrm',
         name: 'Institucional UAGRM',
-        icon: '🎓',
+        icon: ' ',
         description: 'Azul oscuro, rojo y blanco institucional',
         colors: {
             // Header/Navbar - Azul oscuro
@@ -86,7 +86,7 @@ export const COLOR_THEMES = {
     mono: {
         id: 'mono',
         name: 'Blanco y Negro',
-        icon: '⚫',
+        icon: ' ',
         description: 'Elegante diseño monocromático',
         colors: {
             // Header/Navbar - Negro
@@ -123,8 +123,8 @@ export const COLOR_THEMES = {
     // Tema Cielo - Tonos celestiales suaves
     cielo: {
         id: 'cielo',
-        name: 'Cielo Claro',
-        icon: '☁️',
+        name: ' Claro Cielo',
+        icon: ' ',
         description: 'Tonos azul cielo claros y frescos',
         colors: {
             // Header/Navbar - Azul cielo
@@ -162,7 +162,7 @@ export const COLOR_THEMES = {
     esmeralda: {
         id: 'esmeralda',
         name: 'Esmeralda',
-        icon: '💎',
+        icon: ' ',
         description: 'Verde esmeralda elegante',
         colors: {
             // Header/Navbar
@@ -199,8 +199,8 @@ export const COLOR_THEMES = {
     // Tema Violeta - Morado elegante
     violeta: {
         id: 'violeta',
-        name: 'Violeta Real',
-        icon: '👑',
+        name: 'Violeta',
+        icon: ' ',
         description: 'Morado elegante y sofisticado',
         colors: {
             // Header/Navbar

@@ -94,7 +94,16 @@ export const companyJobService = {
         }
     },
 
-    // Obtener conteo de vistas de perfil
+    // Obtener aplicaciones para una oferta
+    getApplicationsForJob: async (jobId) => {
+        try {
+            const response = await axios.get(`${API_BASE}/applications/job/${jobId}`);
+            return response.data || [];
+        } catch (error) {
+            console.error('Error fetching applications:', error);
+            return [];
+        }
+    },    // Obtener conteo de vistas de perfil
     getViewsCount: async (companyId, days = 30) => {
         try {
             const response = await axios.get(`${API_BASE}/companies/${companyId}/views/count?days=${days}`);

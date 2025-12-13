@@ -10,7 +10,8 @@ import {
     Building,
     Clock,
     Activity,
-    BarChart3
+    BarChart3,
+    ArrowRight
 } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
@@ -19,8 +20,10 @@ import api from '../../services/api';
 import { dashboardCache } from '../../utils/cacheManager';
 
 export const DashboardAdmin = () => {
-    const { isDark } = useTheme();
+    const { isDark, currentTheme } = useTheme();
     const navigate = useNavigate();
+    const colors = currentTheme?.colors || {};
+    const accentColor = colors.accent || '#6366f1';
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [stats, setStats] = useState({
@@ -140,292 +143,373 @@ export const DashboardAdmin = () => {
         );
     }
 
-    // Stats con diseño de gradientes premium
+    // Stats con diseño limpio
     const statCards = [
         {
             title: 'Total Estudiantes',
             value: stats.totalStudents || 0,
             icon: Users,
-            gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            iconBg: 'rgba(255,255,255,0.2)',
+            bgLight: 'bg-blue-100',
+            bgDark: 'bg-blue-900/30',
+            textLight: 'text-blue-600',
+            textDark: 'text-blue-400'
         },
         {
             title: 'Total Empresas',
             value: stats.totalCompanies || 0,
             icon: Building,
-            gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            iconBg: 'rgba(255,255,255,0.2)',
+            bgLight: 'bg-indigo-100',
+            bgDark: 'bg-indigo-900/30',
+            textLight: 'text-indigo-600',
+            textDark: 'text-indigo-400'
         },
         {
             title: 'Ofertas Activas',
             value: stats.activeJobs || 0,
             icon: Briefcase,
-            gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-            iconBg: 'rgba(255,255,255,0.2)',
+            bgLight: 'bg-green-100',
+            bgDark: 'bg-green-900/30',
+            textLight: 'text-green-600',
+            textDark: 'text-green-400'
         },
         {
             title: 'Postulaciones Totales',
             value: stats.totalApplications || 0,
             icon: FileText,
-            gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-            iconBg: 'rgba(255,255,255,0.2)',
+            bgLight: 'bg-amber-100',
+            bgDark: 'bg-amber-900/30',
+            textLight: 'text-amber-600',
+            textDark: 'text-amber-400'
         },
         {
             title: 'Contrataciones',
             value: stats.totalHires || 0,
             icon: CheckCircle,
-            gradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-            iconBg: 'rgba(255,255,255,0.2)',
+            bgLight: 'bg-emerald-100',
+            bgDark: 'bg-emerald-900/30',
+            textLight: 'text-emerald-600',
+            textDark: 'text-emerald-400'
         },
         {
             title: 'Usuarios Pendientes',
             value: stats.pendingUsers || 0,
             icon: Clock,
-            gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            iconBg: 'rgba(255,255,255,0.2)',
+            bgLight: 'bg-pink-100',
+            bgDark: 'bg-pink-900/30',
+            textLight: 'text-pink-600',
+            textDark: 'text-pink-400'
+        }
+    ];
+
+    // Acciones Rápidas para Admin
+    const quickActions = [
+        {
+            title: 'Gestionar Usuarios',
+            description: 'Administra estudiantes y empresas',
+            icon: Users,
+            path: '/admin/usuarios'
+        },
+        {
+            title: 'Gestionar Ofertas',
+            description: 'Supervisa ofertas laborales',
+            icon: Briefcase,
+            path: '/admin/ofertas'
+        },
+        {
+            title: 'Anuncios',
+            description: 'Publica anuncios del sistema',
+            icon: AlertTriangle,
+            path: '/admin/anuncios'
+        },
+        {
+            title: 'Reportes',
+            description: 'Visualiza estadísticas y reportes',
+            icon: BarChart3,
+            path: '/admin/reportes'
+        },
+        {
+            title: 'Actividad',
+            description: 'Monitorea actividad del sistema',
+            icon: Activity,
+            path: '/admin/actividad'
+        },
+        {
+            title: 'Configuración',
+            description: 'Ajustes del sistema',
+            icon: TrendingUp,
+            path: '/admin/configuracion'
         }
     ];
 
     return (
         <div className={`min-h-screen transition-colors duration-200 ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`}>
-            <div className="container mx-auto px-4 py-8">
-                {/* Header con gradiente */}
-                <div className={`mb-8 p-6 rounded-2xl ${isDark ? 'bg-gradient-to-r from-slate-800 to-slate-700' : 'bg-gradient-to-r from-primary-500 to-primary-600'}`}>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-3xl font-bold mb-2 text-white">
-                                Panel de Administracion
-                            </h1>
-                            <p className="text-white/80">
-                                Vista general del sistema FICCT Talent
-                            </p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-white/60 text-sm">Ultima actualizacion</p>
-                            <p className="text-white font-medium">
-                                {new Date().toLocaleDateString('es-ES', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}
-                            </p>
-                        </div>
-                    </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+
+                {/* Header simple */}
+                <div className="mb-6">
+                    <h1 className={`text-2xl lg:text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        Panel de Administración
+                    </h1>
+                    <p className={`${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        Vista general del sistema FICCT Talent
+                    </p>
                 </div>
 
-                {/* Stats Grid - Diseño Premium con Gradientes */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {statCards.map((stat, index) => {
-                        const Icon = stat.icon;
-                        return (
-                            <div
-                                key={index}
-                                className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:translate-y-[-4px] hover:scale-[1.02]"
-                                style={{ background: stat.gradient }}
-                            >
-                                {/* Efecto de ola decorativa */}
-                                <div
-                                    className="absolute bottom-0 left-0 right-0 h-16 opacity-20"
-                                    style={{
-                                        background: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1440 320\'%3E%3Cpath fill=\'%23ffffff\' d=\'M0,160L48,138.7C96,117,192,75,288,80C384,85,480,139,576,154.7C672,171,768,149,864,133.3C960,117,1056,107,1152,112C1248,117,1344,139,1392,149.3L1440,160L1440,320L0,320Z\'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom',
-                                        backgroundSize: 'cover'
-                                    }}
-                                />
+                {/* Stats Grid - Estilo Limpio */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    {statCards.map((stat, idx) => (
+                        <Card key={idx} className="p-3">
+                            <div className="flex items-start justify-between mb-2">
+                                <p className={`text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                                    {stat.title}
+                                </p>
+                                <div className={`p-2 rounded-lg ${isDark ? stat.bgDark : stat.bgLight}`}>
+                                    <stat.icon className={`${isDark ? stat.textDark : stat.textLight}`} size={22} />
+                                </div>
+                            </div>
+                            <h3 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                {stat.value}
+                            </h3>
+                        </Card>
+                    ))}
+                </div>
 
-                                <div className="relative p-6">
-                                    {/* Icono en círculo semi-transparente */}
-                                    <div
-                                        className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                                        style={{ background: stat.iconBg }}
-                                    >
-                                        <Icon className="text-white" size={24} strokeWidth={2} />
+                {/* Layout principal: 2/3 + 1/3 */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    {/* Columna izquierda - Acciones Rápidas y Actividad */}
+                    <div className="lg:col-span-2">
+
+                        {/* Acciones Rápidas - Estilo Polaroid */}
+                        <h2 className={`text-lg font-bold mb-5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            Acciones Rápidas
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5 mb-6">
+                            {quickActions.map((action, idx) => (
+                                <Card
+                                    key={idx}
+                                    onClick={() => navigate(action.path)}
+                                    className={`
+                                        group cursor-pointer transition-all duration-300
+                                        hover:shadow-xl hover:translate-y-[-4px]
+                                        p-6 pb-8
+                                        border-b-8
+                                    `}
+                                    style={{
+                                        borderBottomColor: accentColor,
+                                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                                    }}
+                                >
+                                    {/* Ícono centrado grande */}
+                                    <div className="flex justify-center mb-4">
+                                        <div
+                                            className="w-16 h-16 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
+                                            style={{ backgroundColor: `${accentColor}15` }}
+                                        >
+                                            <action.icon size={32} style={{ color: accentColor }} />
+                                        </div>
                                     </div>
 
-                                    {/* Label */}
-                                    <p className="text-white/80 text-sm font-medium mb-1">
-                                        {stat.title}
-                                    </p>
-
-                                    {/* Valor grande */}
-                                    <p className="text-white text-3xl lg:text-4xl font-bold">
-                                        {stat.value}
-                                    </p>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Alert for pending users */}
-                {stats.pendingUsers > 0 && (
-                    <Card className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-700">
-                        <div className="flex items-start justify-between p-4">
-                            <div className="flex items-start gap-3">
-                                <AlertTriangle className="text-yellow-600 dark:text-yellow-400 mt-1" size={24} />
-                                <div>
-                                    <h3 className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                        Acción Requerida
+                                    {/* Título centrado */}
+                                    <h3 className={`font-bold text-base mb-2 text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                        {action.title}
                                     </h3>
-                                    <p className={isDark ? 'text-slate-300' : 'text-slate-700'}>
-                                        Hay {stats.pendingUsers} usuario(s) pendiente(s) de aprobación.
-                                    </p>
-                                </div>
-                            </div>
-                            <Button
-                                onClick={() => navigate('/admin/moderation')}
-                                size="sm"
-                                variant="primary"
-                            >
-                                Ir a Moderación
-                            </Button>
-                        </div>
-                    </Card>
-                )}
 
-                {/* Two Column Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Recent Activity */}
-                    <Card>
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-2">
-                                <Activity className="text-primary-500" size={24} />
-                                <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                    Actividad Reciente
-                                </h2>
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            {recentActivity.length > 0 ? (
-                                recentActivity.map((activity, index) => {
-                                    const Icon = activity.icon;
-                                    return (
-                                        <div
-                                            key={index}
-                                            className={`flex items-start gap-3 p-3 rounded-lg border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}
-                                        >
-                                            <div className={`p-2 rounded-lg ${activity.type === 'student' ? 'bg-blue-100 dark:bg-blue-900/20' :
-                                                activity.type === 'company' ? 'bg-purple-100 dark:bg-purple-900/20' :
-                                                    activity.type === 'job' ? 'bg-green-100 dark:bg-green-900/20' :
-                                                        'bg-orange-100 dark:bg-orange-900/20'
-                                                }`}>
-                                                <Icon className={
-                                                    activity.type === 'student' ? 'text-blue-600 dark:text-blue-400' :
-                                                        activity.type === 'company' ? 'text-purple-600 dark:text-purple-400' :
-                                                            activity.type === 'job' ? 'text-green-600 dark:text-green-400' :
-                                                                'text-orange-600 dark:text-orange-400'
-                                                } size={20} />
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                                                    {activity.message}
-                                                </p>
-                                                <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-                                                    {activity.time}
-                                                </p>
-                                            </div>
+                                    {/* Descripción centrada */}
+                                    <p className={`text-sm leading-relaxed text-center ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                                        {action.description}
+                                    </p>
+
+                                    {/* Indicador de acción en hover */}
+                                    <div className="mt-4 flex justify-center">
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span
+                                                className="text-xs font-medium"
+                                                style={{ color: accentColor }}
+                                            >
+                                                Ir
+                                            </span>
+                                            <ArrowRight
+                                                size={14}
+                                                style={{ color: accentColor }}
+                                            />
                                         </div>
-                                    );
-                                })
-                            ) : (
-                                <div className="text-center py-8">
-                                    <Activity className="mx-auto mb-2 text-slate-400" size={32} />
-                                    <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
-                                        No hay actividad reciente
-                                    </p>
-                                </div>
-                            )}
+                                    </div>
+                                </Card>
+                            ))}
                         </div>
-                    </Card>
 
-                    {/* Quick Actions */}
-                    <Card>
-                        <div className="flex items-center gap-2 mb-6">
-                            <BarChart3 className="text-primary-500" size={24} />
-                            <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                Acciones Rapidas
-                            </h2>
-                        </div>
-                        <div className="space-y-3">
-                            <button
-                                onClick={() => navigate('/admin/moderation')}
-                                className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
-                                    ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
-                                    : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
-                                    }`}
-                            >
-                                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                                    <Users size={20} className="text-blue-600 dark:text-blue-400" />
+                        {/* Alert for pending users */}
+                        {stats.pendingUsers > 0 && (
+                            <Card className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-700">
+                                <div className="flex items-start justify-between p-4">
+                                    <div className="flex items-start gap-3">
+                                        <AlertTriangle className="text-yellow-600 dark:text-yellow-400 mt-1" size={24} />
+                                        <div>
+                                            <h3 className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                Acción Requerida
+                                            </h3>
+                                            <p className={isDark ? 'text-slate-300' : 'text-slate-700'}>
+                                                Hay {stats.pendingUsers} usuario(s) pendiente(s) de aprobación.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        onClick={() => navigate('/admin/moderation')}
+                                        size="sm"
+                                        variant="primary"
+                                    >
+                                        Ir a Moderación
+                                    </Button>
                                 </div>
-                                <div>
-                                    <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                        Gestionar Usuarios
-                                    </p>
-                                    <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                        Moderar y administrar cuentas
-                                    </p>
-                                </div>
-                            </button>
+                            </Card>
+                        )}
 
-                            <button
-                                onClick={() => navigate('/admin/announcements')}
-                                className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
-                                    ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
-                                    : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
-                                    }`}
-                            >
-                                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                                    <TrendingUp size={20} className="text-purple-600 dark:text-purple-400" />
+                        {/* Two Column Layout */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Recent Activity */}
+                            <Card>
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-2">
+                                        <Activity className="text-primary-500" size={24} />
+                                        <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                            Actividad Reciente
+                                        </h2>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                        Gestionar Anuncios
-                                    </p>
-                                    <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                        Crear y editar comunicados
-                                    </p>
+                                <div className="space-y-3">
+                                    {recentActivity.length > 0 ? (
+                                        recentActivity.map((activity, index) => {
+                                            const Icon = activity.icon;
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className={`flex items-start gap-3 p-3 rounded-lg border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-200'}`}
+                                                >
+                                                    <div className={`p-2 rounded-lg ${activity.type === 'student' ? 'bg-blue-100 dark:bg-blue-900/20' :
+                                                        activity.type === 'company' ? 'bg-purple-100 dark:bg-purple-900/20' :
+                                                            activity.type === 'job' ? 'bg-green-100 dark:bg-green-900/20' :
+                                                                'bg-orange-100 dark:bg-orange-900/20'
+                                                        }`}>
+                                                        <Icon className={
+                                                            activity.type === 'student' ? 'text-blue-600 dark:text-blue-400' :
+                                                                activity.type === 'company' ? 'text-purple-600 dark:text-purple-400' :
+                                                                    activity.type === 'job' ? 'text-green-600 dark:text-green-400' :
+                                                                        'text-orange-600 dark:text-orange-400'
+                                                        } size={20} />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className={`text-sm ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                                                            {activity.message}
+                                                        </p>
+                                                        <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
+                                                            {activity.time}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="text-center py-8">
+                                            <Activity className="mx-auto mb-2 text-slate-400" size={32} />
+                                            <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+                                                No hay actividad reciente
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
-                            </button>
+                            </Card>
 
-                            <button
-                                onClick={() => navigate('/admin/reports')}
-                                className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
-                                    ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
-                                    : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
-                                    }`}
-                            >
-                                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                                    <BarChart3 size={20} className="text-green-600 dark:text-green-400" />
+                            {/* Quick Actions */}
+                            <Card>
+                                <div className="flex items-center gap-2 mb-6">
+                                    <BarChart3 className="text-primary-500" size={24} />
+                                    <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                        Acciones Rapidas
+                                    </h2>
                                 </div>
-                                <div>
-                                    <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                        Ver Reportes
-                                    </p>
-                                    <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                        Estadisticas y metricas del sistema
-                                    </p>
-                                </div>
-                            </button>
-
-                            {stats.reportedUsers > 0 && (
-                                <div className={`p-4 rounded-xl border-2 border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20`}>
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
-                                            <AlertTriangle className="text-red-600 dark:text-red-400" size={20} />
+                                <div className="space-y-3">
+                                    <button
+                                        onClick={() => navigate('/admin/moderation')}
+                                        className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
+                                            ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                                            : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
+                                            }`}
+                                    >
+                                        <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                                            <Users size={20} className="text-blue-600 dark:text-blue-400" />
                                         </div>
                                         <div>
                                             <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                                {stats.reportedUsers} reporte(s) pendiente(s)
+                                                Gestionar Usuarios
                                             </p>
-                                            <p className={`text-xs ${isDark ? 'text-red-300' : 'text-red-600'}`}>
-                                                Requiere atencion inmediata
+                                            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                Moderar y administrar cuentas
                                             </p>
                                         </div>
-                                    </div>
+                                    </button>
+
+                                    <button
+                                        onClick={() => navigate('/admin/announcements')}
+                                        className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
+                                            ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                                            : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
+                                            }`}
+                                    >
+                                        <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                                            <TrendingUp size={20} className="text-purple-600 dark:text-purple-400" />
+                                        </div>
+                                        <div>
+                                            <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                Gestionar Anuncios
+                                            </p>
+                                            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                Crear y editar comunicados
+                                            </p>
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        onClick={() => navigate('/admin/reports')}
+                                        className={`w-full p-4 rounded-xl text-left transition-all duration-200 flex items-center gap-3 ${isDark
+                                            ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                                            : 'bg-slate-50 hover:bg-slate-100 border border-slate-200'
+                                            }`}
+                                    >
+                                        <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                                            <BarChart3 size={20} className="text-green-600 dark:text-green-400" />
+                                        </div>
+                                        <div>
+                                            <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                Ver Reportes
+                                            </p>
+                                            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                Estadisticas y metricas del sistema
+                                            </p>
+                                        </div>
+                                    </button>
+
+                                    {stats.reportedUsers > 0 && (
+                                        <div className={`p-4 rounded-xl border-2 border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20`}>
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                                                    <AlertTriangle className="text-red-600 dark:text-red-400" size={20} />
+                                                </div>
+                                                <div>
+                                                    <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                        {stats.reportedUsers} reporte(s) pendiente(s)
+                                                    </p>
+                                                    <p className={`text-xs ${isDark ? 'text-red-300' : 'text-red-600'}`}>
+                                                        Requiere atencion inmediata
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </Card>
                         </div>
-                    </Card>
+                    </div>
                 </div>
             </div>
         </div>

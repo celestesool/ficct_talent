@@ -64,7 +64,14 @@ export const Navbar = () => {
       ]
     },
     {
-      category: 'Académico',
+      category: 'Oportunidades',
+      routes: [
+        { path: '/estudiante/ofertas', label: 'Ofertas Laborales', icon: Briefcase },
+        { path: '/estudiante/postulaciones', label: 'Mis Postulaciones', icon: FileText },
+      ]
+    },
+    {
+      category: 'Herramientas',
       routes: [
         { path: '/estudiante/academico', label: 'Académico', icon: GraduationCap },
         { path: '/estudiante/tests', label: 'Tests de Práctica', icon: Brain },

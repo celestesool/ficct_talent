@@ -14,19 +14,20 @@ export const exportToPDF = (elementId, filename = 'CV-UAGRM') => {
   }
 
   const options = {
-    margin: 10,
+    margin: [5, 5, 5, 5], // Márgenes más pequeños: top, left, bottom, right
     filename: `${filename}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
+    image: { type: 'jpeg', quality: 0.85 }, // Calidad ligeramente reducida
     html2canvas: {
-      scale: 2,
+      scale: 1.5, // Escala reducida para mejor compresión
       useCORS: true,
-      letterRendering: true,
+      letterRendering: false,
       backgroundColor: '#ffffff'
     },
     jsPDF: {
       unit: 'mm',
       format: 'a4',
-      orientation: 'portrait'
+      orientation: 'portrait',
+      compress: true // Habilitar compresión de PDF
     }
   };
 
@@ -46,18 +47,19 @@ export const generatePDFBlob = async (elementId) => {
   }
 
   const options = {
-    margin: 10,
-    image: { type: 'jpeg', quality: 0.98 },
+    margin: [5, 5, 5, 5],
+    image: { type: 'jpeg', quality: 0.85 },
     html2canvas: {
-      scale: 2,
+      scale: 1.5,
       useCORS: true,
-      letterRendering: true,
+      letterRendering: false,
       backgroundColor: '#ffffff'
     },
     jsPDF: {
       unit: 'mm',
       format: 'a4',
-      orientation: 'portrait'
+      orientation: 'portrait',
+      compress: true
     }
   };
 
