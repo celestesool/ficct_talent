@@ -1,13 +1,9 @@
 // src/api/services/aiCVService.js
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const key = import.meta.env.VITE_GEMINI_API_KEY;
+const key = import.meta.env.VITE_GROQ_API_KEY;
 
 if (!key) {
-  throw new Error('Missing Gemini API Key. Check your environment configuration.');
+  throw new Error('Missing Groq API Key. Check your environment configuration.');
 }
-
-const ai = new GoogleGenerativeAI(key);
 
 // Prompt estricto para mejorar el CV
 const IMPROVE_CV_PROMPT = `
@@ -33,28 +29,43 @@ Devuelve SOLO el JSON mejorado:
 
 // Función principal
 export async function improveCVWithAI(currentCV) {
-  const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
-
   const prompt = IMPROVE_CV_PROMPT.replace('{JSON_INPUT}', JSON.stringify(currentCV, null, 2));
 
-  console.log('Enviando a Gemini para mejorar CV...');
+  console.log('Enviando a Groq para mejorar CV...');
   console.log('Prompt:', prompt);
 
   try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.1,
+        max_tokens: 2000,
+      }),
+    });
 
-    // Extraer texto (compatible con diferentes versiones)
-    let textResponse;
-    if (typeof response.text === 'function') {
-      textResponse = response.text();
-    } else if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
-      textResponse = response.candidates[0].content.parts[0].text;
-    } else {
-      throw new Error('Estructura de respuesta no reconocida');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    console.log('Respuesta de Gemini:', textResponse);
+    const result = await response.json();
+    const textResponse = result.choices[0]?.message?.content;
+
+    if (!textResponse) {
+      throw new Error('No response content received');
+    }
+
+    console.log('Respuesta de Groq:', textResponse);
 
     const improvedCV = parseImprovedCV(textResponse);
     console.log('CV mejorado parseado:', improvedCV);
@@ -67,7 +78,7 @@ export async function improveCVWithAI(currentCV) {
   }
 }
 
-// Parsear respuesta de Gemini
+// Parsear respuesta de Groq
 function parseImprovedCV(text) {
   try {
     let cleanText = text.trim();
